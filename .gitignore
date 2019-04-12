@@ -1,0 +1,9 @@
+/htmlcov
+/tests/htmlcov
+dist/*
+.coverage
+.cache
+.idea
+*.pyc
+*.egg-info*
+.tox/*
