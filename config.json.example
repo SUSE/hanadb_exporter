@@ -1,6 +1,9 @@
 {
-  "host": "localhost",
-  "port": 30015,
-  "user": "SYSTEM",
-  "password": "PASSWORD"
+  "exposition_port": 8000,
+  "hana": {
+    "host": "localhost",
+    "port": 30015,
+    "user": "SYSTEM",
+    "password": "PASSWORD"
+  }
 }

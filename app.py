@@ -37,18 +37,19 @@ def main():
 
     connector = hdb_connector.HdbConnector()
     try:
+        hana_config = config.get('hana')
         connector.connect(
-            config.get('host'),
-            config.get('post', 30015),
-            user=config.get('user'),
-            password=config.get('password')
+            hana_config.get('host'),
+            hana_config.get('port', 30015),
+            user=hana_config.get('user'),
+            password=hana_config.get('password')
         )
     except KeyError as err:
         raise KeyError('Configuration file {} is malformed: {}'.format(CONFIG_FILE, err))
     collector = hanadb_exporter.SapHanaExporter.create(
         exporter_type='prometheus', hdb_connector=connector)
     REGISTRY.register(collector)
-    start_http_server(8000)
+    start_http_server(config.get('exposition_port', 30015), '0.0.0.0')
     while True: time.sleep(1)
 
 if __name__ == "__main__":
