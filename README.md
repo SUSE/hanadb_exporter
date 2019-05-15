@@ -4,34 +4,35 @@ Prometheus exporter written in Python, to export SAP HANA database metrics. The
 project is based in the official prometheus exporter: [prometheus_client](https://github.com/prometheus/client_python).
 
 
-## Getting started
-In order to start the prometheus exporter follow the next steps:
+## Prerequisites
 
-1. A SAP HANA database must be running an available. Running the exporter in the
-same machine where the HANA database running is recommended. Ideally each database
+1. A running and reachable SAP HANA database. Running the exporter in the
+same machine where the HANA database is running is recommended. Ideally each database
 should be monitored by one exporter.
 
-2. `dbapi` or `pyhdb`, one of them, must be installed. The first one is the official
-api provided by SAP. The second is an open source option. Here some links for that:
-  - `dbapi`: https://help.sap.com/viewer/1efad1691c1f496b8b580064a6536c2d/Cloud/en-US/39eca89d94ca464ca52385ad50fc7dea.html
-  - `pyhdb`: https://github.com/SAP/PyHDB
+2. A SAP HANA Connector, for that, you have two options:
+  - [`dbapi` (SAP/official)](https://help.sap.com/viewer/1efad1691c1f496b8b580064a6536c2d/Cloud/en-US/39eca89d94ca464ca52385ad50fc7dea.html)
+  - [`pyhdb` (unofficial/open source)](https://github.com/SAP/PyHDB)
 
-  How to install them expalined in the next step.
+The installation of the connector is covered in the `Installation` section.
 
-3. Install the project dependencies (the usage of a virtual environment is recommended).
+## Installation
+Note: The usage of a virtual environment is recommended.
 
   ```
   cd hanadb_exporter # project root folder
   virtualenv virt
   source virt/bin/activate
   pip install -r requirements.txt
-  #uncomment one of the next two options
-  #pip install pyhdb
-  #pip install path-to-hdbcli-N.N.N.tar.gaz
-  #deactivate # to exit from the virtualenv
+  # uncomment one of the next two options
+  # pip install pyhdb
+  # pip install path-to-hdbcli-N.N.N.tar.gaz
+  # deactivate # to exit from the virtualenv
   ```
 
-4. Create the `config.json` configuration file and place it in the project root folder.
+## Configuring and running the exporter
+
+1. Create the `config.json` configuration file and place it under the project root folder.
 An example is available in [config.json.example](config.json.example). Here the most
 important items in the configuration file:
   - `exposition_port`: Port where the prometheus exporter will be exposed.
@@ -40,30 +41,27 @@ important items in the configuration file:
   - `hana.user`: An existing user with access right to the SAP HANA database.
   - `hana.password`: Password of an existing user.
 
-
-5. Start the exporter running the next command:
+2. Start the exporter by running the following command:
 ```
 python app.py
 ```
-
-## Dependencies
-
-List of dependencies are specified in the ["Requirements file"](requirements.txt). Items can be installed using pip:
-
-    pip install -r requirements.txt
 
 ## License
 
 See the [LICENSE](LICENSE) file for license rights and limitations.
 
-## Author
+## Authors
 
-Xabier Arbulu Insausti (xarbulu@suse.com)
+- Kristoffer Grönlund (kgronlund@suse.com)
+- Xabier Arbulu Insausti (xarbulu@suse.com)
+- Ayoub Belarbi (abelarbi@suse.com)
 
 ## Reviewers
 
 *Pull request* preferred reviewers for this project:
+- Kristoffer Grönlund (kgronlund@suse.com)
 - Xabier Arbulu Insausti (xarbulu@suse.com)
+- Ayoub Belarbi (abelarbi@suse.com)
 
 ## References
 
