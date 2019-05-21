@@ -17,18 +17,19 @@ except ImportError:
 
 
 METRICS = [
+    # Memory Metrics
     {
-        'query': 'SELECT ROUND(SUM(TOTAL_MEMORY_USED_SIZE/1024/1024), 2) AS "Used Memory MB" FROM M_SERVICE_MEMORY;',
+        'query': 'SELECT ROUND(SUM(total_memory_used_size/1024/1024),2) used_memory_mb FROM m_service_memory;',
         'info': ('hanadb_total_used_memory', 'Total used memory in MB', None, [], 'MB'),
         'type': core.GaugeMetricFamily
     },
     {
-        'query': 'SELECT ROUND(SUM(MEMORY_SIZE_IN_TOTAL)/1024/1024) AS "Column Tables MB Used" FROM M_CS_TABLES;',
+        'query': 'SELECT ROUND(SUM(memory_size_in_total)/1024/1024) column_tables_used_mb FROM m_cs_tables;',
         'info': ('hanadb_column_tables_used_memory', 'Column tables total memory used in MB', None, [], 'MB'),
         'type': core.GaugeMetricFamily
     },
     {
-        'query': 'SELECT SCHEMA_NAME AS "Schema", ROUND(SUM(MEMORY_SIZE_IN_TOTAL)/1024/1024) AS "MB Used" FROM M_CS_TABLES GROUP BY SCHEMA_NAME ORDER BY "MB Used" DESC;',
+        'query': ' SELECT schema_name, ROUND(SUM(memory_size_in_total)/1024/1024) schema_memory_used_mb FROM m_cs_tables GROUP BY schema_name;',
         'info': ('hanadb_schema_used_memory', 'Total used memory by schema', None, ['schema', 'data'], 'MB'),
         'type': core.GaugeMetricFamily
     },
