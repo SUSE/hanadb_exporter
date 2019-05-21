@@ -62,11 +62,11 @@ class SapHanaCollector(object):
         # Label not set
         metric_obj = core.GaugeMetricFamily(*metric['info'])
         if not metric['info'][3]:
-            metric_obj.add_metric([], str(value[0][0]))
+            metric_obj.add_metric([], str(value[0][-1]))
         else:
             for label_item in value:
                 self._logger.info('%s: %s' % (label_item[0], label_item[1]))
-                metric_obj.add_metric([label_item[0]], float(label_item[1]))
+
         return metric_obj
 
     def collect(self):
