@@ -17,7 +17,7 @@ except ImportError:
     # Load custom prometheus client
     raise NotImplementedError('custom prometheus client not implemented')
 
-from hanadb_exporter.exporters.prometheus_metrics import METRICS
+from hanadb_exporter.exporters.prometheus_metrics import PrometheusMetrics
 
 
 class MalformedMetric(Exception):
@@ -36,7 +36,7 @@ class SapHanaCollector(object):
         self._logger = logging.getLogger(__name__)
         self._hdb_connector = conector
 
-    def _execute(self, metric):
+    def _execute(self, metric_name, metric):
         """
         Create metric object
 
@@ -46,8 +46,8 @@ class SapHanaCollector(object):
         try:
             value = self._hdb_connector.query(metric['query'])
 
-            if metric['type'] == core.GaugeMetricFamily:
-                metric_obj = self._manage_gauge(metric, value)
+            if metric['type'] == "core.GaugeMetricFamily":
+                metric_obj = self._manage_gauge(metric_name, metric, value)
             else:
                 raise NotImplementedError('{} type not implemented'.format(metric['type']))
 
@@ -55,17 +55,16 @@ class SapHanaCollector(object):
         except KeyError as err:
             raise MalformedMetric(err)
 
-    def _manage_gauge(self, metric, value):
+    def _manage_gauge(self, metric_name, metric, value):
         """
         Manage Gauge type metric
         """
         # Label not set
-        metric_obj = core.GaugeMetricFamily(*metric['info'])
-        if not metric['info'][3]:
-            metric_obj.add_metric([], str(value[0][-1]))
-        else:
-            for label_item in value:
-                self._logger.info('%s: %s' % (label_item[0], label_item[1]))
+        metric_obj = core.GaugeMetricFamily(metric_name, metric['description'], None, metric['labels'], metric['unit'])
+
+        metric_obj.add_metric(metric['labels'], str(value[0][-1]))
+        for label_item in value:
+            self._logger.info('%s' % (label_item[0]))
 
         return metric_obj
 
@@ -73,6 +72,7 @@ class SapHanaCollector(object):
         """
         Collect data from database
         """
-        for metric in METRICS:
-            metric_obj = self._execute(metric)
+        metrics = PrometheusMetrics()
+        for (k, v) in metrics.data.items():
+            metric_obj = self._execute(k, v)
             yield metric_obj
