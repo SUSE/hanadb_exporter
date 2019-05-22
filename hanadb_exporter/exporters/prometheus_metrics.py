@@ -19,9 +19,9 @@ except ImportError:
 
 class PrometheusMetrics:
     def __init__(self):
-        self.metrics = self.load_metrics()
+        self.data = self.load_metrics()
 
     def load_metrics(self):
         with open('metrics.json') as metrics_file:
             data = json.load(metrics_file)
-            return data
+            return data['metrics']
