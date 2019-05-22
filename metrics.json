@@ -4,18 +4,21 @@
         "query": "SELECT ROUND(SUM(total_memory_used_size/1024/1024),2) used_memory_mb FROM m_service_memory;",
         "description": "Total used memory in MB",
         "labels": ["schema", "data"],
+        "unit": "MB",
         "type": "core.GaugeMetricFamily"
       },
       "hanadb_column_tables_used_memory": {
         "query": "SELECT ROUND(SUM(memory_size_in_total)/1024/1024) column_tables_used_mb FROM m_cs_tables;",
         "description": "Column tables total memory used in MB",
         "labels": [],
+        "unit": "MB",
         "type": "core.GaugeMetricFamily"
       },
       "hanadb_schema_used_memory": {
         "query": "SELECT schema_name, ROUND(SUM(memory_size_in_total)/1024/1024) schema_memory_used_mb FROM m_cs_tables GROUP BY schema_name;",
         "description": "Total used memory by schema in MB",
         "labels": ["schema", "data"],
+        "unit": "MB",
         "type": "core.GaugeMetricFamily"
       }
     }
