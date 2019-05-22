@@ -1,33 +1,21 @@
 {
     "metrics": {
       "hanadb_total_used_memory": {
-<<<<<<< HEAD
         "query": "SELECT ROUND(SUM(total_memory_used_size/1024/1024),2) used_memory_mb FROM m_service_memory;",
-=======
-        "query": "SELECT ROUND(SUM(TOTAL_MEMORY_USED_SIZE/1024/1024), 2) AS \"Used Memory MB\" FROM M_SERVICE_MEMORY;",
->>>>>>> Use double quotes in metrics.json and escape them
         "description": "Total used memory in MB",
         "labels": ["schema", "data"],
         "unit": "MB",
         "type": "core.GaugeMetricFamily"
       },
       "hanadb_column_tables_used_memory": {
-<<<<<<< HEAD
         "query": "SELECT ROUND(SUM(memory_size_in_total)/1024/1024) column_tables_used_mb FROM m_cs_tables;",
-=======
-        "query": "SELECT ROUND(SUM(MEMORY_SIZE_IN_TOTAL)/1024/1024) AS \"Column Tables MB Used\" FROM M_CS_TABLES;",
->>>>>>> Use double quotes in metrics.json and escape them
         "description": "Column tables total memory used in MB",
         "labels": [],
         "unit": "MB",
         "type": "core.GaugeMetricFamily"
       },
       "hanadb_schema_used_memory": {
-<<<<<<< HEAD
         "query": "SELECT schema_name, ROUND(SUM(memory_size_in_total)/1024/1024) schema_memory_used_mb FROM m_cs_tables GROUP BY schema_name;",
-=======
-        "query": "SELECT SCHEMA_NAME AS \"Schema\", ROUND(SUM(MEMORY_SIZE_IN_TOTAL)/1024/1024) AS \"MB Used\" FROM M_CS_TABLES GROUP BY SCHEMA_NAME ORDER BY \"MB Used\" DESC;",
->>>>>>> Use double quotes in metrics.json and escape them
         "description": "Total used memory by schema in MB",
         "labels": ["schema", "data"],
         "unit": "MB",
