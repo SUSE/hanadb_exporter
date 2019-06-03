@@ -72,6 +72,6 @@ class SapHanaCollector(object):
         Collect data from database
         """
         metrics = PrometheusMetrics()
-        for (k, v) in metrics.data.items():
-            metric_obj = self._execute(k, v)
+        for metric_name, metric_data in metrics.data.items():
+            metric_obj = self._execute(metric_name, metric_data)
             yield metric_obj
