@@ -47,16 +47,15 @@ class SapHanaCollector(object):
         try:
             query_result = self._hdb_connector.query(metric['query'])
             if metric['type'] == "gauge":
-                metric_obj = self._manage_gauge(metric_name, metric, query_result.records)
                 query_columns = []
                 metric_dict = {metric_name: []}
-                for idx ,val in enumerate(query_result.metadata):
-                    query_columns.append(val[0])
+                for meta in query_result.metadata:
+                    query_columns.append(meta[0])
                 for record in query_result.records:
                     metric_dict[metric_name].append(list(itertools.izip(query_columns, record)))
+                metric_obj = self._manage_gauge(metric_name, metric, query_result.records)
             else:
                 raise NotImplementedError('{} type not implemented'.format(metric['type']))
-
             return metric_obj
         except KeyError as err:
             raise MalformedMetric(err)
