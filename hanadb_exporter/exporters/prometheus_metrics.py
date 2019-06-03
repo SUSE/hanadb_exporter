@@ -24,4 +24,4 @@ class PrometheusMetrics:
     def load_metrics(self):
         with open('metrics.json') as metrics_file:
             data = json.load(metrics_file)
-            return data['metrics']
+            return data
