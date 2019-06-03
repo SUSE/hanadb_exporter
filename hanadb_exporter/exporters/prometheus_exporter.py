@@ -9,6 +9,7 @@ SAP HANA database prometheus data exporter
 """
 
 import logging
+import itertools
 
 # TODO: In order to avoid dependencies, import custom prometheus client
 try:
@@ -47,6 +48,12 @@ class SapHanaCollector(object):
             query_result = self._hdb_connector.query(metric['query'])
             if metric['type'] == "gauge":
                 metric_obj = self._manage_gauge(metric_name, metric, query_result.records)
+                query_columns = []
+                metric_dict = {metric_name: []}
+                for idx ,val in enumerate(query_result.metadata):
+                    query_columns.append(val[0])
+                for record in query_result.records:
+                    metric_dict[metric_name].append(list(itertools.izip(query_columns, record)))
             else:
                 raise NotImplementedError('{} type not implemented'.format(metric['type']))
 
