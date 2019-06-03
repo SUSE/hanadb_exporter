@@ -45,7 +45,7 @@ class SapHanaCollector(object):
         """
         try:
             query_result = self._hdb_connector.query(metric['query'])
-            if metric['type'] == "core.GaugeMetricFamily":
+            if metric['type'] == "gauge":
                 metric_obj = self._manage_gauge(metric_name, metric, query_result.records)
             else:
                 raise NotImplementedError('{} type not implemented'.format(metric['type']))
