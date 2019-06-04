@@ -37,7 +37,7 @@ class SapHanaCollector(object):
         self._logger = logging.getLogger(__name__)
         self._hdb_connector = conector
 
-    def _execute(self, query, metric_name, metric_data):
+    def _execute(self, query):
         """
         Create metric object
 
@@ -46,19 +46,18 @@ class SapHanaCollector(object):
         """
         try:
             query_result = self._hdb_connector.query(query)
-            if metric_data['type'] == "gauge":
-                query_columns = []
-                metric_dict = {metric_name: []}
-                for meta in query_result.metadata:
-                    query_columns.append(meta[0])
-                for record in query_result.records:
-                    metric_dict[metric_name].append(list(itertools.izip(query_columns, record)))
-                metric_obj = self._manage_gauge(metric_name, metric_data, query_result.records)
-            else:
-                raise NotImplementedError('{} type not implemented'.format(metric['type']))
-            return metric_obj
+            return query_result
         except KeyError as err:
             raise MalformedMetric(err)
+
+    def _format_records(self, query_result):
+        query_columns = []
+        records = []
+        for meta in query_result.metadata:
+            query_columns.append(meta[0])
+        for record in query_result.records:
+            records.append(list(itertools.izip(query_columns, record)))
+        return records
 
     def _manage_gauge(self, metric_name, metric, records):
         """
@@ -69,7 +68,7 @@ class SapHanaCollector(object):
 
         metric_obj.add_metric(metric['labels'], str(records[0][-1]))
         for label_item in records:
-            self._logger.info('%s' % (label_item[0]))
+            self._logger.info('%s', label_item[0])
 
         return metric_obj
 
@@ -79,6 +78,11 @@ class SapHanaCollector(object):
         """
         metrics = PrometheusMetrics()
         for query, metric in metrics.data.items():
+            #  execute the query once
+            query_result = self._execute(query)
+            records = self._format_records(query_result)
             for metric_name, metric_data in metric.items():
-                metric_obj = self._execute(query, metric_name, metric_data)
-                yield metric_obj
+                if metric_data['type'] == "gauge":
+                    metric_obj = self._manage_gauge(metric_name, metric_data, records)
+                else:
+                    raise NotImplementedError('{} type not implemented'.format(metric['type']))
