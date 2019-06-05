@@ -63,12 +63,17 @@ class SapHanaCollector(object):
         """
         Manage Gauge type metric
         """
-        # Label not set
         metric_obj = core.GaugeMetricFamily(metric['name'], metric['description'], None, metric['labels'], metric['unit'])
-        metric_obj.add_metric(metric['labels'], str(formatted_query_result[0][-1]))
-        for label_item in formatted_query_result:
-            self._logger.info('%s', label_item[0])
-
+        for row in formatted_query_result:
+            labels = []
+            value = 0
+            for cell in row:
+                if cell[0] in metric['labels']:
+                    labels.append(cell[1])
+                if cell[0] == metric['value']:
+                    value = cell[1]
+            metric_obj.add_metric(labels, value)
+        self._logger.info('%s \n', metric_obj.samples)
         return metric_obj
 
     def collect(self):
