@@ -69,12 +69,17 @@ class SapHanaCollector(object):
     def _manage_gauge(self, metric, formatted_query_result):
         """
         Manage Gauge type metric
+
+        Args:
+            metric (dict): a dictionary containing information about the metric
+            formatted_query_result (nested list): query formated by _format_query_result method
         """
         metric_obj = core.GaugeMetricFamily(metric['name'], metric['description'], None, metric['labels'], metric['unit'])
         for row in formatted_query_result:
             labels = []
             value = 0
             for cell in row:
+                # each cell is a tuple (column_name, value)
                 if cell[0] in metric['labels']:
                     labels.append(cell[1])
                 if cell[0] == metric['value']:
