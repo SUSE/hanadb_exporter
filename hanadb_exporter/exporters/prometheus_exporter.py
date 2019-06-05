@@ -39,10 +39,10 @@ class SapHanaCollector(object):
 
     def _execute(self, query):
         """
-        Create metric object
+        Execute query and return a QueryResult object
 
         Args:
-            metric (dict): query, info, type structure dictionary
+            query (string): SQL query
         """
         try:
             query_result = self._hdb_connector.query(query)
@@ -51,6 +51,13 @@ class SapHanaCollector(object):
             raise MalformedMetric(err)
 
     def _format_query_result(self, query_result):
+        """
+        Format query results to match column names with their values for each row
+        Returns nested list, containing tuples (column_name, value)
+
+        Args:
+            query_result (obj): QueryResult object
+        """
         query_columns = []
         formatted_query_result = []
         for meta in query_result.metadata:
@@ -80,10 +87,13 @@ class SapHanaCollector(object):
         """
         Collect data from database
         """
+        # load metric configuration
         metrics_config = PrometheusMetrics()
         for query, metrics in metrics_config.data.items():
-            #  execute the query once
+            #  execute each query once
             query_result = self._execute(query)
+            print('this is the query result \n')
+            print(type(query_result))
             formatted_query_result = self._format_query_result(query_result)
             for metric in metrics:
                 if metric['type'] == "gauge":
