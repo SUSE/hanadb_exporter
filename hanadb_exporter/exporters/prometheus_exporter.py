@@ -32,10 +32,10 @@ class SapHanaCollector(object):
     SAP HANA database data exporter
     """
 
-    def __init__(self, conector):
+    def __init__(self, connector):
         super(SapHanaCollector, self).__init__()
         self._logger = logging.getLogger(__name__)
-        self._hdb_connector = conector
+        self._hdb_connector = connector
 
     def _execute(self, query):
         """
@@ -50,24 +50,23 @@ class SapHanaCollector(object):
         except KeyError as err:
             raise MalformedMetric(err)
 
-    def _format_records(self, query_result):
+    def _format_query_result(self, query_result):
         query_columns = []
-        records = []
+        formatted_query_result = []
         for meta in query_result.metadata:
             query_columns.append(meta[0])
         for record in query_result.records:
-            records.append(list(itertools.izip(query_columns, record)))
-        return records
+            formatted_query_result.append(list(itertools.izip(query_columns, record)))
+        return formatted_query_result
 
-    def _manage_gauge(self, metric_name, metric, records):
+    def _manage_gauge(self, metric, formatted_query_result):
         """
         Manage Gauge type metric
         """
         # Label not set
-        metric_obj = core.GaugeMetricFamily(metric_name, metric['description'], None, metric['labels'], metric['unit'])
-
-        metric_obj.add_metric(metric['labels'], str(records[0][-1]))
-        for label_item in records:
+        metric_obj = core.GaugeMetricFamily(metric['name'], metric['description'], None, metric['labels'], metric['unit'])
+        metric_obj.add_metric(metric['labels'], str(formatted_query_result[0][-1]))
+        for label_item in formatted_query_result:
             self._logger.info('%s', label_item[0])
 
         return metric_obj
@@ -76,13 +75,14 @@ class SapHanaCollector(object):
         """
         Collect data from database
         """
-        metrics = PrometheusMetrics()
-        for query, metric in metrics.data.items():
+        metrics_config = PrometheusMetrics()
+        for query, metrics in metrics_config.data.items():
             #  execute the query once
             query_result = self._execute(query)
-            records = self._format_records(query_result)
-            for metric_name, metric_data in metric.items():
-                if metric_data['type'] == "gauge":
-                    metric_obj = self._manage_gauge(metric_name, metric_data, records)
+            formatted_query_result = self._format_query_result(query_result)
+            for metric in metrics:
+                if metric['type'] == "gauge":
+                    metric_obj = self._manage_gauge(metric, formatted_query_result)
+                    yield metric_obj
                 else:
                     raise NotImplementedError('{} type not implemented'.format(metric['type']))

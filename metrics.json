@@ -1,31 +1,31 @@
 {
   "SELECT ROUND(SUM(total_memory_used_size/1024/1024),2) used_memory_mb FROM m_service_memory;":
-  {
+  [{
     "name": "hanadb_total_used_memory",
     "description": "Total used memory in MB",
     "labels": [],
     "value": "USED_MEMORY_MB",
     "unit": "MB",
     "type": "gauge"
-  },
+  }],
   "SELECT ROUND(SUM(memory_size_in_total)/1024/1024) column_tables_used_mb FROM m_cs_tables;":
-  {
+  [{
     "name": "hanadb_column_tables_used_memory",
     "description": "Column tables total memory used in MB",
     "labels": [],
     "value": "COLUMN_TABLES_USED_MB",
     "unit": "MB",
     "type": "gauge"
-  },
+  }],
   "SELECT schema_name, ROUND(SUM(memory_size_in_total)/1024/1024) schema_memory_used_mb FROM m_cs_tables GROUP BY schema_name;":
-  {
+  [{
     "name": "hanadb_schema_used_memory",
     "description": "Total used memory by schema in MB",
     "labels": ["SCHEMA_NAME"],
     "value": "SCHEMA_MEMORY_USED_MB",
     "unit": "MB",
     "type": "gauge"
-  },
+  }],
   "SELECT MAX(TIMESTAMP) TIMESTAMP, HOST, MEASURED_ELEMENT_NAME CORE, SUM(MAP(CAPTION, 'User Time', TO_NUMBER(VALUE), 0)) USER_PCT, SUM(MAP(CAPTION, 'System Time', TO_NUMBER(VALUE), 0)) SYSTEM_PCT, SUM(MAP(CAPTION, 'Wait Time', TO_NUMBER(VALUE), 0)) WAITIO_PCT, SUM(MAP(CAPTION, 'Idle Time', 0, TO_NUMBER(VALUE))) BUSY_PCT, SUM(MAP(CAPTION, 'Idle Time', TO_NUMBER(VALUE), 0)) IDLE_PCT FROM M_HOST_AGENT_METRICS WHERE MEASURED_ELEMENT_TYPE = 'Processor' GROUP BY HOST, MEASURED_ELEMENT_NAME;":
   [
     {
