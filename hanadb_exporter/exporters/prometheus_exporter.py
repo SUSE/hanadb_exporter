@@ -36,18 +36,6 @@ class SapHanaCollector(object):
         self._logger = logging.getLogger(__name__)
         self._hdb_connector = connector
 
-    def _execute(self, query):
-        """
-        Execute query and return a QueryResult object
-
-        Args:
-            query (string): SQL query
-        """
-        try:
-            query_result = self._hdb_connector.query(query)
-            return query_result
-        except KeyError as err:
-            raise MalformedMetric(err)
 
     def _format_query_result(self, query_result):
         """
@@ -59,10 +47,10 @@ class SapHanaCollector(object):
         """
         query_columns = []
         formatted_query_result = []
-        for meta in query_result.metadata:
-            query_columns.append(meta[0])
+        query_columns = [meta[0] for meta in query_result.metadata]
         for record in query_result.records:
             formatted_query_result.append(list(itertools.izip(query_columns, record)))
+        # TODO manage formatted_query_result with a class, a named tuple or a dictionary instead of a tuple
         return formatted_query_result
 
     def _manage_gauge(self, metric, formatted_query_result):
@@ -96,7 +84,7 @@ class SapHanaCollector(object):
         metrics_config = PrometheusMetrics()
         for query, metrics in metrics_config.data.items():
             #  execute each query once
-            query_result = self._execute(query)
+            query_result = self._hdb_connector.query(query)
             formatted_query_result = self._format_query_result(query_result)
             for metric in metrics:
                 if metric['type'] == "gauge":
