@@ -33,7 +33,6 @@ class SapHanaCollector(object):
     """
 
     def __init__(self, connector):
-        super(SapHanaCollector, self).__init__()
         self._logger = logging.getLogger(__name__)
         self._hdb_connector = connector
 
