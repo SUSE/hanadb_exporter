@@ -73,7 +73,8 @@ class SapHanaCollector(object):
             metric (dict): a dictionary containing information about the metric
             formatted_query_result (nested list): query formated by _format_query_result method
         """
-        metric_obj = core.GaugeMetricFamily(metric['name'], metric['description'], None, metric['labels'], metric['unit'])
+        metric_obj = core.GaugeMetricFamily(metric['name'],
+            metric['description'], None, metric['labels'], metric['unit'])
         for row in formatted_query_result:
             labels = []
             value = 0
@@ -96,8 +97,6 @@ class SapHanaCollector(object):
         for query, metrics in metrics_config.data.items():
             #  execute each query once
             query_result = self._execute(query)
-            print('this is the query result \n')
-            print(type(query_result))
             formatted_query_result = self._format_query_result(query_result)
             for metric in metrics:
                 if metric['type'] == "gauge":
