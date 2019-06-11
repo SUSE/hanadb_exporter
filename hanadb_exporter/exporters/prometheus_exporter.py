@@ -65,14 +65,22 @@ class SapHanaCollector(object):
             metric['description'], None, metric['labels'], metric['unit'])
         for row in formatted_query_result:
             labels = []
-            value = 0
+            value = None
             for cell in row:
                 # each cell is a tuple (column_name, value)
                 if cell[0] in metric['labels']:
                     labels.append(cell[1])
-                if cell[0] == metric['value']:
+                if metric['value'] == '':
+                    raise ValueError('No value specified in metrics.json for {}'
+                        .format(metric['name']))
+                elif cell[0] == metric['value']:
                     value = cell[1]
-            metric_obj.add_metric(labels, value)
+            if value is None:
+                raise ValueError(
+                    'Value specified in metrics.json for {} is not present in the query result'
+                    .format(metric['name']))
+            else:
+                metric_obj.add_metric(labels, value)
         self._logger.info('%s \n', metric_obj.samples)
         return metric_obj
 
