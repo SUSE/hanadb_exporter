@@ -9,7 +9,11 @@ SAP HANA database prometheus data exporter
 """
 
 import logging
-import itertools
+
+try:
+    from itertools import izip as zip
+except ImportError:
+    pass
 
 # TODO: In order to avoid dependencies, import custom prometheus client
 try:
@@ -49,7 +53,7 @@ class SapHanaCollector(object):
         formatted_query_result = []
         query_columns = [meta[0] for meta in query_result.metadata]
         for record in query_result.records:
-            formatted_query_result.append(list(itertools.izip(query_columns, record)))
+            formatted_query_result.append(list(zip(query_columns, record)))
         # TODO manage formatted_query_result with a class, a named tuple or a dictionary instead of a tuple
         return formatted_query_result
 
