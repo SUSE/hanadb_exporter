@@ -1,6 +1,6 @@
 with import <nixpkgs> {};
 
-stdenv.mkDerivation { 
+stdenv.mkDerivation {
     name = "hanadb_exporter";
 
     buildInputs = [
