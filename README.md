@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/SUSE/hanadb_exporter.svg?branch=master)](https://travis-ci.org/SUSE/hanadb_exporter)
+[![Maintainability](https://api.codeclimate.com/v1/badges/1fc3a80d4e8342fa6f0d/maintainability)](https://codeclimate.com/github/SUSE/hanadb_exporter/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/1fc3a80d4e8342fa6f0d/test_coverage)](https://codeclimate.com/github/SUSE/hanadb_exporter/test_coverage)
+
 # SAP HANA Database exporter
 
 Prometheus exporter written in Python, to export SAP HANA database metrics. The
