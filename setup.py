@@ -16,12 +16,8 @@ try:
 except ImportError:
     from distutils.core import setup
 
-<<<<<<< HEAD
 from hanadb_exporter import __version__
 
-=======
-import hanadb_exporter
->>>>>>> Update setup.py file
 
 def read(fname):
     """
@@ -31,7 +27,6 @@ def read(fname):
 
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
-<<<<<<< HEAD
 def read_dependencies(fname):
     """
     Read requirements
@@ -57,11 +52,6 @@ def read_links(fname):
 VERSION = __version__
 NAME = "hanadb_exporter"
 DESCRIPTION = "SAP HANA database data exporter"
-=======
-VERSION = hanadb_exporter.__version__
-NAME = "hanadb_exporter"
-DESCRIPTION = "Prometheus exporter for HANA database"
->>>>>>> Update setup.py file
 
 AUTHOR = "xarbulu"
 AUTHOR_EMAIL = "xarbulu@suse.de"
@@ -77,8 +67,8 @@ CLASSIFIERS = [
     "Natural Language :: English",
     "Operating System :: Unix",
     "Operating System :: Microsoft :: Windows",
-    "Programming Language :: Python :: 2.7",
-    "Programming Language :: Python :: 2 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3 :: Only",
 ]
 
 SCRIPTS = ['bin/hanadb_exporter']
@@ -106,6 +96,7 @@ SETUP_PARAMS = dict(
     install_requires=DEPENDENCIES,
     dependency_links=LINKS,
     classifiers=CLASSIFIERS,
+    dependency_links=DEPENDENCY_LINKS,
 )
 
 def main():
