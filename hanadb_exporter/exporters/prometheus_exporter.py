@@ -79,12 +79,7 @@ class SapHanaCollector(object):
                         .format(metric['name']))
                 elif cell[0] == metric['value']:
                     value = cell[1]
-            if value is None:
-                raise ValueError(
-                    'Value specified in metrics.json for {} is not present in the query result'
-                    .format(metric['name']))
-            else:
-                metric_obj.add_metric(labels, value)
+            metric_obj.add_metric(labels, value)
         self._logger.info('%s \n', metric_obj.samples)
         return metric_obj
 
