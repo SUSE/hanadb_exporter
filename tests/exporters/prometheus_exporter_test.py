@@ -19,79 +19,59 @@ import unittest
 
 import mock
 
-from hanadb_exporter.exporters.prometheus_exporter import SapHanaCollector, MalformedMetric
+from hanadb_exporter.exporters.prometheus_exporter import SapHanaCollector, SapHanaCollector
+class SapHanaCollector(unittest.TestCase):
+    """
+    Unitary tests for SapHanaCollector.
+    """
+    @classmethod
+    def setUpClass(cls):
+        """
+        Global setUp.
+        """
 
-# class TestMyModule(unittest.TestCase):
-#     """
-#     Unitary tests for YourClassName.
-#     """
+        logging.basicConfig(level=logging.INFO)
 
-#     @classmethod
-#     def setUpClass(cls):
-#         """
-#         Global setUp.
-#         """
+    def setUp(self):
+        """
+        Test setUp.
+        """
+        self.SapHanaCollector = SapHanaCollector(kwargs.get('hdb_connector'))
 
-#         logging.basicConfig(level=logging.INFO)
+    def tearDown(self):
+        """
+        Test tearDown.
+        """
 
-#     def setUp(self):
-#         """
-#         Test setUp.
-#         """
-#         self._test_module = mymodule.MyModule()
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Global tearDown.
+        """
 
-#     def tearDown(self):
-#         """
-#         Test tearDown.
-#         """
+    # def test_collect(self):
 
-#     @classmethod
-#     def tearDownClass(cls):
-#         """
-#         Global tearDown.
-#         """
 
-#     def test_append_value(self):
-#         self._test_module.append_value(5)
-#         self.assertEqual(5, self._test_module._my_values[-1])
+class SapHanaCollector(unittest.TestCase):
+    """
+    Unitary tests for SapHanaCollector.
+    """
 
-#         self._test_module.append_value('hello')
-#         self.assertEqual('hello', self._test_module._my_values[-1])
+    @classmethod
+    def setUpClass(cls):
+        """
+        Global setUp.
+        """
 
-#     def test_clean(self):
-#         self._test_module._my_values.append(5)
-#         self._test_module.clean()
-#         self.assertEqual([], self._test_module._my_values)
+        logging.basicConfig(level=logging.INFO)
 
-#     @mock.patch('logging.Logger.info')
-#     def test_show(self, logger):
-#         self._test_module._my_values.append(5)
-#         self._test_module._my_values.append(15)
-#         self._test_module._my_values.append(25)
+    def tearDown(self):
+        """
+        Test tearDown.
+        """
 
-#         self._test_module.show()
-
-#         logger.assert_has_calls([
-#             mock.call('%d: %s', 1, 5),
-#             mock.call('%d: %s', 2, 15),
-#             mock.call('%d: %s', 3, 25)
-#         ])
-
-#     def test_first_value(self):
-#         self._test_module._my_values.append(5)
-#         value = self._test_module.first_value()
-#         self.assertEqual(5, value)
-
-#     def test_first_value_empty(self):
-#         with self.assertRaises(IndexError):
-#             self._test_module.first_value()
-
-#     @mock.patch('logging.Logger.info')
-#     def test_welcome(self, logger):
-#         utils.welcome('xarbulu')
-#         logger.assert_called_once_with("Hello %s!", 'xarbulu')
-
-#     @mock.patch('logging.Logger.info')
-#     def test_farewell(self, logger):
-#         utils.farewell('xarbulu')
-#         logger.assert_called_once_with("Farewell %s!", 'xarbulu')
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Global tearDown.
+        """
