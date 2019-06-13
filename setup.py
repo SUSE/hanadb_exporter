@@ -96,7 +96,6 @@ SETUP_PARAMS = dict(
     install_requires=DEPENDENCIES,
     dependency_links=LINKS,
     classifiers=CLASSIFIERS,
-    dependency_links=DEPENDENCY_LINKS,
 )
 
 def main():
