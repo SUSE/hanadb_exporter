@@ -68,5 +68,64 @@
       "unit": "percent",
       "type": "gauge"
     }
+  ],
+  "SELECT MAX(timestamp) timestamp, host, measured_element_name interface, MAX(MAP(caption, 'Collision Rate', TO_NUMBER(value), 0)) coll_per_s, MAX(MAP(caption, 'Receive Rate', TO_NUMBER(value), 0)) recv_kb_per_s, MAX(MAP(caption, 'Transmit Rate', TO_NUMBER(value), 0)) trans_kb_per_s,MAX(MAP(caption, 'Packet Receive Rate', TO_NUMBER(value), 0)) recv_pack_per_s, MAX(MAP(caption, 'Packet Transmit Rate', TO_NUMBER(value), 0)) trans_pack_per_s, MAX(MAP(caption, 'Receive Error Rate', TO_NUMBER(value), 0)) recv_err_per_s, MAX(MAP(caption, 'Transmit Error Rate', TO_NUMBER(value), 0)) trans_err_per_s FROM sys.m_host_agent_metrics WHERE measured_element_type = 'NetworkPort' GROUP BY host, measured_element_name;":
+  [
+    {
+      "name": "hanadb_network_collisions_per",
+      "description": "Network collisions per second",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "COLL_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_network_receive_rate_kb_per",
+      "description": "Network received rate in kilobytes per seconds",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "RECV_KB_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_network_transmission_rate_kb_per",
+      "description": "Network transmission rate in kilobytes per seconds",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "TRANS_KB_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_network_receive_requests_per",
+      "description": "Network receive rate in requests (packets) per seconds",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "RECV_PACK_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_network_transmission_rate_requests_per",
+      "description": "Network transmission rate in requests (packets) per seconds",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "TRANS_PACK_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_network_receive_rate_errors_per",
+      "description": "Network receive rate of errors per seconds",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "RECV_ERR_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_network_transmission_rate_errors_per",
+      "description": "Network tramission rate of errors per seconds",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "TRANS_ERR_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    }
   ]
 }
