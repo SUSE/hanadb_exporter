@@ -18,7 +18,7 @@ from shaptools import hdb_connector
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 
-from hanadb_exporter import exporter_factory
+import exporter_factory
 
 
 def parse_config(config_file):

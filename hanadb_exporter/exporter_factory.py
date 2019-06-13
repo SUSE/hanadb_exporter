@@ -10,7 +10,7 @@ SAP HANA database exporter factory
 
 import logging
 
-from hanadb_exporter.exporters import prometheus_exporter
+from exporters import prometheus_exporter
 
 
 class SapHanaExporter(object):
