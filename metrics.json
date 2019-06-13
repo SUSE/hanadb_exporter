@@ -127,5 +127,40 @@
       "unit": "seconds",
       "type": "gauge"
     }
+  ],
+  "SELECT host, LPAD(port,5) port, file_name, file_type, used_size/1024/1024 used_size_mb, total_size/1024/1024 total_size_mb, (total_size - used_size)/1024/1024 available_size_mb, LPAD(TO_DECIMAL(MAP(total_size, 0, 0, ( 1 - used_size / total_size ) * 100), 10, 2), 8) frag_pct FROM   sys.m_volume_files;":
+  [
+    {
+      "name": "hanadb_disk_used_size",
+      "description": "Used space per file and file type (in MB)",
+      "labels": ["HOST", "PORT", "FILE_NAME", "FILE_TYPE"],
+      "value": "USED_SIZE_MB",
+      "unit": "MB",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_total_size",
+      "description": "Total space per file and file type (in MB)",
+      "labels": ["HOST", "PORT", "FILE_NAME", "FILE_TYPE"],
+      "value": "TOTAL_SIZE_MB",
+      "unit": "MB",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_available_size",
+      "description": "Available space per file and file type (in MB)",
+      "labels": ["HOST", "PORT", "FILE_NAME", "FILE_TYPE"],
+      "value": "AVAILABLE_SIZE_MB",
+      "unit": "MB",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_fragmentation",
+      "description": "Percentage of unused space compared to total space in file",
+      "labels": ["HOST", "PORT", "FILE_NAME", "FILE_TYPE"],
+      "value": "FRAG_PCT",
+      "unit": "percent",
+      "type": "gauge"
+    }
   ]
 }
