@@ -22,7 +22,7 @@ except ImportError:
     # Load custom prometheus client
     raise NotImplementedError('custom prometheus client not implemented')
 
-from hanadb_exporter.exporters.prometheus_metrics import PrometheusMetrics
+from exporters.prometheus_metrics import PrometheusMetrics
 
 
 class MalformedMetric(Exception):
