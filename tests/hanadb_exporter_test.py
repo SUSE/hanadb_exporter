@@ -24,6 +24,7 @@ except ImportError:
 
 import hanadb_exporter
 
+
 class TestHanaDBExporter(unittest.TestCase):
     """
     Unitary tests for hanadb_exporter/__init__.py.

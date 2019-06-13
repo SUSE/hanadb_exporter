@@ -27,16 +27,17 @@ Note: The usage of a virtual environment is recommended.
   cd hanadb_exporter # project root folder
   virtualenv virt
   source virt/bin/activate
-  pip install -r requirements.txt
   # uncomment one of the next two options
   # pip install pyhdb
   # pip install path-to-hdbcli-N.N.N.tar.gaz
+  pip install .
+  # pip install -e . # To install in development mode
   # deactivate # to exit from the virtualenv
   ```
 
 ## Configuring and running the exporter
 
-1. Create the `config.json` configuration file and place it under the project root folder.
+1. Create the `config.json` configuration file.
 An example is available in [config.json.example](config.json.example). Here the most
 important items in the configuration file:
   - `exposition_port`: Port where the prometheus exporter will be exposed.
@@ -47,7 +48,9 @@ important items in the configuration file:
 
 2. Start the exporter by running the following command:
 ```
-python app.py
+hanadb_exporter -c config.json
+# Or
+python hanadb_exporter/main.py -c config.json
 ```
 
 ## License

@@ -16,6 +16,8 @@ try:
 except ImportError:
     from distutils.core import setup
 
+from hanadb_exporter import __version__
+
 
 def read(fname):
     """
@@ -47,7 +49,7 @@ def read_links(fname):
             links.remove(link)
     return links
 
-VERSION = "0.1.0"
+VERSION = __version__
 NAME = "hanadb_exporter"
 DESCRIPTION = "SAP HANA database data exporter"
 
@@ -69,7 +71,7 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 2 :: Only",
 ]
 
-SCRIPTS = []
+SCRIPTS = ['bin/hanadb_exporter']
 
 DEPENDENCIES = read_dependencies('requirements.txt')
 LINKS = read_links('requirements.txt')
