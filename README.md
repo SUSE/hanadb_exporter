@@ -62,6 +62,7 @@ See the [LICENSE](LICENSE) file for license rights and limitations.
 - Kristoffer Gronlund (kgronlund@suse.com)
 - Xabier Arbulu Insausti (xarbulu@suse.com)
 - Ayoub Belarbi (abelarbi@suse.com)
+- Diego Akechi (dakechi@suse.com)
 
 ## Reviewers
 
