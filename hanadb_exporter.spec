@@ -1,5 +1,5 @@
 #
-# spec file for package python-hanadb_exporter
+# spec file for package hanadb_exporter
 #
 # Copyright (c) 2019 SUSE LLC
 #
@@ -21,7 +21,7 @@
 %endif
 
 %{?!python_module:%define python_module() python-%{**} python3-%{**}}
-Name:           python-hanadb_exporter
+Name:           hanadb_exporter
 Version:        0.1.0
 Release:        0
 Summary:        SAP HANA database metrics exporter
