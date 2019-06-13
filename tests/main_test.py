@@ -16,7 +16,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import logging
 import unittest
-import mock
+
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 class TestApp(unittest.TestCase):
     """
