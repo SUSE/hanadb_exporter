@@ -23,17 +23,17 @@ The installation of the connector is covered in the `Installation` section.
 ## Installation
 Note: The usage of a virtual environment is recommended.
 
-  ```
-  cd hanadb_exporter # project root folder
-  virtualenv virt
-  source virt/bin/activate
-  # uncomment one of the next two options
-  # pip install pyhdb
-  # pip install path-to-hdbcli-N.N.N.tar.gaz
-  pip install .
-  # pip install -e . # To install in development mode
-  # deactivate # to exit from the virtualenv
-  ```
+```
+cd hanadb_exporter # project root folder
+virtualenv virt
+source virt/bin/activate
+# uncomment one of the next two options
+# pip install pyhdb
+# pip install path-to-hdbcli-N.N.N.tar.gaz
+pip install .
+# pip install -e . # To install in development mode
+# deactivate # to exit from the virtualenv
+```
 
 ## Configuring and running the exporter
 
@@ -59,14 +59,14 @@ See the [LICENSE](LICENSE) file for license rights and limitations.
 
 ## Authors
 
-- Kristoffer Grönlund (kgronlund@suse.com)
+- Kristoffer Gronlund (kgronlund@suse.com)
 - Xabier Arbulu Insausti (xarbulu@suse.com)
 - Ayoub Belarbi (abelarbi@suse.com)
 
 ## Reviewers
 
 *Pull request* preferred reviewers for this project:
-- Kristoffer Grönlund (kgronlund@suse.com)
+- Kristoffer Gronlund (kgronlund@suse.com)
 - Xabier Arbulu Insausti (xarbulu@suse.com)
 - Ayoub Belarbi (abelarbi@suse.com)
 

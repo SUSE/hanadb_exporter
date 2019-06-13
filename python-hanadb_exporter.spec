@@ -69,6 +69,6 @@ SAP HANA database metrics exporter
 %license LICENSE
 %endif
 %{python_sitelib}/*
-%{_bindir}/hanadb_exporter
+%python3_only %{_bindir}/hanadb_exporter
 
 %changelog
