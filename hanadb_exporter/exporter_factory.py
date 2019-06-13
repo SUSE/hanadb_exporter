@@ -10,7 +10,7 @@ SAP HANA database exporter factory
 
 import logging
 
-from exporters import prometheus_exporter
+from hanadb_exporter.exporters import prometheus_exporter
 
 
 class SapHanaExporter(object):
@@ -29,7 +29,10 @@ class SapHanaExporter(object):
         cls._logger = logging.getLogger(__name__)
         if exporter_type == 'prometheus':
             cls._logger.info('prometheus exporter selected')
-            collector = prometheus_exporter.SapHanaCollector(kwargs.get('hdb_connector'))
+            collector = prometheus_exporter.SapHanaCollector(
+                connector=kwargs.get('hdb_connector'),
+                metrics_file=kwargs.get('metrics_file')
+            )
             return collector
         else:
             raise NotImplementedError(

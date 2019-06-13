@@ -22,7 +22,7 @@ except ImportError:
     # Load custom prometheus client
     raise NotImplementedError('custom prometheus client not implemented')
 
-from exporters.prometheus_metrics import PrometheusMetrics
+from hanadb_exporter.exporters import prometheus_metrics
 
 
 class MalformedMetric(Exception):
@@ -36,10 +36,11 @@ class SapHanaCollector(object):
     SAP HANA database data exporter
     """
 
-    def __init__(self, connector):
+    def __init__(self, connector, metrics_file):
         self._logger = logging.getLogger(__name__)
         self._hdb_connector = connector
-
+        # load metric configuration
+        self._metrics_config = prometheus_metrics.PrometheusMetrics(metrics_file)
 
     def _format_query_result(self, query_result):
         """
@@ -65,8 +66,8 @@ class SapHanaCollector(object):
             metric (dict): a dictionary containing information about the metric
             formatted_query_result (nested list): query formated by _format_query_result method
         """
-        metric_obj = core.GaugeMetricFamily(metric['name'],
-            metric['description'], None, metric['labels'], metric['unit'])
+        metric_obj = core.GaugeMetricFamily(
+            metric['name'], metric['description'], None, metric['labels'], metric['unit'])
         for row in formatted_query_result:
             labels = []
             value = None
@@ -75,8 +76,8 @@ class SapHanaCollector(object):
                 if cell[0] in metric['labels']:
                     labels.append(cell[1])
                 if metric['value'] == '':
-                    raise ValueError('No value specified in metrics.json for {}'
-                        .format(metric['name']))
+                    raise ValueError('No value specified in metrics.json for {}'.format(
+                        metric['name']))
                 elif cell[0] == metric['value']:
                     value = cell[1]
             metric_obj.add_metric(labels, value)
@@ -87,9 +88,8 @@ class SapHanaCollector(object):
         """
         Collect data from database
         """
-        # load metric configuration
-        metrics_config = PrometheusMetrics()
-        for query, metrics in metrics_config.data.items():
+
+        for query, metrics in self._metrics_config.data.items():
             #  execute each query once
             query_result = self._hdb_connector.query(query)
             formatted_query_result = self._format_query_result(query_result)

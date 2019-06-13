@@ -20,9 +20,8 @@
 %bcond_without test
 %endif
 
-%{?!python_module:%define python_module() python-%{**} python3-%{**}}
 Name:           hanadb_exporter
-Version:        0.1.0
+Version:        0.2.0
 Release:        0
 Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0
@@ -30,16 +29,14 @@ Group:          Development/Languages/Python
 Url:            https://github.com/SUSE/hanadb_exporter
 Source:         hanadb_exporter-%{version}.tar.gz
 %if %{with test}
-BuildRequires:  %{python_module mock}
-BuildRequires:  %{python_module pytest}
+BuildRequires:  python3-mock
+BuildRequires:  python3-pytest
 %endif
-BuildRequires:  %{python_module setuptools}
+BuildRequires:  python3-setuptools
 BuildRequires:  fdupes
-BuildRequires:  python-rpm-macros
-Requires:       shaptools>=0.2.1
-Requires:       python-prometheus_client>=0.6.0
+Requires:       python3-shaptools >= 0.2.1
+Requires:       python3-prometheus_client >= 0.6.0
 BuildArch:      noarch
-%python_subpackages
 
 %description
 SAP HANA database metrics exporter
@@ -48,27 +45,27 @@ SAP HANA database metrics exporter
 %setup -q -n hanadb_exporter-%{version}
 
 %build
-%python_build
+python3 setup.py build
 
 %install
-%python_install
-%python_expand %fdupes %{buildroot}%{$python_sitelib}
+python3 setup.py install --root %{buildroot} --prefix=%{_prefix}
+%fdupes %{buildroot}%{python3_sitelib}
 # do not install tests
-%python_expand rm -r %{buildroot}%{$python_sitelib}/tests
+rm -r %{buildroot}%{python3_sitelib}/tests
 
 %if %{with test}
 %check
-%pytest tests
+pytest tests
 %endif
 
-%files %{python_files}
+%files
 %if 0%{?sle_version:1} && 0%{?sle_version} < 120300
 %doc README.md LICENSE
 %else
 %doc README.md
 %license LICENSE
 %endif
-%{python_sitelib}/*
-%python3_only %{_bindir}/hanadb_exporter
+%{python3_sitelib}/*
+%{_bindir}/hanadb_exporter
 
 %changelog
