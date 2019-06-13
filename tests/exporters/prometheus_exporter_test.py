@@ -16,11 +16,11 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import logging
 import unittest
-
 import mock
 
-from hanadb_exporter.exporters.prometheus_exporter import SapHanaCollector, SapHanaCollector
-class SapHanaCollector(unittest.TestCase):
+from hanadb_exporter.exporters.prometheus_exporter import PrometheusMetrics, SapHanaCollector, MalformedMetric
+
+class TestSapHanaCollector(unittest.TestCase):
     """
     Unitary tests for SapHanaCollector.
     """
@@ -36,7 +36,6 @@ class SapHanaCollector(unittest.TestCase):
         """
         Test setUp.
         """
-        self.SapHanaCollector = SapHanaCollector(kwargs.get('hdb_connector'))
 
     def tearDown(self):
         """
@@ -49,10 +48,7 @@ class SapHanaCollector(unittest.TestCase):
         Global tearDown.
         """
 
-    # def test_collect(self):
-
-
-class SapHanaCollector(unittest.TestCase):
+class TestMalformedMetric(unittest.TestCase):
     """
     Unitary tests for SapHanaCollector.
     """

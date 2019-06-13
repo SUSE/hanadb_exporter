@@ -21,7 +21,7 @@ import mock
 
 from hanadb_exporter.exporters.prometheus_metrics import PrometheusMetrics
 
-class PrometheusMetrics(unittest.TestCase):
+class TestPrometheusMetrics(unittest.TestCase):
     """
     Unitary tests for YourClassName.
     """
