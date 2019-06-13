@@ -22,7 +22,7 @@ try:
 except ImportError:
     import mock
 
-from hanadb_exporter.exporters.prometheus_metrics import PrometheusMetrics
+import hanadb_exporter
 
 class TestPrometheusMetrics(unittest.TestCase):
     """
