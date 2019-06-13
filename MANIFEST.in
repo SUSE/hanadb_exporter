@@ -1,6 +1,5 @@
 # Include useful user documentation
 include README.md
-include CHANGELOG.md
 include LICENSE
 include requirements.txt
 

@@ -11,14 +11,14 @@ SAP HANA database prometheus data exporter app
 import logging
 import time
 import json
+import argparse
+
+from shaptools import hdb_connector
 
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 
-import hanadb_exporter
-from shaptools import hdb_connector
-
-CONFIG_FILE = './config.json'
+from hanadb_exporter import exporter_factory
 
 
 def parse_config(config_file):
@@ -30,10 +30,28 @@ def parse_config(config_file):
     return json_data
 
 
+def parse_arguments():
+    """
+    Parase command line arguments
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-c", "--config", help="Path to hanadb_exporter configuration file", required=True)
+    parser.add_argument(
+        "--verbosity",
+        help="Python logging level. Options: DEBUG, INFO, WARN, ERROR (INFO by default)")
+    args = parser.parse_args()
+    return args
+
+
 # Start up the server to expose the metrics.
-def main():
-    logging.basicConfig(level=logging.INFO)
-    config = parse_config(CONFIG_FILE)
+def run():
+    """
+    Main execution
+    """
+    args = parse_arguments()
+    logging.basicConfig(level=args.verbosity or logging.INFO)
+    config = parse_config(args.config)
 
     connector = hdb_connector.HdbConnector()
     try:
@@ -45,12 +63,13 @@ def main():
             password=hana_config.get('password')
         )
     except KeyError as err:
-        raise KeyError('Configuration file {} is malformed: {}'.format(CONFIG_FILE, err))
-    collector = hanadb_exporter.SapHanaExporter.create(
+        raise KeyError('Configuration file {} is malformed: {}'.format(args.config, err))
+    collector = exporter_factory.SapHanaExporter.create(
         exporter_type='prometheus', hdb_connector=connector)
     REGISTRY.register(collector)
     start_http_server(config.get('exposition_port', 30015), '0.0.0.0')
-    while True: time.sleep(1)
+    while True:
+        time.sleep(1)
 
 if __name__ == "__main__":
-    main()
+    run()

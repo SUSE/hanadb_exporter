@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/SUSE/hanadb_exporter.svg?branch=master)](https://travis-ci.org/SUSE/hanadb_exporter)
+[![Maintainability](https://api.codeclimate.com/v1/badges/1fc3a80d4e8342fa6f0d/maintainability)](https://codeclimate.com/github/SUSE/hanadb_exporter/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/1fc3a80d4e8342fa6f0d/test_coverage)](https://codeclimate.com/github/SUSE/hanadb_exporter/test_coverage)
+
 # SAP HANA Database exporter
 
 Prometheus exporter written in Python, to export SAP HANA database metrics. The
@@ -19,20 +23,21 @@ The installation of the connector is covered in the `Installation` section.
 ## Installation
 Note: The usage of a virtual environment is recommended.
 
-  ```
-  cd hanadb_exporter # project root folder
-  virtualenv virt
-  source virt/bin/activate
-  pip install -r requirements.txt
-  # uncomment one of the next two options
-  # pip install pyhdb
-  # pip install path-to-hdbcli-N.N.N.tar.gaz
-  # deactivate # to exit from the virtualenv
-  ```
+```
+cd hanadb_exporter # project root folder
+virtualenv virt
+source virt/bin/activate
+# uncomment one of the next two options
+# pip install pyhdb
+# pip install path-to-hdbcli-N.N.N.tar.gaz
+pip install .
+# pip install -e . # To install in development mode
+# deactivate # to exit from the virtualenv
+```
 
 ## Configuring and running the exporter
 
-1. Create the `config.json` configuration file and place it under the project root folder.
+1. Create the `config.json` configuration file.
 An example is available in [config.json.example](config.json.example). Here the most
 important items in the configuration file:
   - `exposition_port`: Port where the prometheus exporter will be exposed.
@@ -43,7 +48,9 @@ important items in the configuration file:
 
 2. Start the exporter by running the following command:
 ```
-python app.py
+hanadb_exporter -c config.json
+# Or
+python hanadb_exporter/main.py -c config.json
 ```
 
 ## License
@@ -52,14 +59,14 @@ See the [LICENSE](LICENSE) file for license rights and limitations.
 
 ## Authors
 
-- Kristoffer Grönlund (kgronlund@suse.com)
+- Kristoffer Gronlund (kgronlund@suse.com)
 - Xabier Arbulu Insausti (xarbulu@suse.com)
 - Ayoub Belarbi (abelarbi@suse.com)
 
 ## Reviewers
 
 *Pull request* preferred reviewers for this project:
-- Kristoffer Grönlund (kgronlund@suse.com)
+- Kristoffer Gronlund (kgronlund@suse.com)
 - Xabier Arbulu Insausti (xarbulu@suse.com)
 - Ayoub Belarbi (abelarbi@suse.com)
 

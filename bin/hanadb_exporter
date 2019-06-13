@@ -1,0 +1,9 @@
+#!/usr/bin/python3
+"""
+hanadb_exporter command line execution file
+"""
+
+from hanadb_exporter import main
+
+if __name__ == "__main__":
+    main.run()
