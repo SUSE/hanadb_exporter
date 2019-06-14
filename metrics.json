@@ -68,5 +68,209 @@
       "unit": "percent",
       "type": "gauge"
     }
+  ],
+  "SELECT MAX(timestamp) timestamp, host, measured_element_name interface, MAX(MAP(caption, 'Collision Rate', TO_NUMBER(value), 0)) coll_per_s, MAX(MAP(caption, 'Receive Rate', TO_NUMBER(value), 0)) recv_kb_per_s, MAX(MAP(caption, 'Transmit Rate', TO_NUMBER(value), 0)) trans_kb_per_s,MAX(MAP(caption, 'Packet Receive Rate', TO_NUMBER(value), 0)) recv_pack_per_s, MAX(MAP(caption, 'Packet Transmit Rate', TO_NUMBER(value), 0)) trans_pack_per_s, MAX(MAP(caption, 'Receive Error Rate', TO_NUMBER(value), 0)) recv_err_per_s, MAX(MAP(caption, 'Transmit Error Rate', TO_NUMBER(value), 0)) trans_err_per_s FROM sys.m_host_agent_metrics WHERE measured_element_type = 'NetworkPort' GROUP BY host, measured_element_name;":
+  [
+    {
+      "name": "hanadb_network_collisions_per",
+      "description": "Network collisions per second",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "COLL_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_network_receive_rate_kb_per",
+      "description": "Network received rate in kilobytes per seconds",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "RECV_KB_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_network_transmission_rate_kb_per",
+      "description": "Network transmission rate in kilobytes per seconds",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "TRANS_KB_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_network_receive_requests_per",
+      "description": "Network receive rate in requests (packets) per seconds",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "RECV_PACK_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_network_transmission_rate_requests_per",
+      "description": "Network transmission rate in requests (packets) per seconds",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "TRANS_PACK_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_network_receive_rate_errors_per",
+      "description": "Network receive rate of errors per seconds",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "RECV_ERR_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_network_transmission_rate_errors_per",
+      "description": "Network tramission rate of errors per seconds",
+      "labels": ["HOST", "INTERFACE"],
+      "value": "TRANS_ERR_PER_S",
+      "unit": "seconds",
+      "type": "gauge"
+    }
+  ],
+  "SELECT host, LPAD(port,5) port, file_name, file_type, used_size/1024/1024 used_size_mb, total_size/1024/1024 total_size_mb, (total_size - used_size)/1024/1024 available_size_mb, LPAD(TO_DECIMAL(MAP(total_size, 0, 0, ( 1 - used_size / total_size ) * 100), 10, 2), 8) frag_pct FROM   sys.m_volume_files;":
+  [
+    {
+      "name": "hanadb_disk_vol_files_used_size",
+      "description": "Used space per file and file type (in MB)",
+      "labels": ["HOST", "PORT", "FILE_NAME", "FILE_TYPE"],
+      "value": "USED_SIZE_MB",
+      "unit": "MB",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_vol_files_total_size",
+      "description": "Total space per file and file type (in MB)",
+      "labels": ["HOST", "PORT", "FILE_NAME", "FILE_TYPE"],
+      "value": "TOTAL_SIZE_MB",
+      "unit": "MB",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_vol_files_available_size",
+      "description": "Available space per file and file type (in MB)",
+      "labels": ["HOST", "PORT", "FILE_NAME", "FILE_TYPE"],
+      "value": "AVAILABLE_SIZE_MB",
+      "unit": "MB",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_vol_files_fragmentation",
+      "description": "Percentage of unused space compared to total space in file",
+      "labels": ["HOST", "PORT", "FILE_NAME", "FILE_TYPE"],
+      "value": "FRAG_PCT",
+      "unit": "percent",
+      "type": "gauge"
+    }
+  ],
+  "SELECT TO_DECIMAL(SUM(MAP(usage_type, 'DATA', used_size, 0))/1024/1024, 10, 2) total_data_vol_mb, TO_DECIMAL(SUM(MAP(usage_type, 'LOG', used_size, 0))/1024/1024, 10, 2) total_log_vol_mb, TO_DECIMAL(SUM(MAP(usage_type, 'DATA_BACKUP', used_size, 0))/1024/1024, 10, 2) total_data_backup_vol_mb,   TO_DECIMAL(SUM(MAP(usage_type, 'LOG_BACKUP', used_size, 0))/1024/1024, 10, 2) total_log_backup_vol_mb, TO_DECIMAL(SUM(MAP(usage_type, 'TRACE', used_size, 0))/1024/1024, 10, 2) total_trace_vol_mb, TO_DECIMAL(SUM(MAP(usage_type, 'CATALOG_BACKUP', used_size, 0))/1024/1024, 10, 2) total_catalog_backup_vol_mb, TO_DECIMAL(SUM(MAP(usage_type, 'ROOTKEY_BACKUP', used_size, 0))/1024/1024, 10, 2) total_rootkey_backup_vol_mb FROM sys.m_disk_usage;":
+  [
+    {
+      "name": "hanadb_disk_total_data_volume_size",
+      "description": "Total disk size used for DATA files (in MB)",
+      "labels": [],
+      "value": "TOTAL_DATA_VOL_MB",
+      "unit": "MB",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_total_log_volume_size",
+      "description": "Total disk size used for LOG files (in MB)",
+      "labels": [],
+      "value": "TOTAL_LOG_VOL_MB",
+      "unit": "MB",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_total_data_backup_size",
+      "description": "Total disk size used for DATA files backup (in MB)",
+      "labels": [],
+      "value": "TOTAL_DATA_BACKUP_VOL_MB",
+      "unit": "MB",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_total_log_backup_size",
+      "description": "Total disk size used for LOG files backup (in MB)",
+      "labels": [],
+      "value": "TOTAL_LOG_BACKUP_VOL_MB",
+      "unit": "MB",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_total_trace_volume_size",
+      "description": "Total disk size used for Trace files (in MB)",
+      "labels": [],
+      "value": "TOTAL_TRACE_VOL_MB",
+      "unit": "MB",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_total_catalog_backup_size",
+      "description": "Total disk size used for catalog backup files (in MB)",
+      "labels": [],
+      "value": "TOTAL_CATALOG_BACKUP_VOL_MB",
+      "unit": "MB",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_total_rootkey_backup_size",
+      "description": "Total disk size used for rootkey backup files (in MB)",
+      "labels": [],
+      "value": "TOTAL_ROOTKEY_BACKUP_VOL_MB",
+      "unit": "MB",
+      "type": "gauge"
+    }
+  ],
+  "SELECT host, disk, queue_length, srv_ms + wait_ms latency_ms, srv_ms, wait_ms, io_per_s, tp_kbps FROM( SELECT MAX(TIMESTAMP) timestamp, host,     measured_element_name disk, MAX(MAP(caption, 'Queue Length', TO_NUMBER(value), 0)) queue_length, MAX(MAP(caption, 'Service Time', TO_NUMBER(value), 0)) srv_ms, MAX(MAP(caption, 'Wait Time', TO_NUMBER(value), 0)) wait_ms, MAX(MAP(caption, 'I/O Rate', TO_NUMBER(value), 0)) io_per_s, MAX(MAP(caption, 'Total Throughput', TO_NUMBER(value), 0)) tp_kbps FROM sys.m_host_agent_metrics WHERE measured_element_type = 'Disk' GROUP BY host, measured_element_name);":
+  [
+    {
+      "name": "hanadb_disk_io_queue_length",
+      "description": "I/O queue length (number of queued requests)",
+      "labels": ["HOST", "DISK"],
+      "value": "QUEUE_LENGTH",
+      "unit": "requests",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_io_latency",
+      "description": "Total I/O latency (ms), calculated from the sum of service and wait time",
+      "labels": ["HOST", "DISK"],
+      "value": "LATENCY_MS",
+      "unit": "ms",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_io_service_time",
+      "description": "I/O service time in ms",
+      "labels": ["HOST", "DISK"],
+      "value": "SRV_MS",
+      "unit": "ms",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_io_wait_time",
+      "description": "I/O service time in ms",
+      "labels": ["HOST", "DISK"],
+      "value": "WAIT_MS",
+      "unit": "ms",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_io_requests_per",
+      "description": "I/O requests per second",
+      "labels": ["HOST", "DISK"],
+      "value": "IO_PER_S",
+      "unit": "second",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_io_throughput",
+      "description": "I/O throughput in KB/seconds",
+      "labels": ["HOST", "DISK"],
+      "value": "TP_KBPS",
+      "unit": "kb_second",
+      "type": "gauge"
+    }
   ]
 }
