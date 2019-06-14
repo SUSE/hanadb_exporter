@@ -221,5 +221,56 @@
       "unit": "MB",
       "type": "gauge"
     }
+  ],
+  "SELECT host, disk, queue_length, srv_ms + wait_ms latency_ms, srv_ms, wait_ms, io_per_s, tp_kbps FROM( SELECT MAX(TIMESTAMP) timestamp, host,     measured_element_name disk, MAX(MAP(caption, 'Queue Length', TO_NUMBER(value), 0)) queue_length, MAX(MAP(caption, 'Service Time', TO_NUMBER(value), 0)) srv_ms, MAX(MAP(caption, 'Wait Time', TO_NUMBER(value), 0)) wait_ms, MAX(MAP(caption, 'I/O Rate', TO_NUMBER(value), 0)) io_per_s, MAX(MAP(caption, 'Total Throughput', TO_NUMBER(value), 0)) tp_kbps FROM sys.m_host_agent_metrics WHERE measured_element_type = 'Disk' GROUP BY host, measured_element_name);":
+  [
+    {
+      "name": "hanadb_disk_io_queue_length",
+      "description": "I/O queue length (number of queued requests)",
+      "labels": ["HOST", "DISK"],
+      "value": "QUEUE_LENGTH",
+      "unit": "requests",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_io_latency",
+      "description": "Total I/O latency (ms), calculated from the sum of service and wait time",
+      "labels": ["HOST", "DISK"],
+      "value": "LATENCY_MS",
+      "unit": "ms",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_io_service_time",
+      "description": "I/O service time in ms",
+      "labels": ["HOST", "DISK"],
+      "value": "SRV_MS",
+      "unit": "ms",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_io_wait_time",
+      "description": "I/O service time in ms",
+      "labels": ["HOST", "DISK"],
+      "value": "WAIT_MS",
+      "unit": "ms",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_io_requests_per",
+      "description": "I/O requests per second",
+      "labels": ["HOST", "DISK"],
+      "value": "IO_PER_S",
+      "unit": "second",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_disk_io_throughput",
+      "description": "I/O throughput in KB/seconds",
+      "labels": ["HOST", "DISK"],
+      "value": "TP_KBPS",
+      "unit": "kb_second",
+      "type": "gauge"
+    }
   ]
 }
