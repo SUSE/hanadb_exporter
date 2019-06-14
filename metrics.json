@@ -1,32 +1,23 @@
 {
-  "SELECT ROUND(SUM(total_memory_used_size/1024/1024),2) used_memory_mb FROM m_service_memory;":
-  [{
-    "name": "hanadb_total_used_memory",
-    "description": "Total used memory in MB",
-    "labels": [],
-    "value": "USED_MEMORY_MB",
-    "unit": "MB",
-    "type": "gauge"
-  }],
-  "SELECT ROUND(SUM(memory_size_in_total)/1024/1024) column_tables_used_mb FROM m_cs_tables;":
+  "SELECT ROUND(SUM(memory_size_in_total)/1024/1024) column_tables_used_mb FROM sys.m_cs_tables;":
   [{
     "name": "hanadb_column_tables_used_memory",
     "description": "Column tables total memory used in MB",
     "labels": [],
     "value": "COLUMN_TABLES_USED_MB",
-    "unit": "MB",
+    "unit": "mb",
     "type": "gauge"
   }],
-  "SELECT schema_name, ROUND(SUM(memory_size_in_total)/1024/1024) schema_memory_used_mb FROM m_cs_tables GROUP BY schema_name;":
+  "SELECT schema_name, ROUND(SUM(memory_size_in_total)/1024/1024) schema_memory_used_mb FROM sys.m_cs_tables GROUP BY schema_name;":
   [{
     "name": "hanadb_schema_used_memory",
     "description": "Total used memory by schema in MB",
     "labels": ["SCHEMA_NAME"],
     "value": "SCHEMA_MEMORY_USED_MB",
-    "unit": "MB",
+    "unit": "mb",
     "type": "gauge"
   }],
-  "SELECT MAX(TIMESTAMP) TIMESTAMP, HOST, MEASURED_ELEMENT_NAME CORE, SUM(MAP(CAPTION, 'User Time', TO_NUMBER(VALUE), 0)) USER_PCT, SUM(MAP(CAPTION, 'System Time', TO_NUMBER(VALUE), 0)) SYSTEM_PCT, SUM(MAP(CAPTION, 'Wait Time', TO_NUMBER(VALUE), 0)) WAITIO_PCT, SUM(MAP(CAPTION, 'Idle Time', 0, TO_NUMBER(VALUE))) BUSY_PCT, SUM(MAP(CAPTION, 'Idle Time', TO_NUMBER(VALUE), 0)) IDLE_PCT FROM M_HOST_AGENT_METRICS WHERE MEASURED_ELEMENT_TYPE = 'Processor' GROUP BY HOST, MEASURED_ELEMENT_NAME;":
+  "SELECT MAX(TIMESTAMP) TIMESTAMP, HOST, MEASURED_ELEMENT_NAME CORE, SUM(MAP(CAPTION, 'User Time', TO_NUMBER(VALUE), 0)) USER_PCT, SUM(MAP(CAPTION, 'System Time', TO_NUMBER(VALUE), 0)) SYSTEM_PCT, SUM(MAP(CAPTION, 'Wait Time', TO_NUMBER(VALUE), 0)) WAITIO_PCT, SUM(MAP(CAPTION, 'Idle Time', 0, TO_NUMBER(VALUE))) BUSY_PCT, SUM(MAP(CAPTION, 'Idle Time', TO_NUMBER(VALUE), 0)) IDLE_PCT FROM sys.M_HOST_AGENT_METRICS WHERE MEASURED_ELEMENT_TYPE = 'Processor' GROUP BY HOST, MEASURED_ELEMENT_NAME;":
   [
     {
       "name": "hanadb_cpu_user",
@@ -135,7 +126,7 @@
       "description": "Used space per file and file type (in MB)",
       "labels": ["HOST", "PORT", "FILE_NAME", "FILE_TYPE"],
       "value": "USED_SIZE_MB",
-      "unit": "MB",
+      "unit": "mb",
       "type": "gauge"
     },
     {
@@ -143,7 +134,7 @@
       "description": "Total space per file and file type (in MB)",
       "labels": ["HOST", "PORT", "FILE_NAME", "FILE_TYPE"],
       "value": "TOTAL_SIZE_MB",
-      "unit": "MB",
+      "unit": "mb",
       "type": "gauge"
     },
     {
@@ -151,7 +142,7 @@
       "description": "Available space per file and file type (in MB)",
       "labels": ["HOST", "PORT", "FILE_NAME", "FILE_TYPE"],
       "value": "AVAILABLE_SIZE_MB",
-      "unit": "MB",
+      "unit": "mb",
       "type": "gauge"
     },
     {
@@ -170,7 +161,7 @@
       "description": "Total disk size used for DATA files (in MB)",
       "labels": [],
       "value": "TOTAL_DATA_VOL_MB",
-      "unit": "MB",
+      "unit": "mb",
       "type": "gauge"
     },
     {
@@ -178,7 +169,7 @@
       "description": "Total disk size used for LOG files (in MB)",
       "labels": [],
       "value": "TOTAL_LOG_VOL_MB",
-      "unit": "MB",
+      "unit": "mb",
       "type": "gauge"
     },
     {
@@ -186,7 +177,7 @@
       "description": "Total disk size used for DATA files backup (in MB)",
       "labels": [],
       "value": "TOTAL_DATA_BACKUP_VOL_MB",
-      "unit": "MB",
+      "unit": "mb",
       "type": "gauge"
     },
     {
@@ -194,7 +185,7 @@
       "description": "Total disk size used for LOG files backup (in MB)",
       "labels": [],
       "value": "TOTAL_LOG_BACKUP_VOL_MB",
-      "unit": "MB",
+      "unit": "mb",
       "type": "gauge"
     },
     {
@@ -202,7 +193,7 @@
       "description": "Total disk size used for Trace files (in MB)",
       "labels": [],
       "value": "TOTAL_TRACE_VOL_MB",
-      "unit": "MB",
+      "unit": "mb",
       "type": "gauge"
     },
     {
@@ -210,7 +201,7 @@
       "description": "Total disk size used for catalog backup files (in MB)",
       "labels": [],
       "value": "TOTAL_CATALOG_BACKUP_VOL_MB",
-      "unit": "MB",
+      "unit": "mb",
       "type": "gauge"
     },
     {
@@ -218,7 +209,7 @@
       "description": "Total disk size used for rootkey backup files (in MB)",
       "labels": [],
       "value": "TOTAL_ROOTKEY_BACKUP_VOL_MB",
-      "unit": "MB",
+      "unit": "mb",
       "type": "gauge"
     }
   ],
@@ -270,6 +261,81 @@
       "labels": ["HOST", "DISK"],
       "value": "TP_KBPS",
       "unit": "kb_second",
+      "type": "gauge"
+    }
+  ],
+  "SELECT m.host, LPAD(m.port, 5) port, m.service_name service, TO_DECIMAL(m.shared_memory_allocated_size / 1024 / 1024, 10, 2) shm_alloc_mb,  TO_DECIMAL(m.shared_memory_used_size / 1024 / 1024, 10, 2) shm_used_mb, TO_DECIMAL(MAP(m.shared_memory_allocated_size, 0, 0, m.shared_memory_used_size / m.shared_memory_allocated_size * 100), 10, 2) shm_used_pct, TO_DECIMAL(m.heap_memory_allocated_size / 1024 / 1024, 10, 2) heap_alloc_mb, TO_DECIMAL(m.heap_memory_used_size / 1024 / 1024, 10, 2) heap_used_mb, TO_DECIMAL(MAP(m.heap_memory_allocated_size, 0, 0, m.heap_memory_used_size / m.heap_memory_allocated_size * 100), 10, 2) heap_used_pct, TO_DECIMAL(m.total_memory_used_size / 1024 / 1024, 10, 2) total_memory_used_mb, TO_DECIMAL(m.physical_memory_size / 1024 / 1024, 10, 2) total_phys_mem_mb, TO_DECIMAL(m.logical_memory_size / 1024 / 1024, 10, 2) total_logical_mem_mb FROM  sys.m_service_memory m":
+  [
+    {
+      "name": "hanadb_memory_shared_allocated",
+      "description": "Allocated Shared Memory in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "SHM_ALLOC_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_shared_used",
+      "description": "Used Shared Memory in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "SHM_USED_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_shared_used",
+      "description": "Percentage of used Shared Memory",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "SHM_USED_PCT",
+      "unit": "percent",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_heap_allocated",
+      "description": "Allocated Heap Memory in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "HEAP_ALLOC_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_heap_used",
+      "description": "Used Heap Memory in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "HEAP_USED_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_used_used",
+      "description": "Percentage of used Heap Memory",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "HEAP_USED_PCT",
+      "unit": "percent",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_total_used",
+      "description": "Total memory used per services in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "TOTAL_MEMORY_USED_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_physical_total",
+      "description": "Total Physical/resident memory size (operating system perspective) per service in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "TOTAL_PHYS_MEM_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_virtual_total",
+      "description": "Total Virtual memory size (operating system perspective) per service in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "TOTAL_LOGICAL_MEM_MB",
+      "unit": "mb",
       "type": "gauge"
     }
   ]
