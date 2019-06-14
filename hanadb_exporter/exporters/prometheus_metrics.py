@@ -10,18 +10,20 @@ SAP HANA database prometheus data exporter metrics
 
 import json
 
-# TODO: In order to avoid dependencies, import custom prometheus client
-try:
-    from prometheus_client import core
-except ImportError:
-    # Load custom prometheus client
-    raise NotImplementedError('custom prometheus client not implemented')
 
-class PrometheusMetrics:
-    def __init__(self):
-        self.data = self.load_metrics()
+class PrometheusMetrics(object):
+    """
+    Class to store the metrics data
+    """
 
-    def load_metrics(self):
-        with open('../metrics.json') as metrics_file:
-            data = json.load(metrics_file)
-            return data
+    def __init__(self, metrics_file):
+        self.data = self.load_metrics(metrics_file)
+
+    @classmethod
+    def load_metrics(cls, metrics_file):
+        """
+        Load metrics file as json
+        """
+        with open(metrics_file, 'r') as file_ptr:
+            data = json.load(file_ptr)
+        return data
