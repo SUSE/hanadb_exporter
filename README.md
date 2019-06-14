@@ -38,7 +38,7 @@ pip install .
 ## Configuring and running the exporter
 
 1. Create the `config.json` configuration file.
-An example is available in [config.json.example](config.json.example). Here the most
+An example of `config.json` available in [config.json.example](config.json.example). Here the most
 important items in the configuration file:
   - `exposition_port`: Port where the prometheus exporter will be exposed.
   - `hana.host`: Address of the SAP HANA database.
@@ -48,9 +48,9 @@ important items in the configuration file:
 
 2. Start the exporter by running the following command:
 ```
-hanadb_exporter -c config.json
+hanadb_exporter -c config.json -m metrics.json
 # Or
-python hanadb_exporter/main.py -c config.json
+python hanadb_exporter/main.py -c config.json -m metrics.json
 ```
 
 ## License

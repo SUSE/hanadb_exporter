@@ -18,7 +18,7 @@ from shaptools import hdb_connector
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 
-import exporter_factory
+from hanadb_exporter import exporter_factory
 
 
 def parse_config(config_file):
@@ -38,6 +38,8 @@ def parse_arguments():
     parser.add_argument(
         "-c", "--config", help="Path to hanadb_exporter configuration file", required=True)
     parser.add_argument(
+        "-m", "--metrics", help="Path to hanadb_exporter metrics file", required=True)
+    parser.add_argument(
         "--verbosity",
         help="Python logging level. Options: DEBUG, INFO, WARN, ERROR (INFO by default)")
     args = parser.parse_args()
@@ -52,6 +54,7 @@ def run():
     args = parse_arguments()
     logging.basicConfig(level=args.verbosity or logging.INFO)
     config = parse_config(args.config)
+    metrics = args.metrics
 
     connector = hdb_connector.HdbConnector()
     try:
@@ -64,8 +67,9 @@ def run():
         )
     except KeyError as err:
         raise KeyError('Configuration file {} is malformed: {}'.format(args.config, err))
+
     collector = exporter_factory.SapHanaExporter.create(
-        exporter_type='prometheus', hdb_connector=connector)
+        exporter_type='prometheus', metrics_file=metrics, hdb_connector=connector)
     REGISTRY.register(collector)
     start_http_server(config.get('exposition_port', 30015), '0.0.0.0')
     while True:
