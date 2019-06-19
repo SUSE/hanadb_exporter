@@ -26,7 +26,7 @@
 %endif
 
 Name:           hanadb_exporter
-Version:        0.2.0
+Version:        0.2.1
 Release:        0
 Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0
@@ -67,8 +67,8 @@ install -D -m 644 daemon/hanadb_exporter.service %{buildroot}%{_unitdir}/hanadb_
 mkdir -p %{buildroot}%{_fillupdir}
 mkdir -p %{buildroot}%{_sysconfdir}/sysconfig
 install -D -m 0644 daemon/hanadb_exporter.sysconfig %{buildroot}%{_fillupdir}/sysconfig.hanadb_exporter
-install -D -m 0644 config.json.example %{buildroot}/usr/share/doc/packages/hanadb_exporter/config.json.example
-install -D -m 0644 metrics.json %{buildroot}/usr/share/doc/packages/hanadb_exporter/metrics.json
+install -D -m 0644 config.json.example %{buildroot}%{_docdir}/hanadb_exporter/config.json.example
+install -D -m 0644 metrics.json %{buildroot}%{_docdir}/hanadb_exporter/metrics.json
 
 %post
 %service_add_post hanadb_exporter.service
@@ -76,8 +76,8 @@ if [ ! -e %{_sysconfdir}/sysconfig/hanadb_exporter ]; then
     %fillup_only hanadb_exporter
 fi
 rm -rf  %{_sysconfdir}/hanadb_exporter/*
-ln -s /usr/share/doc/packages/hanadb_exporter/config.json.example %{_sysconfdir}/hanadb_exporter/config.json.example
-ln -s /usr/share/doc/packages/hanadb_exporter/metrics.json  %{_sysconfdir}/hanadb_exporter/metrics.json
+ln -s %{_docdir}/hanadb_exporter/config.json.example %{_sysconfdir}/hanadb_exporter/config.json.example
+ln -s %{_docdir}/hanadb_exporter/metrics.json  %{_sysconfdir}/hanadb_exporter/metrics.json
 
 %pre
 %service_add_pre hanadb_exporter.service
@@ -104,8 +104,8 @@ pytest tests
 %{_bindir}/hanadb_exporter
 
 %dir %{_sysconfdir}/hanadb_exporter
-/usr/share/doc/packages/hanadb_exporter/config.json.example
-/usr/share/doc/packages/hanadb_exporter/metrics.json
+%{_docdir}/hanadb_exporter/config.json.example
+%{_docdir}/hanadb_exporter/metrics.json
 %{_fillupdir}/sysconfig.hanadb_exporter
 %{_unitdir}/hanadb_exporter.service
 
