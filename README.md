@@ -53,6 +53,30 @@ hanadb_exporter -c config.json -m metrics.json
 python hanadb_exporter/main.py -c config.json -m metrics.json
 ```
 
+## Running as a daemon
+The hanadb_exporter can be executed using `systemd`. For that, the best option is to install the
+project using a rpm package. This can be done following the next steps (this example is for tumbleweed):
+
+```
+# All the command must be executed as root user
+zypper addrepo https://download.opensuse.org/repositories/network:/ha-clustering:/Factory/openSUSE_Tumbleweed/network:ha-clustering:Factory.repo
+zypper ref
+zypper in hanadb_exporter
+```
+
+Even using this way, the SAP HANA database connector package must be installed independently (see [Installation](#installation)).
+After that we need to create the configuration file as `/etc/hanadb_exporter/config.json`.
+The [config.json.example](./config.json.example) can be used as example (the example file is
+stored in `/etc/hanadb_exporter` folder too).
+
+Now, the exporter can be started as a daemon:
+```
+# All the command must be executed as root user
+systemctl start hanadb_exporter
+# Check the status with
+systemctl status hanadb_exporter
+```
+
 ## License
 
 See the [LICENSE](LICENSE) file for license rights and limitations.
