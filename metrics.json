@@ -307,7 +307,7 @@
       "type": "gauge"
     },
     {
-      "name": "hanadb_memory_used_used",
+      "name": "hanadb_memory_heap_used",
       "description": "Percentage of used Heap Memory",
       "labels": ["HOST", "PORT", "SERVICE"],
       "value": "HEAP_USED_PCT",
