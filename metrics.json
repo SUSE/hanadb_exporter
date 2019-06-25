@@ -154,61 +154,37 @@
       "type": "gauge"
     }
   ],
-  "SELECT TO_DECIMAL(SUM(MAP(usage_type, 'DATA', used_size, 0))/1024/1024, 10, 2) total_data_vol_mb, TO_DECIMAL(SUM(MAP(usage_type, 'LOG', used_size, 0))/1024/1024, 10, 2) total_log_vol_mb, TO_DECIMAL(SUM(MAP(usage_type, 'DATA_BACKUP', used_size, 0))/1024/1024, 10, 2) total_data_backup_vol_mb,   TO_DECIMAL(SUM(MAP(usage_type, 'LOG_BACKUP', used_size, 0))/1024/1024, 10, 2) total_log_backup_vol_mb, TO_DECIMAL(SUM(MAP(usage_type, 'TRACE', used_size, 0))/1024/1024, 10, 2) total_trace_vol_mb, TO_DECIMAL(SUM(MAP(usage_type, 'CATALOG_BACKUP', used_size, 0))/1024/1024, 10, 2) total_catalog_backup_vol_mb, TO_DECIMAL(SUM(MAP(usage_type, 'ROOTKEY_BACKUP', used_size, 0))/1024/1024, 10, 2) total_rootkey_backup_vol_mb FROM sys.m_disk_usage;":
+  "SELECT md.host, md.usage_type, md.path, md.filesystem_type, TO_DECIMAL(md.total_device_size / 1024 / 1024, 10, 2) total_device_size_mb, TO_DECIMAL(md.total_size / 1024 / 1024, 10, 2) total_size_mb, TO_DECIMAL(md.used_size / 1024 / 1024, 10, 2) total_used_size_mb, TO_DECIMAL(du.used_size / 1024 / 1024, 10, 2) used_size_mb FROM sys.m_disk_usage du, sys.m_disks md WHERE du.host = md.host AND du.usage_type = md.usage_type;":
   [
     {
-      "name": "hanadb_disk_total_data_volume_size",
-      "description": "Total disk size used for DATA files (in MB)",
-      "labels": [],
-      "value": "TOTAL_DATA_VOL_MB",
+      "name": "hanadb_disk_total_device_size",
+      "description": "Total device size returned by the operating system (in MB). It will be repeated if the device is shared between usages_types.",
+      "labels": ["HOST", "USAGE_TYPE", "PATH", "FILESYSTEM_TYPE"],
+      "value": "TOTAL_DEVICE_SIZE_MB",
       "unit": "mb",
       "type": "gauge"
     },
     {
-      "name": "hanadb_disk_total_log_volume_size",
-      "description": "Total disk size used for LOG files (in MB)",
-      "labels": [],
-      "value": "TOTAL_LOG_VOL_MB",
+      "name": "hanadb_disk_total_size",
+      "description": "Specifies the volume size in MB. It will be repeated if the volume is shared between usages_types.",
+      "labels": ["HOST", "USAGE_TYPE", "PATH", "FILESYSTEM_TYPE"],
+      "value": "TOTAL_SIZE_MB",
       "unit": "mb",
       "type": "gauge"
     },
     {
-      "name": "hanadb_disk_total_data_backup_size",
-      "description": "Total disk size used for DATA files backup (in MB)",
-      "labels": [],
-      "value": "TOTAL_DATA_BACKUP_VOL_MB",
+      "name": "hanadb_disk_total_used_size",
+      "description": "Specifies the used volume size in MB. It will be repeated if the volume is shared between usages_types.",
+      "labels": ["HOST", "USAGE_TYPE", "PATH", "FILESYSTEM_TYPE"],
+      "value": "TOTAL_USED_SIZE_MB",
       "unit": "mb",
       "type": "gauge"
     },
     {
-      "name": "hanadb_disk_total_log_backup_size",
-      "description": "Total disk size used for LOG files backup (in MB)",
-      "labels": [],
-      "value": "TOTAL_LOG_BACKUP_VOL_MB",
-      "unit": "mb",
-      "type": "gauge"
-    },
-    {
-      "name": "hanadb_disk_total_trace_volume_size",
-      "description": "Total disk size used for Trace files (in MB)",
-      "labels": [],
-      "value": "TOTAL_TRACE_VOL_MB",
-      "unit": "mb",
-      "type": "gauge"
-    },
-    {
-      "name": "hanadb_disk_total_catalog_backup_size",
-      "description": "Total disk size used for catalog backup files (in MB)",
-      "labels": [],
-      "value": "TOTAL_CATALOG_BACKUP_VOL_MB",
-      "unit": "mb",
-      "type": "gauge"
-    },
-    {
-      "name": "hanadb_disk_total_rootkey_backup_size",
-      "description": "Total disk size used for rootkey backup files (in MB)",
-      "labels": [],
-      "value": "TOTAL_ROOTKEY_BACKUP_VOL_MB",
+      "name": "hanadb_disk_used_size",
+      "description": "Size of used disk space in MB based on usage_type",
+      "labels": ["HOST", "USAGE_TYPE", "PATH", "FILESYSTEM_TYPE"],
+      "value": "USED_SIZE_MB",
       "unit": "mb",
       "type": "gauge"
     }
