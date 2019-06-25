@@ -431,7 +431,7 @@
     },
     {
       "name": "hanadb_host_memory_alloc_limit",
-      "description": "Allocation limit for all process per host in MB",
+      "description": "Memory allocation limit for all process per host in MB",
       "labels": ["HOST"],
       "value": "HOST_ALLOC_LIMIT_MB",
       "unit": "mb",
@@ -454,7 +454,7 @@
       "type": "gauge"
     },
     {
-      "name": "hanadb_host_memory_alloc_total",
+      "name": "hanadb_host_memory_pool_size",
       "description": "Size of the memory pool for all SAP HANA processes per host in MB",
       "labels": ["HOST"],
       "value": "HOST_TOTAL_ALLOC_MEM_MB",
