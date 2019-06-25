@@ -386,5 +386,96 @@
       "unit": "mb",
       "type": "gauge"
     }
+  ],
+  "SELECT host, ROUND((used_physical_memory + free_physical_memory) / 1024 / 1024, 2) host_physical_mem_mb, ROUND(used_physical_memory / 1024 / 1024, 2) host_resident_mem_mb, ROUND(free_physical_memory / 1024 / 1024, 2) host_free_physical_mem_mb, ROUND(free_swap_space / 1024 / 1024, 2) host_free_swap_mb, ROUND(used_swap_space / 1024 / 1024, 2) host_used_swap_mb, ROUND(allocation_limit / 1024 / 1024, 2) host_alloc_limit_mb, ROUND(instance_total_memory_used_size / 1024 / 1024, 2) host_total_used_mem_mb, ROUND(instance_total_memory_peak_used_size / 1024 / 1024, 2) host_total_peak_used_mem_mb, ROUND(instance_total_memory_allocated_size / 1024 / 1024, 2) host_total_alloc_mem_mb, ROUND(instance_code_size / 1024 / 1024, 2) host_code_size_mb, ROUND(instance_shared_memory_allocated_size / 1024 / 1024, 2) host_shr_mem_alloc_mb FROM sys.m_host_resource_utilization;":
+  [
+    {
+      "name": "hanadb_host_memory_physical_total",
+      "description": "Total physical memory per host in MB",
+      "labels": ["HOST"],
+      "value": "HOST_PHYSICAL_MEM_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_host_memory_resident",
+      "description": "Total resident (used physical) memory per host in MB",
+      "labels": ["HOST"],
+      "value": "HOST_RESIDENT_MEM_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_host_memory_physical_free",
+      "description": "Free physical memory per host in MB",
+      "labels": ["HOST"],
+      "value": "HOST_FREE_PHYSICAL_MEM_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_host_memory_swap_free",
+      "description": "Free swap memory per host in MB",
+      "labels": ["HOST"],
+      "value": "HOST_FREE_SWAP_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_host_memory_swap_used",
+      "description": "Used swap memory per host in MB",
+      "labels": ["HOST"],
+      "value": "HOST_USED_SWAP_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_host_memory_alloc_limit",
+      "description": "Allocation limit for all process per host in MB",
+      "labels": ["HOST"],
+      "value": "HOST_ALLOC_LIMIT_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_host_memory_used_total",
+      "description": "Amount of memory from the memory pool that is currently being used by SAP HANA processes per host in MB",
+      "labels": ["HOST"],
+      "value": "HOST_TOTAL_USED_MEM_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_host_memory_used_peak",
+      "description": "Peak memory from the memory pool used by SAP HANA processes since the instance started (this is a sample-based value) per host in MB",
+      "labels": ["HOST"],
+      "value": "HOST_TOTAL_PEAK_USED_MEM_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_host_memory_alloc_total",
+      "description": "Size of the memory pool for all SAP HANA processes per host in MB",
+      "labels": ["HOST"],
+      "value": "HOST_TOTAL_ALLOC_MEM_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_host_memory_code_size",
+      "description": "Code size, including shared libraries of SAP HANA processes per host in MB",
+      "labels": ["HOST"],
+      "value": "HOST_CODE_SIZE_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_host_memory_shared_alloc",
+      "description": "Shared memory size of SAP HANA processes per host in MB",
+      "labels": ["HOST"],
+      "value": "HOST_SHR_MEM_ALLOC_MB",
+      "unit": "mb",
+      "type": "gauge"
+    }
   ]
 }
