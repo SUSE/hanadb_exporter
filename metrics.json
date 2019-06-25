@@ -264,77 +264,125 @@
       "type": "gauge"
     }
   ],
-  "SELECT m.host, LPAD(m.port, 5) port, m.service_name service, TO_DECIMAL(m.shared_memory_allocated_size / 1024 / 1024, 10, 2) shm_alloc_mb,  TO_DECIMAL(m.shared_memory_used_size / 1024 / 1024, 10, 2) shm_used_mb, TO_DECIMAL(MAP(m.shared_memory_allocated_size, 0, 0, m.shared_memory_used_size / m.shared_memory_allocated_size * 100), 10, 2) shm_used_pct, TO_DECIMAL(m.heap_memory_allocated_size / 1024 / 1024, 10, 2) heap_alloc_mb, TO_DECIMAL(m.heap_memory_used_size / 1024 / 1024, 10, 2) heap_used_mb, TO_DECIMAL(MAP(m.heap_memory_allocated_size, 0, 0, m.heap_memory_used_size / m.heap_memory_allocated_size * 100), 10, 2) heap_used_pct, TO_DECIMAL(m.total_memory_used_size / 1024 / 1024, 10, 2) total_memory_used_mb, TO_DECIMAL(m.physical_memory_size / 1024 / 1024, 10, 2) total_phys_mem_mb, TO_DECIMAL(m.logical_memory_size / 1024 / 1024, 10, 2) total_logical_mem_mb FROM  sys.m_service_memory m":
+  "SELECT m.host, LPAD(m.port, 5) port, m.service_name service, TO_DECIMAL(m.shared_memory_allocated_size / 1024 / 1024, 10, 2) shm_alloc_mb, TO_DECIMAL(m.shared_memory_used_size / 1024 / 1024, 10, 2) shm_used_mb, TO_DECIMAL(MAP(m.shared_memory_allocated_size, 0, 0, m.shared_memory_used_size / m.shared_memory_allocated_size * 100), 10, 2) shm_used_pct, TO_DECIMAL(m.heap_memory_allocated_size / 1024 / 1024, 10, 2) heap_alloc_mb, TO_DECIMAL(m.heap_memory_used_size / 1024 / 1024, 10, 2) heap_used_mb, TO_DECIMAL(MAP(m.heap_memory_allocated_size, 0, 0, m.heap_memory_used_size / m.heap_memory_allocated_size * 100), 10, 2) heap_used_pct, TO_DECIMAL(m.total_memory_used_size / 1024 / 1024, 10, 2) total_memory_used_mb, TO_DECIMAL(m.physical_memory_size / 1024 / 1024, 10, 2) total_phys_mem_mb, TO_DECIMAL(m.logical_memory_size / 1024 / 1024, 10, 2) total_logical_mem_mb, TO_DECIMAL(m.code_size / 1024 / 1024, 10, 2) code_size_mem_mb, TO_DECIMAL(m.stack_size / 1024 / 1024, 10, 2) stack_size_mem_mb, TO_DECIMAL(m.compactors_freeable_size / 1024 / 1024, 10, 2) compactors_freeable_size_mem_mb,   TO_DECIMAL(m.compactors_allocated_size / 1024 / 1024, 10, 2) compactors_allocated_size_mem_mb, TO_DECIMAL(m.allocation_limit / 1024 / 1024, 10, 2) process_alloc_limit_mb, TO_DECIMAL(m.effective_allocation_limit / 1024 / 1024, 10, 2) effective_proc_alloc_limit_mb FROM sys.m_service_memory m;":
   [
     {
-      "name": "hanadb_memory_shared_allocated",
-      "description": "Allocated Shared Memory in MB",
+      "name": "hanadb_memory_service_shared_allocated",
+      "description": "Allocated Shared Memory part of the memory pool per service in MB",
       "labels": ["HOST", "PORT", "SERVICE"],
       "value": "SHM_ALLOC_MB",
       "unit": "mb",
       "type": "gauge"
     },
     {
-      "name": "hanadb_memory_shared_used",
-      "description": "Used Shared Memory in MB",
+      "name": "hanadb_memory_service_shared_used",
+      "description": "Used Shared Memory part of the memory pool per service in MB",
       "labels": ["HOST", "PORT", "SERVICE"],
       "value": "SHM_USED_MB",
       "unit": "mb",
       "type": "gauge"
     },
     {
-      "name": "hanadb_memory_shared_used",
-      "description": "Percentage of used Shared Memory",
+      "name": "hanadb_memory_service_shared_used",
+      "description": "Percentage of used Shared Memory from the memory pool per service",
       "labels": ["HOST", "PORT", "SERVICE"],
       "value": "SHM_USED_PCT",
       "unit": "percent",
       "type": "gauge"
     },
     {
-      "name": "hanadb_memory_heap_allocated",
-      "description": "Allocated Heap Memory in MB",
+      "name": "hanadb_memory_service_heap_allocated",
+      "description": "Allocated Heap Memory part of the memory pool per service in MB",
       "labels": ["HOST", "PORT", "SERVICE"],
       "value": "HEAP_ALLOC_MB",
       "unit": "mb",
       "type": "gauge"
     },
     {
-      "name": "hanadb_memory_heap_used",
-      "description": "Used Heap Memory in MB",
+      "name": "hanadb_memory_service_heap_used",
+      "description": "Used Heap Memory part of the memory pool per service in MB",
       "labels": ["HOST", "PORT", "SERVICE"],
       "value": "HEAP_USED_MB",
       "unit": "mb",
       "type": "gauge"
     },
     {
-      "name": "hanadb_memory_heap_used",
-      "description": "Percentage of used Heap Memory",
+      "name": "hanadb_memory_service_heap_used",
+      "description": "Percentage of used Heap Memory part of the memory pool per service",
       "labels": ["HOST", "PORT", "SERVICE"],
       "value": "HEAP_USED_PCT",
       "unit": "percent",
       "type": "gauge"
     },
     {
-      "name": "hanadb_memory_total_used",
-      "description": "Total memory used per services in MB",
+      "name": "hanadb_memory_service_total_used",
+      "description": "Total memory from the memory pool used per services in MB",
       "labels": ["HOST", "PORT", "SERVICE"],
       "value": "TOTAL_MEMORY_USED_MB",
       "unit": "mb",
       "type": "gauge"
     },
     {
-      "name": "hanadb_memory_physical_total",
-      "description": "Total Physical/resident memory size (operating system perspective) per service in MB",
+      "name": "hanadb_memory_service_physical_total",
+      "description": "Total physical resident memory size (operating system perspective) per service in MB",
       "labels": ["HOST", "PORT", "SERVICE"],
       "value": "TOTAL_PHYS_MEM_MB",
       "unit": "mb",
       "type": "gauge"
     },
     {
-      "name": "hanadb_memory_virtual_total",
+      "name": "hanadb_memory_service_virtual_total",
       "description": "Total Virtual memory size (operating system perspective) per service in MB",
       "labels": ["HOST", "PORT", "SERVICE"],
       "value": "TOTAL_LOGICAL_MEM_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_service_code_size",
+      "description": "Code size, including shared libraries, per service in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "CODE_SIZE_MEM_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_service_stack_size",
+      "description": "Stack size per service in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "STACK_SIZE_MEM_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_service_compactors_freeable_size",
+      "description": "Memory that can be freed during a memory shortage per service in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "COMPACTORS_FREEABLE_SIZE_MEM_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_service_compactors_allocated_size",
+      "description": "Part of the memory pool that can potentially (if unpinned) be freed during a memory shortage per service in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "COMPACTORS_ALLOCATED_SIZE_MEM_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_service_alloc_limit",
+      "description": "Maximum memory pool size (configurable value) per service in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "PROCESS_ALLOC_LIMIT_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_memory_service_effective_alloc_limit",
+      "description": "Effective maximum memory pool size, considering the pool sizes of other processes (computed value) per service in MB",
+      "labels": ["HOST", "PORT", "SERVICE"],
+      "value": "PROCESS_ALLOC_LIMIT_MB",
       "unit": "mb",
       "type": "gauge"
     }
