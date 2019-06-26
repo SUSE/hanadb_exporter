@@ -1,18 +1,18 @@
 {
-  "SELECT ROUND(SUM(memory_size_in_total)/1024/1024) column_tables_used_mb FROM sys.m_cs_tables;":
+  "SELECT host, ROUND(SUM(memory_size_in_total)/1024/1024) column_tables_used_mb FROM sys.m_cs_tables GROUP BY host;":
   [{
     "name": "hanadb_column_tables_used_memory",
     "description": "Column tables total memory used in MB",
-    "labels": [],
+    "labels": ["HOST"],
     "value": "COLUMN_TABLES_USED_MB",
     "unit": "mb",
     "type": "gauge"
   }],
-  "SELECT schema_name, ROUND(SUM(memory_size_in_total)/1024/1024) schema_memory_used_mb FROM sys.m_cs_tables GROUP BY schema_name;":
+  "SELECT host, schema_name, ROUND(SUM(memory_size_in_total)/1024/1024) schema_memory_used_mb FROM sys.m_cs_tables GROUP BY host, schema_name;":
   [{
     "name": "hanadb_schema_used_memory",
     "description": "Total used memory by schema in MB",
-    "labels": ["SCHEMA_NAME"],
+    "labels": ["HOST", "SCHEMA_NAME"],
     "value": "SCHEMA_MEMORY_USED_MB",
     "unit": "mb",
     "type": "gauge"
@@ -193,7 +193,7 @@
   [
     {
       "name": "hanadb_disk_io_queue_length",
-      "description": "I/O queue length (number of queued requests)",
+      "description": "I/O queue length (average queue length of the requests that were issued to the Disk Device)",
       "labels": ["HOST", "DISK"],
       "value": "QUEUE_LENGTH",
       "unit": "requests",
