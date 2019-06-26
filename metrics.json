@@ -469,7 +469,7 @@
       "description": "Total elapsed time of SQL statements executions by service and SQL type in miliseconds",
       "labels": ["HOST", "PORT", "SERVICE", "SQL_TYPE"],
       "value": "ELAPSED_MS",
-      "unit": "sec",
+      "unit": "ms",
       "type": "gauge"
     },
     {
