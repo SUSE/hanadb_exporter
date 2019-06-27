@@ -534,5 +534,16 @@
       "unit": "count",
       "type": "gauge"
     }
+  ],
+  "SELECT host, LPAD(port, 5) port, connection_type, MAP(connection_status,'','N/A', connection_status) connection_status, COUNT(1) total_connections FROM SYS.M_CONNECTIONS  GROUP BY host, port, connection_status, connection_type;":
+  [
+    {
+      "name": "hanadb_connections_total",
+      "description": "Number of connections grouped by Type and Status",
+      "labels": ["HOST", "PORT", "CONNECTION_TYPE", "CONNECTION_STATUS"],
+      "value": "TOTAL_CONNECTIONS",
+      "unit": "count",
+      "type": "gauge"
+    }
   ]
 }
