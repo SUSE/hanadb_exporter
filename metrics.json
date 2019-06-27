@@ -615,5 +615,40 @@
       "unit": "count",
       "type": "gauge"
     }
+  ],
+  "SELECT TO_VARCHAR(RT.TAKEOVER_START_TIME) START_TIME, MAP(RT.TAKEOVER_END_TIME, NULL, 'N/A', TO_VARCHAR(RT.TAKEOVER_END_TIME)) END_TIME, MAP(SECONDS_BETWEEN(RT.TAKEOVER_START_TIME, RT.TAKEOVER_END_TIME),NULL, -1,SECONDS_BETWEEN(RT.TAKEOVER_START_TIME, RT.TAKEOVER_END_TIME)) DURATION_S, RT.SOURCE_SITE_NAME SRC_SITE_NAME, RT.SOURCE_MASTER_NAMESERVER_HOST SRC_HOST, RT.SITE_NAME TGT_SITE_NAME, RT.MASTER_NAMESERVER_HOST TGT_HOST, RT.TAKEOVER_TYPE TYPE, RT.OPERATION_MODE, MAP(RT.REPLICATION_STATUS,'ACTIVE',0,'ERROR', 4, 'SYNCING',2, 'INITIALIZING',1,'UNKNOWN', 3, 99) REPLICATION_STATUS, TO_VARCHAR(RT.LOG_POSITION_TIME) LOG_POS_TIME, TO_VARCHAR(RT.SHIPPED_LOG_POSITION_TIME) SHIPPED_LOG_POS_TIME, RT.LOG_POSITION, RT.SHIPPED_LOG_POSITION  FROM M_SYSTEM_REPLICATION_TAKEOVER_HISTORY RT;":
+  [
+    {
+      "name": "hanadb_sr_takeover_replication",
+      "description": "System Replication status at takeover time. Values: 0-ACTIVE, 1-INITIALIZING, 2-SYNCING, 3-UNKNOWN, 4-ERROR, 99-UNMAPPED",
+      "labels": ["START_TIME", "END_TIME", "SRC_SITE_NAME", "SRC_HOST", "TGT_SITE_NAME", "TGT_HOST", "OPERATION_MODE", "LOG_POS_TIME", "SHIPPED_LOG_POS_TIME"],
+      "value": "REPLICATION_STATUS",
+      "unit": "status",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_sr_takeover_duration_time",
+      "description": "System Replication takeover duration time. Returns -1 if cannot be calculated, together with END_TIME=N/A. It is a workaround to when HANA cannot collect this value",
+      "labels": ["START_TIME", "END_TIME", "SRC_SITE_NAME", "SRC_HOST", "TGT_SITE_NAME", "TGT_HOST", "OPERATION_MODE", "LOG_POS_TIME", "SHIPPED_LOG_POS_TIME"],
+      "value": "DURATION_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_sr_takeover_log_position",
+      "description": "Specifies the master log position, that has been reached by takeover",
+      "labels": ["START_TIME", "END_TIME", "SRC_SITE_NAME", "SRC_HOST", "TGT_SITE_NAME", "TGT_HOST", "OPERATION_MODE", "LOG_POS_TIME", "SHIPPED_LOG_POS_TIME"],
+      "value": "LOG_POSITION",
+      "unit": "bigint",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_sr_takeover_shipped_log_position",
+      "description": "Specifies the highest master log position that has been shipped before executing takeover",
+      "labels": ["START_TIME", "END_TIME", "SRC_SITE_NAME", "SRC_HOST", "TGT_SITE_NAME", "TGT_HOST", "OPERATION_MODE", "LOG_POS_TIME", "SHIPPED_LOG_POS_TIME"],
+      "value": "SHIPPED_LOG_POSITION",
+      "unit": "bigint",
+      "type": "gauge"
+    }
   ]
 }
