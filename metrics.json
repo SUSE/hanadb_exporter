@@ -497,7 +497,7 @@
       "type": "gauge"
     }
   ],
-  "SELECT TOP 10 host, LPAD(port, 5) port, SUBSTRING(REPLACE_REGEXPR('\n' IN statement_string WITH ' ' OCCURRENCE ALL), 1,30) sql_string, statement_hash sql_hash, execution_count, total_execution_time + total_preparation_time total_elapsed_time FROM sys.m_sql_plan_cache ORDER BY total_elapsed_time DESC;":
+  "SELECT TOP 10 host, LPAD(port, 5) port, SUBSTRING(REPLACE_REGEXPR('\n' IN statement_string WITH ' ' OCCURRENCE ALL), 1,30) sql_string, statement_hash sql_hash, execution_count, total_execution_time + total_preparation_time total_elapsed_time FROM sys.m_sql_plan_cache ORDER BY total_elapsed_time, execution_count DESC;":
   [
     {
       "name": "hanadb_sql_top_time_consumers",
@@ -511,7 +511,26 @@
       "name": "hanadb_sql_top_time_consumers",
       "description": "Top statements time consumers. Number of total executions of the SQL Statement",
       "labels": ["HOST", "PORT", "SQL_STRING", "SQL_HASH"],
-      "value": "TOTAL_ELAPSED_TIME",
+      "value": "EXECUTION_COUNT",
+      "unit": "count",
+      "type": "gauge"
+    }
+  ],
+  "SELECT TOP 10 host, LPAD(port, 5) port, SUBSTRING(REPLACE_REGEXPR('\n' IN statement_string WITH ' ' OCCURRENCE ALL), 1,30) sql_string, statement_hash sql_hash, execution_count, total_execution_memory_size FROM sys.m_sql_plan_cache ORDER BY total_execution_memory_size, execution_count  DESC;":
+  [
+    {
+      "name": "hanadb_sql_top_mem_consumers",
+      "description": "Top statements memory consumers. Specifies the total size of tracked actual memory consumption in bytes",
+      "labels": ["HOST", "PORT", "SQL_STRING", "SQL_HASH"],
+      "value": "TOTAL_EXECUTION_MEMORY_SIZE",
+      "unit": "byte",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_sql_top_mem_consumers",
+      "description": "Top statements time consumers. Number of total executions of the SQL Statement",
+      "labels": ["HOST", "PORT", "SQL_STRING", "SQL_HASH"],
+      "value": "EXECUTION_COUNT",
       "unit": "count",
       "type": "gauge"
     }
