@@ -496,5 +496,24 @@
       "unit": "ms",
       "type": "gauge"
     }
+  ],
+  "SELECT TOP 10 host, LPAD(port, 5) port, SUBSTRING(REPLACE_REGEXPR('\n' IN statement_string WITH ' ' OCCURRENCE ALL), 1,30) sql_string, statement_hash sql_hash, execution_count, total_execution_time + total_preparation_time total_elapsed_time FROM sys.m_sql_plan_cache ORDER BY total_elapsed_time DESC;":
+  [
+    {
+      "name": "hanadb_sql_top_time_consumers",
+      "description": "Top statements time consumers. Sum of the time consumed in all executions in Microseconds",
+      "labels": ["HOST", "PORT", "SQL_STRING", "SQL_HASH"],
+      "value": "TOTAL_ELAPSED_TIME",
+      "unit": "mu",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_sql_top_time_consumers",
+      "description": "Top statements time consumers. Number of total executions of the SQL Statement",
+      "labels": ["HOST", "PORT", "SQL_STRING", "SQL_HASH"],
+      "value": "TOTAL_ELAPSED_TIME",
+      "unit": "count",
+      "type": "gauge"
+    }
   ]
 }
