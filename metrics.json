@@ -545,5 +545,75 @@
       "unit": "count",
       "type": "gauge"
     }
+  ],
+  "SELECT TOP 10 host, LPAD(port, 5) port, SUBSTRING(REPLACE_REGEXPR('\n' IN statement_string WITH ' ' OCCURRENCE ALL), 1,30) sql_string, statement_hash sql_hash, execution_count, total_execution_memory_size FROM sys.m_sql_plan_cache ORDER BY total_execution_memory_size, execution_count  DESC;":
+  [
+    {
+      "name": "hanadb_sql_top_mem_consumers",
+      "description": "Top statements memory consumers. Specifies the total size of tracked actual memory consumption in bytes",
+      "labels": ["HOST", "PORT", "SQL_STRING", "SQL_HASH"],
+      "value": "TOTAL_EXECUTION_MEMORY_SIZE",
+      "unit": "byte",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_sql_top_mem_consumers",
+      "description": "Top statements time consumers. Number of total executions of the SQL Statement",
+      "labels": ["HOST", "PORT", "SQL_STRING", "SQL_HASH"],
+      "value": "EXECUTION_COUNT",
+      "unit": "count",
+      "type": "gauge"
+    }
+  ],
+  "SELECT host, LPAD(port, 5) port, site_name, secondary_site_name, secondary_host, LPAD(secondary_port, 5) secondary_port, replication_mode, MAP(secondary_active_status, 'YES', 1,0) secondary_active_status, MAP(UPPER(replication_status),'ACTIVE',0,'ERROR', 4, 'SYNCING',2, 'INITIALIZING',1,'UNKNOWN', 3, 99) replication_status, TO_DECIMAL(SECONDS_BETWEEN(SHIPPED_LOG_POSITION_TIME, LAST_LOG_POSITION_TIME), 10, 2) ship_delay_s, TO_DECIMAL((LAST_LOG_POSITION - SHIPPED_LOG_POSITION) * 64 / 1024 / 1024, 10, 2) async_buff_used_mb, secondary_reconnect_count, secondary_failover_count FROM sys.m_service_replication;":
+  [
+    {
+      "name": "hanadb_sr_ship_delay",
+      "description": "System Replication log shipping delay in seconds",
+      "labels": ["HOST", "PORT", "SITE_NAME", "SECONDARY_SITE_NAME", "SECONDARY_HOST", "SECONDARY_PORT", "REPLICATION_MODE"],
+      "value": "SHIP_DELAY_S",
+      "unit": "seconds",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_sr_async_used_shipping_buffer",
+      "description": "System Replication current filling level of asynchronous log shipping buffer (MB)",
+      "labels": ["HOST", "PORT", "SITE_NAME", "SECONDARY_SITE_NAME", "SECONDARY_HOST", "SECONDARY_PORT", "REPLICATION_MODE"],
+      "value": "ASYNC_BUFF_USED_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_sr_secondary_active",
+      "description": "System Replication - Specifies the secondary active status. Values: 0 - INACTIVE and 1 - ACTIVE",
+      "labels": ["HOST", "PORT", "SITE_NAME", "SECONDARY_SITE_NAME", "SECONDARY_HOST", "SECONDARY_PORT", "REPLICATION_MODE"],
+      "value": "SECONDARY_ACTIVE_STATUS",
+      "unit": "status",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_sr_replication",
+      "description": "System Replication status. Values: 0-ACTIVE, 1-INITIALIZING, 2-SYNCING, 3-UNKNOWN, 4-ERROR, 99-UNMAPPED ",
+      "labels": ["HOST", "PORT", "SITE_NAME", "SECONDARY_SITE_NAME", "SECONDARY_HOST", "SECONDARY_PORT", "REPLICATION_MODE"],
+      "value": "REPLICATION_STATUS",
+      "unit": "status",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_sr_secondary_reconnect",
+      "description": "System Replication secondary reconnect count",
+      "labels": ["HOST", "PORT", "SITE_NAME", "SECONDARY_SITE_NAME", "SECONDARY_HOST", "SECONDARY_PORT", "REPLICATION_MODE"],
+      "value": "SECONDARY_RECONNECT_COUNT",
+      "unit": "count",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_sr_secondary_failover",
+      "description": "System Replication secondary failover count",
+      "labels": ["HOST", "PORT", "SITE_NAME", "SECONDARY_SITE_NAME", "SECONDARY_HOST", "SECONDARY_PORT", "REPLICATION_MODE"],
+      "value": "SECONDARY_FAILOVER_COUNT",
+      "unit": "count",
+      "type": "gauge"
+    }
   ]
 }
