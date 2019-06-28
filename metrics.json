@@ -565,6 +565,41 @@
       "type": "gauge"
     }
   ],
+  "SELECT TOP 10 ct.host, LPAD(ct.port,5) port, ct.schema_name, ct.table_name, TO_DECIMAL(ct.memory_size_in_total / 1024 / 1024, 10, 2) memory_size_in_total_mb, TO_DECIMAL(ct.estimated_max_memory_size_in_total / 1024 / 1024, 10, 2) estimated_max_mem_total_mb, ct.record_count, TO_DECIMAL(tps.disk_size / 1024 / 1024, 10, 2) disk_size_mb FROM sys.m_cs_tables ct, sys.m_table_persistence_statistics tps WHERE ct.schema_name = tps.schema_name AND ct.table_name = tps.table_name ORDER BY ct.memory_size_in_total DESC;":
+  [
+    {
+      "name": "hanadb_table_cs_top_mem_total",
+      "description": "Top 10 tables consuming more memory. The total memory size (MB) is the sum of memory size in the main, delta, and history parts",
+      "labels": ["HOST", "PORT", "SCHEMA_NAME", "TABLE_NAME"],
+      "value": "MEMORY_SIZE_IN_TOTAL_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_table_cs_top_mem_estimated_max",
+      "description": "Top 10 tables consuming more memory. The estimated maximum memory consumption (MB), in total, for the fully loaded table (data for open transactions is not included)",
+      "labels": ["HOST", "PORT", "SCHEMA_NAME", "TABLE_NAME"],
+      "value": "ESTIMATED_MAX_MEM_TOTAL_MB",
+      "unit": "mb",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_table_cs_top_mem_record",
+      "description": "Top 10 tables consuming more memory. The record count of the table",
+      "labels": ["HOST", "PORT", "SCHEMA_NAME", "TABLE_NAME"],
+      "value": "RECORD_COUNT",
+      "unit": "count",
+      "type": "gauge"
+    },
+    {
+      "name": "hanadb_table_cs_top_mem_disk_size",
+      "description": "Top 10 tables consuming more memory. The total disk size of all of the table parts",
+      "labels": ["HOST", "PORT", "SCHEMA_NAME", "TABLE_NAME"],
+      "value": "DISK_SIZE_MB",
+      "unit": "mb",
+      "type": "gauge"
+    }
+  ],
   "SELECT host, LPAD(port, 5) port, site_name, secondary_site_name, secondary_host, LPAD(secondary_port, 5) secondary_port, replication_mode, MAP(secondary_active_status, 'YES', 1,0) secondary_active_status, MAP(UPPER(replication_status),'ACTIVE',0,'ERROR', 4, 'SYNCING',2, 'INITIALIZING',1,'UNKNOWN', 3, 99) replication_status, TO_DECIMAL(SECONDS_BETWEEN(SHIPPED_LOG_POSITION_TIME, LAST_LOG_POSITION_TIME), 10, 2) ship_delay_s, TO_DECIMAL((LAST_LOG_POSITION - SHIPPED_LOG_POSITION) * 64 / 1024 / 1024, 10, 2) async_buff_used_mb, secondary_reconnect_count, secondary_failover_count FROM sys.m_service_replication;":
   [
     {
@@ -616,7 +651,7 @@
       "type": "gauge"
     }
   ],
-  "SELECT TO_VARCHAR(RT.TAKEOVER_START_TIME) START_TIME, MAP(RT.TAKEOVER_END_TIME, NULL, 'N/A', TO_VARCHAR(RT.TAKEOVER_END_TIME)) END_TIME, MAP(SECONDS_BETWEEN(RT.TAKEOVER_START_TIME, RT.TAKEOVER_END_TIME),NULL, -1,SECONDS_BETWEEN(RT.TAKEOVER_START_TIME, RT.TAKEOVER_END_TIME)) DURATION_S, RT.SOURCE_SITE_NAME SRC_SITE_NAME, RT.SOURCE_MASTER_NAMESERVER_HOST SRC_HOST, RT.SITE_NAME TGT_SITE_NAME, RT.MASTER_NAMESERVER_HOST TGT_HOST, RT.TAKEOVER_TYPE TYPE, RT.OPERATION_MODE, MAP(RT.REPLICATION_STATUS,'ACTIVE',0,'ERROR', 4, 'SYNCING',2, 'INITIALIZING',1,'UNKNOWN', 3, 99) REPLICATION_STATUS, TO_VARCHAR(RT.LOG_POSITION_TIME) LOG_POS_TIME, TO_VARCHAR(RT.SHIPPED_LOG_POSITION_TIME) SHIPPED_LOG_POS_TIME, RT.LOG_POSITION, RT.SHIPPED_LOG_POSITION  FROM M_SYSTEM_REPLICATION_TAKEOVER_HISTORY RT;":
+  "SELECT TOP 10 TO_VARCHAR(RT.TAKEOVER_START_TIME) START_TIME, MAP(RT.TAKEOVER_END_TIME, NULL, 'N/A', TO_VARCHAR(RT.TAKEOVER_END_TIME)) END_TIME, MAP(SECONDS_BETWEEN(RT.TAKEOVER_START_TIME, RT.TAKEOVER_END_TIME),NULL, -1,SECONDS_BETWEEN(RT.TAKEOVER_START_TIME, RT.TAKEOVER_END_TIME)) DURATION_S, RT.SOURCE_SITE_NAME SRC_SITE_NAME, RT.SOURCE_MASTER_NAMESERVER_HOST SRC_HOST, RT.SITE_NAME TGT_SITE_NAME, RT.MASTER_NAMESERVER_HOST TGT_HOST, RT.TAKEOVER_TYPE TYPE, RT.OPERATION_MODE, MAP(RT.REPLICATION_STATUS,'ACTIVE',0,'ERROR', 4, 'SYNCING',2, 'INITIALIZING',1,'UNKNOWN', 3, 99) REPLICATION_STATUS, TO_VARCHAR(RT.LOG_POSITION_TIME) LOG_POS_TIME, TO_VARCHAR(RT.SHIPPED_LOG_POSITION_TIME) SHIPPED_LOG_POS_TIME, RT.LOG_POSITION, RT.SHIPPED_LOG_POSITION  FROM M_SYSTEM_REPLICATION_TAKEOVER_HISTORY RT;":
   [
     {
       "name": "hanadb_sr_takeover_replication",
