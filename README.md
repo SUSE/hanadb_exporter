@@ -48,6 +48,10 @@ important items in the configuration file:
   - `logging.config_file`: Python logging system configuration file (by default WARN and ERROR level messages will be sent to the syslog)
   - `logging.log_file`: Logging file (/var/log/hanadb_exporter.log by default)
 
+The logging configuration file follows the python standard logging system style: [Python logging](https://docs.python.org/3/library/logging.config.html).
+
+Using the default [configuration file](./logging_config.ini), it will redirect the logs to the file assigned in the [json configuration file](./config.json.example) and to the syslog (only logging level up to WARNING).
+
 2. Start the exporter by running the following command:
 ```
 hanadb_exporter -c config.json -m metrics.json
@@ -70,6 +74,8 @@ Even using this way, the SAP HANA database connector package must be installed i
 After that we need to create the configuration file as `/etc/hanadb_exporter/config.json`.
 The [config.json.example](./config.json.example) can be used as example (the example file is
 stored in `/etc/hanadb_exporter` folder too).
+
+The logging configuration file can be updated as well to customize it (stored in `/etc/hanadb_exporter/logging_config.ini`)
 
 Now, the exporter can be started as a daemon:
 ```
