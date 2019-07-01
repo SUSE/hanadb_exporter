@@ -8,7 +8,10 @@ SAP HANA database prometheus data exporter app
 :since: 2019-05-09
 """
 
+import sys
+import traceback
 import logging
+from logging.config import fileConfig
 import time
 import json
 import argparse
@@ -46,14 +49,41 @@ def parse_arguments():
     return args
 
 
+def setup_logging(config):
+    """
+    Setup logging system
+    """
+    hana_config = config.get('hana')
+    sufix = 'hanadb_exporter_{}_{}'.format(hana_config.get('host'), hana_config.get('port', 30015))
+    log_file = config.get('logging').get('log_file', '/var/log/{}'.format(sufix))
+
+    fileConfig(config.get('logging').get('config_file'), defaults={'logfilename': log_file})
+
+    # The next method is used to recatch and raise all
+    # exceptions to redirect them to the logging system
+    def handle_exception(*exc_info):
+        """
+        Catch exceptions to log them
+        """
+        text = ''.join(traceback.format_exception(*exc_info))
+        logging.getLogger('hanadb_exporter').error(text)
+
+    sys.excepthook = handle_exception
+
+
 # Start up the server to expose the metrics.
 def run():
     """
     Main execution
     """
     args = parse_arguments()
-    logging.basicConfig(level=args.verbosity or logging.INFO)
     config = parse_config(args.config)
+
+    if config.get('logging', None):
+        setup_logging(config)
+    else:
+        logging.basicConfig(level=args.verbosity or logging.INFO)
+
     metrics = args.metrics
 
     connector = hdb_connector.HdbConnector()

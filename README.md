@@ -45,12 +45,14 @@ important items in the configuration file:
   - `hana.port`: Port where the SAP HANA database is exposed.
   - `hana.user`: An existing user with access right to the SAP HANA database.
   - `hana.password`: Password of an existing user.
+  - `logging.config_file`: Python logging system configuration file (by default WARN and ERROR level messages will be sent to the syslog)
+  - `logging.log_file`: Logging file (/var/log/hanadb_exporter.log by default)
 
 2. Start the exporter by running the following command:
 ```
 hanadb_exporter -c config.json -m metrics.json
 # Or
-python hanadb_exporter/main.py -c config.json -m metrics.json
+python3 hanadb_exporter/main.py -c config.json -m metrics.json
 ```
 
 ## Running as a daemon
