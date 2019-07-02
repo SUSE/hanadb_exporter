@@ -45,7 +45,6 @@ class Query(object):
         """
         Parse metrics by query
         """
-        # TODO: Could we add a simple SQL query syntax check?
         self.query = query
         self.metrics = []
         self.enabled = query_data.get('enabled', True)

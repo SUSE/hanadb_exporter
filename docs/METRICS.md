@@ -14,7 +14,7 @@ Each entry in the JSON file is formed by a SAP HANA SQL query (key) and the metr
 * `name (str):`: The name used to export the metric.
 * `description (str)`: The description of the metric (available as `# HELP`).
 * `labels (list)`: List of labels used to split the records.
-* `value (str)`: The name of the column used to gather the exported value (must much with one of the column of the query).
+* `value (str)`: The name of the column used to gather the exported value (must match with one of the columns of the query).
 * `unit (str):`: Used unit for the exported value (`mb` for example).
 * `type (enum{gauge})`: Type of the exported metric (available options: `gauge`).
 
