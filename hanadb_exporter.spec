@@ -26,7 +26,7 @@
 %endif
 
 Name:           hanadb_exporter
-Version:        0.2.2
+Version:        0.3.0
 Release:        0
 Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0
@@ -97,9 +97,9 @@ pytest tests
 
 %files
 %if 0%{?sle_version:1} && 0%{?sle_version} < 120300
-%doc README.md LICENSE
+%doc README.md docs/METRICS.md LICENSE
 %else
-%doc README.md
+%doc README.md docs/METRICS.md
 %license LICENSE
 %endif
 %{python3_sitelib}/*
