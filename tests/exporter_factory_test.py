@@ -1,5 +1,5 @@
 """
-Unitary tests for hanadb_exporter/__init__.py.
+Unitary tests for hanadb_exporter/exporter_factory.py.
 
 :author: xarbulu
 :organization: SUSE LLC
@@ -15,47 +15,38 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import logging
-import unittest
 
 try:
     from unittest import mock
 except ImportError:
     import mock
 
-import hanadb_exporter
+import pytest
+
+from hanadb_exporter import exporter_factory
 
 
-class TestHanaDBExporter(unittest.TestCase):
+class TestSapHanaExporter(object):
     """
-    Unitary tests for hanadb_exporter/__init__.py.
+    Unitary tests for hanadb_exporter/exporter_factory.py.
     """
 
-    @classmethod
-    def setUpClass(cls):
-        """
-        Global setUp.
-        """
+    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.SapHanaCollector')
+    @mock.patch('logging.Logger.info')
+    def test_create(self, mock_logger, mock_hana_collector):
+        mocked_collector = mock.Mock()
+        mock_connector = mock.Mock()
+        mock_hana_collector.return_value = mocked_collector
+        collector = exporter_factory.SapHanaExporter.create(
+            exporter_type='prometheus', hdb_connector=mock_connector, metrics_file='metrics.json')
 
-        logging.basicConfig(level=logging.INFO)
+        mock_logger.assert_called_once_with('prometheus exporter selected')
+        assert collector == mocked_collector
 
-    def setUp(self):
-        """
-        Test setUp.
-        """
+    def test_create_error(self):
+        mock_connector = mock.Mock()
+        with pytest.raises(NotImplementedError) as err:
+            exporter_factory.SapHanaExporter.create(
+                exporter_type='other', hdb_connector=mock_connector, metrics_file='metrics.json')
 
-    def tearDown(self):
-        """
-        Test tearDown.
-        """
-
-    @classmethod
-    def tearDownClass(cls):
-        """
-        Global tearDown.
-        """
-
-    def test_dummy(self):
-        """
-        Test created to just enable the CI in travis
-        """
-        pass
+        assert '{} exporter not implemented'.format('other') in str(err.value)
