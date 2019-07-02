@@ -101,7 +101,7 @@ def run():
     collector = exporter_factory.SapHanaExporter.create(
         exporter_type='prometheus', metrics_file=metrics, hdb_connector=connector)
     REGISTRY.register(collector)
-    start_http_server(config.get('exposition_port', 30015), '0.0.0.0')
+    start_http_server(config.get('exposition_port', 8001), '0.0.0.0')
     while True:
         time.sleep(1)
 

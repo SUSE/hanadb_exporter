@@ -11,6 +11,7 @@ SAP HANA database prometheus data exporter
 import logging
 
 try:
+    # pylint:disable=W0622
     from itertools import izip as zip
 except ImportError:
     pass
@@ -41,6 +42,7 @@ class SapHanaCollector(object):
         self._hdb_connector = connector
         # load metric configuration
         self._metrics_config = prometheus_metrics.PrometheusMetrics(metrics_file)
+        # TODO: Get hana version
 
     def _format_query_result(self, query_result):
         """
@@ -50,7 +52,6 @@ class SapHanaCollector(object):
         Args:
             query_result (obj): QueryResult object
         """
-        query_columns = []
         formatted_query_result = []
         query_columns = [meta[0] for meta in query_result.metadata]
         for record in query_result.records:
@@ -67,18 +68,18 @@ class SapHanaCollector(object):
             formatted_query_result (nested list): query formated by _format_query_result method
         """
         metric_obj = core.GaugeMetricFamily(
-            metric['name'], metric['description'], None, metric['labels'], metric['unit'])
+            metric.name, metric.description, None, metric.labels, metric.unit)
         for row in formatted_query_result:
             labels = []
             value = None
             for cell in row:
                 # each cell is a tuple (column_name, value)
-                if cell[0] in metric['labels']:
+                if cell[0] in metric.labels:
                     labels.append(cell[1])
-                if metric['value'] == '':
+                if metric.value == '':
                     raise ValueError('No value specified in metrics.json for {}'.format(
-                        metric['name']))
-                elif cell[0] == metric['value']:
+                        metric.name))
+                elif cell[0] == metric.value:
                     value = cell[1]
             metric_obj.add_metric(labels, value)
         self._logger.info('%s \n', metric_obj.samples)
@@ -89,13 +90,16 @@ class SapHanaCollector(object):
         Collect data from database
         """
 
-        for query, metrics in self._metrics_config.data.items():
-            #  execute each query once
-            query_result = self._hdb_connector.query(query)
-            formatted_query_result = self._format_query_result(query_result)
-            for metric in metrics:
-                if metric['type'] == "gauge":
-                    metric_obj = self._manage_gauge(metric, formatted_query_result)
-                    yield metric_obj
-                else:
-                    raise NotImplementedError('{} type not implemented'.format(metric['type']))
+        for query in self._metrics_config.queries:
+            #  execute each query once (only if enabled)
+            if query.enabled:
+                query_result = self._hdb_connector.query(query.query)
+                formatted_query_result = self._format_query_result(query_result)
+                for metric in query.metrics:
+                    if metric.type == "gauge":
+                        metric_obj = self._manage_gauge(metric, formatted_query_result)
+                        yield metric_obj
+                    else:
+                        raise NotImplementedError('{} type not implemented'.format(metric.type))
+            else:
+                self._logger.info('Query %s is disabled', query.query)
