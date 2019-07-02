@@ -26,7 +26,7 @@
 %endif
 
 Name:           hanadb_exporter
-Version:        0.2.1
+Version:        0.2.2
 Release:        0
 Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0
@@ -69,6 +69,7 @@ mkdir -p %{buildroot}%{_sysconfdir}/sysconfig
 install -D -m 0644 daemon/hanadb_exporter.sysconfig %{buildroot}%{_fillupdir}/sysconfig.hanadb_exporter
 install -D -m 0644 config.json.example %{buildroot}%{_docdir}/hanadb_exporter/config.json.example
 install -D -m 0644 metrics.json %{buildroot}%{_docdir}/hanadb_exporter/metrics.json
+install -D -m 0644 logging_config.ini %{buildroot}%{_docdir}/hanadb_exporter/logging_config.ini
 
 %post
 %service_add_post hanadb_exporter.service
@@ -78,6 +79,7 @@ fi
 rm -rf  %{_sysconfdir}/hanadb_exporter/*
 ln -s %{_docdir}/hanadb_exporter/config.json.example %{_sysconfdir}/hanadb_exporter/config.json.example
 ln -s %{_docdir}/hanadb_exporter/metrics.json  %{_sysconfdir}/hanadb_exporter/metrics.json
+ln -s %{_docdir}/hanadb_exporter/logging_config.ini  %{_sysconfdir}/hanadb_exporter/logging_config.ini
 
 %pre
 %service_add_pre hanadb_exporter.service
@@ -106,6 +108,7 @@ pytest tests
 %dir %{_sysconfdir}/hanadb_exporter
 %{_docdir}/hanadb_exporter/config.json.example
 %{_docdir}/hanadb_exporter/metrics.json
+%{_docdir}/hanadb_exporter/logging_config.ini
 %{_fillupdir}/sysconfig.hanadb_exporter
 %{_unitdir}/hanadb_exporter.service
 
