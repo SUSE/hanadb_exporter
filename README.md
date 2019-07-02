@@ -20,6 +20,10 @@ should be monitored by one exporter.
 
 The installation of the connector is covered in the `Installation` section.
 
+## Metrics file
+
+The exporter uses an additional file to know the metrics that are going to be exported. Here more information about the [metrics file](./docs/METRICS.md).
+
 ## Installation
 Note: The usage of a virtual environment is recommended.
 
@@ -40,7 +44,7 @@ pip install .
 1. Create the `config.json` configuration file.
 An example of `config.json` available in [config.json.example](config.json.example). Here the most
 important items in the configuration file:
-  - `exposition_port`: Port where the prometheus exporter will be exposed.
+  - `exposition_port`: Port where the prometheus exporter will be exposed (8001 by default).
   - `hana.host`: Address of the SAP HANA database.
   - `hana.port`: Port where the SAP HANA database is exposed.
   - `hana.user`: An existing user with access right to the SAP HANA database.
@@ -74,6 +78,8 @@ Even using this way, the SAP HANA database connector package must be installed i
 After that we need to create the configuration file as `/etc/hanadb_exporter/config.json`.
 The [config.json.example](./config.json.example) can be used as example (the example file is
 stored in `/etc/hanadb_exporter` folder too).
+
+The default [metrics file](./metrics.json) is stored in `/etc/hanadb_exporter/metrics.json`.
 
 The logging configuration file can be updated as well to customize it (stored in `/etc/hanadb_exporter/logging_config.ini`)
 
