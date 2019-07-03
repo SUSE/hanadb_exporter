@@ -23,6 +23,8 @@ except ImportError:
 
 import pytest
 
+sys.modules['prometheus_client'] = mock.MagicMock()
+
 from hanadb_exporter.exporters import prometheus_exporter
 
 
