@@ -62,7 +62,7 @@ rm -r %{buildroot}%{python3_sitelib}/tests
 
 # Add daemon files
 mkdir -p %{buildroot}%{_sysconfdir}/hanadb_exporter
-install -D -m 644 daemon/hanadb_exporter.service %{buildroot}%{_unitdir}/hanadb_exporter.service
+install -D -m 644 daemon/hanadb_exporter@.service %{buildroot}%{_unitdir}/hanadb_exporter@.service
 
 mkdir -p %{buildroot}%{_fillupdir}
 mkdir -p %{buildroot}%{_sysconfdir}/sysconfig
@@ -72,7 +72,7 @@ install -D -m 0644 metrics.json %{buildroot}%{_docdir}/hanadb_exporter/metrics.j
 install -D -m 0644 logging_config.ini %{buildroot}%{_docdir}/hanadb_exporter/logging_config.ini
 
 %post
-%service_add_post hanadb_exporter.service
+%service_add_post hanadb_exporter@.service
 if [ ! -e %{_sysconfdir}/sysconfig/hanadb_exporter ]; then
     %fillup_only hanadb_exporter
 fi
@@ -82,13 +82,13 @@ ln -s %{_docdir}/hanadb_exporter/metrics.json  %{_sysconfdir}/hanadb_exporter/me
 ln -s %{_docdir}/hanadb_exporter/logging_config.ini  %{_sysconfdir}/hanadb_exporter/logging_config.ini
 
 %pre
-%service_add_pre hanadb_exporter.service
+%service_add_pre hanadb_exporter@.service
 
 %preun
-%service_del_preun -n hanadb_exporter.service
+%service_del_preun -n hanadb_exporter@.service
 
 %postun
-%service_del_postun -n hanadb_exporter.service
+%service_del_postun -n hanadb_exporter@.service
 
 %if %{with test}
 %check
@@ -110,6 +110,6 @@ pytest tests
 %{_docdir}/hanadb_exporter/metrics.json
 %{_docdir}/hanadb_exporter/logging_config.ini
 %{_fillupdir}/sysconfig.hanadb_exporter
-%{_unitdir}/hanadb_exporter.service
+%{_unitdir}/hanadb_exporter@.service
 
 %changelog
