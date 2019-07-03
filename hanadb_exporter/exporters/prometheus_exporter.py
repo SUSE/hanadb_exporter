@@ -13,7 +13,7 @@ import logging
 try:
     # pylint:disable=W0622
     from itertools import izip as zip
-except ImportError:
+except ImportError: # pragma: no cover
     pass
 
 # TODO: In order to avoid dependencies, import custom prometheus client
