@@ -75,7 +75,8 @@ zypper in hanadb_exporter
 ```
 
 Even using this way, the SAP HANA database connector package must be installed independently (see [Installation](#installation)).
-After that we need to create the configuration file as `/etc/hanadb_exporter/config.json`.
+
+After that we need to create the configuration file as `/etc/hanadb_exporter/my-exporter.json` (the name is relevant as we will use it to start the daemon).
 The [config.json.example](./config.json.example) can be used as example (the example file is
 stored in `/etc/hanadb_exporter` folder too).
 
@@ -83,12 +84,12 @@ The default [metrics file](./metrics.json) is stored in `/etc/hanadb_exporter/me
 
 The logging configuration file can be updated as well to customize it (stored in `/etc/hanadb_exporter/logging_config.ini`)
 
-Now, the exporter can be started as a daemon:
+Now, the exporter can be started as a daemon. As we can have multiple `hanadb_exporter` instances running in one machine, the service is created using a template file, so an extra information must be given to `systemd` (this is done adding the `@` keyword after the service name together with the name of the configuration file created previously in `/etc/hanadb_exporter/{name}.json`):
 ```
 # All the command must be executed as root user
-systemctl start hanadb_exporter
+systemctl start hanadb_exporter@my-exporter
 # Check the status with
-systemctl status hanadb_exporter
+systemctl status hanadb_exporter@my-exporter
 ```
 
 ## License
