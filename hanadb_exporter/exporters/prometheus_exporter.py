@@ -19,7 +19,7 @@ except ImportError:
 # TODO: In order to avoid dependencies, import custom prometheus client
 try:
     from prometheus_client import core
-except ImportError:
+except ImportError: # pragma: no cover
     # Load custom prometheus client
     raise NotImplementedError('custom prometheus client not implemented')
 
@@ -73,6 +73,8 @@ class SapHanaCollector(object):
             labels = []
             value = None
             for cell in row:
+                # TODO: exception labels not found
+                # TODO: exception value not found
                 # each cell is a tuple (column_name, value)
                 if cell[0] in metric.labels:
                     labels.append(cell[1])
@@ -93,6 +95,7 @@ class SapHanaCollector(object):
         for query in self._metrics_config.queries:
             #  execute each query once (only if enabled)
             if query.enabled:
+                # TODO: manage query error in an exception
                 query_result = self._hdb_connector.query(query.query)
                 formatted_query_result = self._format_query_result(query_result)
                 for metric in query.metrics:

@@ -15,63 +15,216 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import logging
-import unittest
 
 try:
     from unittest import mock
 except ImportError:
     import mock
 
-import hanadb_exporter
+import pytest
 
-class TestSapHanaCollector(unittest.TestCase):
+from hanadb_exporter.exporters import prometheus_exporter
+
+
+class TestSapHanaCollector(object):
     """
     Unitary tests for SapHanaCollector.
     """
-    @classmethod
-    def setUpClass(cls):
-        """
-        Global setUp.
-        """
 
-        logging.basicConfig(level=logging.INFO)
-
-    def setUp(self):
+    @mock.patch('hanadb_exporter.exporters.prometheus_metrics.PrometheusMetrics')
+    def setup(self, mock_metrics):
         """
         Test setUp.
         """
+        self._mock_metrics_config = mock.Mock()
+        mock_metrics.return_value = self._mock_metrics_config
+        self._mock_connector = mock.Mock()
+        self._collector = prometheus_exporter.SapHanaCollector(self._mock_connector, 'metrics.json')
 
-    def tearDown(self):
-        """
-        Test tearDown.
-        """
+    def test_format_query_result(self):
+        query_results = mock.Mock()
+        query_results.metadata = [
+            ('column1', 'other_data',), ('column2', 'other_data'), ('column3', 'other_data')]
+        query_results.records = [
+            ('data1', 'data2', 'data3'),
+            ('data4', 'data5', 'data6'),
+            ('data7', 'data8', 'data9')
+        ]
+        formatted_result = self._collector._format_query_result(query_results)
 
-    @classmethod
-    def tearDownClass(cls):
-        """
-        Global tearDown.
-        """
+        assert formatted_result == [
+            [('column1', 'data1'), ('column2', 'data2'), ('column3', 'data3')],
+            [('column1', 'data4'), ('column2', 'data5'), ('column3', 'data6')],
+            [('column1', 'data7'), ('column2', 'data8'), ('column3', 'data9')]
+        ]
 
-class TestMalformedMetric(unittest.TestCase):
-    """
-    Unitary tests for SapHanaCollector.
-    """
+    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
+    @mock.patch('logging.Logger.info')
+    def test_manage_gauge(self, mock_logger, mock_core):
 
-    @classmethod
-    def setUpClass(cls):
-        """
-        Global setUp.
-        """
+        mock_gauge_instance = mock.Mock()
+        mock_gauge_instance.samples = 'samples'
+        mock_core.GaugeMetricFamily = mock.Mock()
+        mock_core.GaugeMetricFamily.return_value = mock_gauge_instance
 
-        logging.basicConfig(level=logging.INFO)
+        mock_metric = mock.Mock()
+        mock_metric.name = 'name'
+        mock_metric.description = 'description'
+        mock_metric.labels = ['column1', 'column2']
+        mock_metric.unit = 'mb'
+        mock_metric.value = 'column3'
 
-    def tearDown(self):
-        """
-        Test tearDown.
-        """
+        formatted_query = [
+            [('column1', 'data1'), ('column2', 'data2'), ('column3', 'data3')],
+            [('column1', 'data4'), ('column2', 'data5'), ('column3', 'data6')],
+            [('column1', 'data7'), ('column2', 'data8'), ('column3', 'data9')]
+        ]
 
-    @classmethod
-    def tearDownClass(cls):
-        """
-        Global tearDown.
-        """
+        metric_obj = self._collector._manage_gauge(mock_metric, formatted_query)
+
+        mock_core.GaugeMetricFamily.assert_called_once_with(
+            'name', 'description', None, ['column1', 'column2'], 'mb')
+
+        mock_gauge_instance.add_metric.assert_has_calls([
+            mock.call(['data1', 'data2'], 'data3'),
+            mock.call(['data4', 'data5'], 'data6'),
+            mock.call(['data7', 'data8'], 'data9')
+        ])
+
+        mock_logger.assert_called_once_with('%s \n', 'samples')
+        assert metric_obj == mock_gauge_instance
+
+    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
+    def test_manage_gauge_no_value(self, mock_core):
+
+        mock_gauge_instance = mock.Mock()
+        mock_gauge_instance.samples = 'samples'
+        mock_core.GaugeMetricFamily = mock.Mock()
+        mock_core.GaugeMetricFamily.return_value = mock_gauge_instance
+
+        mock_metric = mock.Mock()
+        mock_metric.name = 'name'
+        mock_metric.description = 'description'
+        mock_metric.labels = ['column1', 'column2']
+        mock_metric.unit = 'mb'
+        mock_metric.value = ''
+
+        formatted_query = [
+            [('column1', 'data1'), ('column2', 'data2'), ('column3', 'data3')],
+            [('column1', 'data4'), ('column2', 'data5'), ('column3', 'data6')],
+            [('column1', 'data7'), ('column2', 'data8'), ('column3', 'data9')]
+        ]
+
+        with pytest.raises(ValueError) as err:
+            self._collector._manage_gauge(mock_metric, formatted_query)
+
+        mock_core.GaugeMetricFamily.assert_called_once_with(
+            'name', 'description', None, ['column1', 'column2'], 'mb')
+
+        assert 'No value specified in metrics.json for {}',format('name') in str(err.value)
+
+    @mock.patch('logging.Logger.info')
+    def test_collect(self, mock_logger):
+
+        self._collector._format_query_result = mock.Mock()
+        self._collector._manage_gauge = mock.Mock()
+
+        self._mock_connector.query.side_effect = [
+            'result1', 'result2']
+        self._collector._format_query_result.side_effect = [
+            'form_result1', 'form_result2']
+
+        self._collector._manage_gauge.side_effect = [
+            'gauge1', 'gauge2', 'gauge3', 'gauge4', 'gauge5']
+
+        metrics1_1 = mock.Mock(type='gauge')
+        metrics1_2 = mock.Mock(type='gauge')
+        metrics1 = [metrics1_1, metrics1_2]
+        query1 = mock.Mock(enabled=True, query='query1', metrics=metrics1)
+        metrics2_1 = mock.Mock(type='gauge')
+        metrics2_2 = mock.Mock(type='gauge')
+        metrics2 = [metrics2_1, metrics2_2]
+        query2 = mock.Mock(enabled=False, query='query2', metrics=metrics2)
+        metrics3_1 = mock.Mock(type='gauge')
+        metrics3_2 = mock.Mock(type='gauge')
+        metrics3_3 = mock.Mock(type='gauge')
+        metrics3 = [metrics3_1, metrics3_2, metrics3_3]
+        query3 = mock.Mock(enabled=True, query='query3', metrics=metrics3)
+
+        self._collector._metrics_config.queries = [
+            query1, query2, query3
+        ]
+
+        for index, element in enumerate(self._collector.collect()):
+            assert element == 'gauge{}'.format(index+1)
+
+        self._mock_connector.query.assert_has_calls([
+            mock.call('query1'),
+            mock.call('query3')])
+
+        self._collector._format_query_result.assert_has_calls([
+            mock.call('result1'),
+            mock.call('result2')
+        ])
+
+        self._collector._manage_gauge.assert_has_calls([
+            mock.call(metrics1_1, 'form_result1'),
+            mock.call(metrics1_2, 'form_result1'),
+            mock.call(metrics3_1, 'form_result2'),
+            mock.call(metrics3_2, 'form_result2'),
+            mock.call(metrics3_3, 'form_result2'),
+        ])
+
+        mock_logger.assert_called_once_with('Query %s is disabled', 'query2')
+
+    def test_collect_incorrect_type(self):
+
+        self._collector._format_query_result = mock.Mock()
+        self._collector._manage_gauge = mock.Mock()
+
+        self._mock_connector.query.side_effect = [
+            'result1', 'result2']
+        self._collector._format_query_result.side_effect = [
+            'form_result1', 'form_result2']
+
+        self._collector._manage_gauge.side_effect = [
+            'gauge1', 'gauge2', 'gauge3', 'gauge4', 'gauge5']
+
+        metrics1_1 = mock.Mock(type='gauge')
+        metrics1_2 = mock.Mock(type='gauge')
+        metrics1 = [metrics1_1, metrics1_2]
+        query1 = mock.Mock(enabled=True, query='query1', metrics=metrics1)
+        metrics2_1 = mock.Mock(type='gauge')
+        metrics2_2 = mock.Mock(type='gauge')
+        metrics2 = [metrics2_1, metrics2_2]
+        query2 = mock.Mock(enabled=False, query='query2', metrics=metrics2)
+        metrics3_1 = mock.Mock(type='gauge')
+        metrics3_2 = mock.Mock(type='other')
+        metrics3_3 = mock.Mock(type='gauge')
+        metrics3 = [metrics3_1, metrics3_2, metrics3_3]
+        query3 = mock.Mock(enabled=True, query='query3', metrics=metrics3)
+
+        self._collector._metrics_config.queries = [
+            query1, query2, query3
+        ]
+
+        with pytest.raises(NotImplementedError) as err:
+            for index, element in enumerate(self._collector.collect()):
+                assert element == 'gauge{}'.format(index+1)
+
+        assert '{} type not implemented'.format('other') in str(err.value)
+
+        self._mock_connector.query.assert_has_calls([
+            mock.call('query1'),
+            mock.call('query3')])
+
+        self._collector._format_query_result.assert_has_calls([
+            mock.call('result1'),
+            mock.call('result2')
+        ])
+
+        self._collector._manage_gauge.assert_has_calls([
+            mock.call(metrics1_1, 'form_result1'),
+            mock.call(metrics1_2, 'form_result1'),
+            mock.call(metrics3_1, 'form_result2')
+        ])

@@ -61,7 +61,7 @@ def setup_logging(config):
 
     # The next method is used to recatch and raise all
     # exceptions to redirect them to the logging system
-    def handle_exception(*exc_info):
+    def handle_exception(*exc_info): # pragma: no cover
         """
         Catch exceptions to log them
         """
@@ -88,15 +88,15 @@ def run():
 
     connector = hdb_connector.HdbConnector()
     try:
-        hana_config = config.get('hana')
+        hana_config = config['hana']
         connector.connect(
-            hana_config.get('host'),
+            hana_config['host'],
             hana_config.get('port', 30015),
-            user=hana_config.get('user'),
-            password=hana_config.get('password')
+            user=hana_config['user'],
+            password=hana_config['password']
         )
     except KeyError as err:
-        raise KeyError('Configuration file {} is malformed: {}'.format(args.config, err))
+        raise KeyError('Configuration file {} is malformed: {} not found'.format(args.config, err))
 
     collector = exporter_factory.SapHanaExporter.create(
         exporter_type='prometheus', metrics_file=metrics, hdb_connector=connector)
@@ -105,5 +105,5 @@ def run():
     while True:
         time.sleep(1)
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     run()
