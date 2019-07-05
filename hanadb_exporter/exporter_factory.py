@@ -11,6 +11,7 @@ SAP HANA database exporter factory
 import logging
 
 from hanadb_exporter.exporters import prometheus_exporter
+from hanadb_exporter import utils
 
 
 class SapHanaExporter(object):
@@ -19,7 +20,21 @@ class SapHanaExporter(object):
 
     Args:
         exporter_type (str): Exporter type. Options: prometheus
+        metrics_file (str): Path to the metrics file
+        hdb_connector (hdb_connector.HdbConnector): SAP HANA database connector
     """
+
+    @staticmethod
+    def get_hana_version(connector):
+        """
+        Query the SAP HANA database version
+
+        Args:
+            connector: HANA database api connector
+        """
+        query = 'SELECT * FROM sys.m_database;'
+        query_result = connector.query(query)
+        return utils.format_query_result(query_result)[0]['VERSION']
 
     @classmethod
     def create(cls, exporter_type='prometheus', **kwargs):
@@ -27,11 +42,15 @@ class SapHanaExporter(object):
         Create SAP HANA exporter
         """
         cls._logger = logging.getLogger(__name__)
+        connector = kwargs.get('hdb_connector')
+        hana_version = cls.get_hana_version(connector)
+        cls._logger.info('SAP HANA database version: %s', hana_version)
         if exporter_type == 'prometheus':
             cls._logger.info('prometheus exporter selected')
             collector = prometheus_exporter.SapHanaCollector(
-                connector=kwargs.get('hdb_connector'),
-                metrics_file=kwargs.get('metrics_file')
+                connector=connector,
+                metrics_file=kwargs.get('metrics_file'),
+                hana_version=hana_version
             )
             return collector
         else:

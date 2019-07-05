@@ -10,26 +10,10 @@ SAP HANA database prometheus data exporter
 
 import logging
 
-try:
-    # pylint:disable=W0622
-    from itertools import izip as zip
-except ImportError: # pragma: no cover
-    pass
-
-# TODO: In order to avoid dependencies, import custom prometheus client
-try:
-    from prometheus_client import core
-except ImportError: # pragma: no cover
-    # Load custom prometheus client
-    raise NotImplementedError('custom prometheus client not implemented')
+from prometheus_client import core
 
 from hanadb_exporter.exporters import prometheus_metrics
-
-
-class MalformedMetric(Exception):
-    """
-    Metric malformed method
-    """
+from hanadb_exporter import utils
 
 
 class SapHanaCollector(object):
@@ -37,27 +21,12 @@ class SapHanaCollector(object):
     SAP HANA database data exporter
     """
 
-    def __init__(self, connector, metrics_file):
+    def __init__(self, connector, metrics_file, hana_version):
         self._logger = logging.getLogger(__name__)
         self._hdb_connector = connector
         # load metric configuration
         self._metrics_config = prometheus_metrics.PrometheusMetrics(metrics_file)
-        # TODO: Get hana version
-
-    def _format_query_result(self, query_result):
-        """
-        Format query results to match column names with their values for each row
-        Returns nested list, containing tuples (column_name, value)
-
-        Args:
-            query_result (obj): QueryResult object
-        """
-        formatted_query_result = []
-        query_columns = [meta[0] for meta in query_result.metadata]
-        for record in query_result.records:
-            formatted_query_result.append(list(zip(query_columns, record)))
-        # TODO manage formatted_query_result with a class, a named tuple or a dictionary instead of a tuple
-        return formatted_query_result
+        self._hana_version = hana_version
 
     def _manage_gauge(self, metric, formatted_query_result):
         """
@@ -71,20 +40,19 @@ class SapHanaCollector(object):
             metric.name, metric.description, None, metric.labels, metric.unit)
         for row in formatted_query_result:
             labels = []
-            value = None
-            for cell in row:
+            metric_value = None
+            for column_name, column_value in row.items():
                 # TODO: exception labels not found
                 # TODO: exception value not found
-                # each cell is a tuple (column_name, value)
-                if cell[0] in metric.labels:
-                    labels.append(cell[1])
+                if column_name in metric.labels:
+                    labels.append(column_value)
                 if metric.value == '':
                     raise ValueError('No value specified in metrics.json for {}'.format(
                         metric.name))
-                elif cell[0] == metric.value:
-                    value = cell[1]
-            metric_obj.add_metric(labels, value)
-        self._logger.info('%s \n', metric_obj.samples)
+                elif column_name == metric.value:
+                    metric_value = column_value
+            metric_obj.add_metric(labels, metric_value)
+        self._logger.debug('%s \n', metric_obj.samples)
         return metric_obj
 
     def collect(self):
@@ -94,10 +62,10 @@ class SapHanaCollector(object):
 
         for query in self._metrics_config.queries:
             #  execute each query once (only if enabled)
-            if query.enabled:
+            if query.enabled and self._hana_version >= query.hana_version:
                 # TODO: manage query error in an exception
                 query_result = self._hdb_connector.query(query.query)
-                formatted_query_result = self._format_query_result(query_result)
+                formatted_query_result = utils.format_query_result(query_result)
                 for metric in query.metrics:
                     if metric.type == "gauge":
                         metric_obj = self._manage_gauge(metric, formatted_query_result)
@@ -105,4 +73,5 @@ class SapHanaCollector(object):
                     else:
                         raise NotImplementedError('{} type not implemented'.format(metric.type))
             else:
-                self._logger.info('Query %s is disabled', query.query)
+                self._logger.info(
+                    'Query %s is disabled or only available in higher hana versions', query.query)
