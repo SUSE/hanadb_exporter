@@ -38,20 +38,24 @@ class SapHanaCollector(object):
         """
         metric_obj = core.GaugeMetricFamily(
             metric.name, metric.description, None, metric.labels, metric.unit)
+        # TODO: This should be done in the sanity check in prometheus_metrics.py
+        if metric.value == '':
+            raise ValueError('No value specified in metrics.json for {}'.format(
+                metric.name))
         for row in formatted_query_result:
             labels = []
             metric_value = None
             for column_name, column_value in row.items():
                 # TODO: exception labels not found
                 # TODO: exception value not found
-                if column_name in metric.labels:
-                    labels.append(column_value)
-                if metric.value == '':
-                    raise ValueError('No value specified in metrics.json for {}'.format(
-                        metric.name))
-                elif column_name == metric.value:
-                    metric_value = column_value
+                try:
+                    labels.insert(metric.labels.index(column_name), column_value)
+                except ValueError: # Received data is not a label, check for the value
+                    if column_name == metric.value:
+                        metric_value = column_value
+
             metric_obj.add_metric(labels, metric_value)
+
         self._logger.debug('%s \n', metric_obj.samples)
         return metric_obj
 
