@@ -2,6 +2,7 @@
   "SELECT host, ROUND(SUM(memory_size_in_total)/1024/1024) column_tables_used_mb FROM sys.m_cs_tables GROUP BY host;":
   {
     "enabled": true,
+    "hana_version": "1.0",
     "metrics": [
       {
         "name": "hanadb_column_tables_used_memory",
