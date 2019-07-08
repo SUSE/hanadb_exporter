@@ -81,38 +81,10 @@ class TestSapHanaCollector(object):
         mock_logger.assert_called_once_with('%s \n', 'samples')
         assert metric_obj == mock_gauge_instance
 
-    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
-    def test_manage_gauge_no_value(self, mock_core):
-
-        mock_gauge_instance = mock.Mock()
-        mock_gauge_instance.samples = 'samples'
-        mock_core.GaugeMetricFamily = mock.Mock()
-        mock_core.GaugeMetricFamily.return_value = mock_gauge_instance
-
-        mock_metric = mock.Mock()
-        mock_metric.name = 'name'
-        mock_metric.description = 'description'
-        mock_metric.labels = ['column1', 'column2']
-        mock_metric.unit = 'mb'
-        mock_metric.value = ''
-
-        formatted_query = [
-            {'column1':'data1', 'column2':'data2', 'column3':'data3'},
-            {'column1':'data4', 'column2':'data5', 'column3':'data6'},
-            {'column1':'data7', 'column2':'data8', 'column3':'data9'}
-        ]
-
-        with pytest.raises(ValueError) as err:
-            self._collector._manage_gauge(mock_metric, formatted_query)
-
-        mock_core.GaugeMetricFamily.assert_called_once_with(
-            'name', 'description', None, ['column1', 'column2'], 'mb')
-
-        assert 'No value specified in metrics.json for {}',format('name') in str(err.value)
-
     @mock.patch('hanadb_exporter.utils.format_query_result')
+    @mock.patch('hanadb_exporter.utils.check_hana_range')
     @mock.patch('logging.Logger.info')
-    def test_collect(self, mock_logger, mock_format_query):
+    def test_collect(self, mock_logger, mock_hana_range, mock_format_query):
 
         self._collector._manage_gauge = mock.Mock()
 
@@ -121,26 +93,28 @@ class TestSapHanaCollector(object):
         mock_format_query.side_effect = [
             'form_result1', 'form_result2']
 
+        mock_hana_range.side_effect = [True, True, False]
+
         self._collector._manage_gauge.side_effect = [
             'gauge1', 'gauge2', 'gauge3', 'gauge4', 'gauge5']
 
         metrics1_1 = mock.Mock(type='gauge')
         metrics1_2 = mock.Mock(type='gauge')
         metrics1 = [metrics1_1, metrics1_2]
-        query1 = mock.Mock(enabled=True, query='query1', metrics=metrics1, hana_version='1.0')
+        query1 = mock.Mock(enabled=True, query='query1', metrics=metrics1, hana_version_range=['1.0'])
         metrics2_1 = mock.Mock(type='gauge')
         metrics2_2 = mock.Mock(type='gauge')
         metrics2 = [metrics2_1, metrics2_2]
-        query2 = mock.Mock(enabled=False, query='query2', metrics=metrics2, hana_version='1.0')
+        query2 = mock.Mock(enabled=False, query='query2', metrics=metrics2, hana_version_range=['2.0'])
         metrics3_1 = mock.Mock(type='gauge')
         metrics3_2 = mock.Mock(type='gauge')
         metrics3_3 = mock.Mock(type='gauge')
         metrics3 = [metrics3_1, metrics3_2, metrics3_3]
-        query3 = mock.Mock(enabled=True, query='query3', metrics=metrics3, hana_version='2.0')
+        query3 = mock.Mock(enabled=True, query='query3', metrics=metrics3, hana_version_range=['3.0'])
         metrics4_1 = mock.Mock(type='gauge')
         metrics4_2 = mock.Mock(type='gauge')
         metrics4 = [metrics2_1, metrics2_2]
-        query4 = mock.Mock(enabled=True, query='query4', metrics=metrics4, hana_version='2.0,1')
+        query4 = mock.Mock(enabled=True, query='query4', metrics=metrics4, hana_version_range=['1.0.0', '2.0.0'])
 
         self._collector._metrics_config.queries = [
             query1, query2, query3, query4
@@ -158,6 +132,12 @@ class TestSapHanaCollector(object):
             mock.call('result2')
         ])
 
+        mock_hana_range.assert_has_calls([
+            mock.call('2.0', ['1.0']),
+            mock.call('2.0', ['3.0']),
+            mock.call('2.0', ['1.0.0', '2.0.0'])
+        ])
+
         self._collector._manage_gauge.assert_has_calls([
             mock.call(metrics1_1, 'form_result1'),
             mock.call(metrics1_2, 'form_result1'),
@@ -167,12 +147,14 @@ class TestSapHanaCollector(object):
         ])
 
         mock_logger.assert_has_calls([
-            mock.call('Query %s is disabled or only available in higher hana versions', 'query2'),
-            mock.call('Query %s is disabled or only available in higher hana versions', 'query4')
+            mock.call('Query %s is disabled', 'query2'),
+            mock.call('Query %s out of the provided hana version range: %s',
+                'query4', ['1.0.0', '2.0.0'])
         ])
 
     @mock.patch('hanadb_exporter.utils.format_query_result')
-    def test_collect_incorrect_type(self, mock_format_query):
+    @mock.patch('hanadb_exporter.utils.check_hana_range')
+    def test_collect_incorrect_type(self, mock_hana_range, mock_format_query):
 
         self._collector._manage_gauge = mock.Mock()
 
@@ -181,22 +163,24 @@ class TestSapHanaCollector(object):
         mock_format_query.side_effect = [
             'form_result1', 'form_result2']
 
+        mock_hana_range.side_effect = [True, True, True]
+
         self._collector._manage_gauge.side_effect = [
             'gauge1', 'gauge2', 'gauge3', 'gauge4', 'gauge5']
 
         metrics1_1 = mock.Mock(type='gauge')
         metrics1_2 = mock.Mock(type='gauge')
         metrics1 = [metrics1_1, metrics1_2]
-        query1 = mock.Mock(enabled=True, query='query1', metrics=metrics1, hana_version='1.0')
+        query1 = mock.Mock(enabled=True, query='query1', metrics=metrics1, hana_version_range=['1.0'])
         metrics2_1 = mock.Mock(type='gauge')
         metrics2_2 = mock.Mock(type='gauge')
         metrics2 = [metrics2_1, metrics2_2]
-        query2 = mock.Mock(enabled=False, query='query2', metrics=metrics2, hana_version='1.0')
+        query2 = mock.Mock(enabled=False, query='query2', metrics=metrics2, hana_version_range=['2.0'])
         metrics3_1 = mock.Mock(type='gauge')
         metrics3_2 = mock.Mock(type='other')
         metrics3_3 = mock.Mock(type='gauge')
         metrics3 = [metrics3_1, metrics3_2, metrics3_3]
-        query3 = mock.Mock(enabled=True, query='query3', metrics=metrics3, hana_version='1.0')
+        query3 = mock.Mock(enabled=True, query='query3', metrics=metrics3, hana_version_range=['3.0'])
 
         self._collector._metrics_config.queries = [
             query1, query2, query3
@@ -215,6 +199,11 @@ class TestSapHanaCollector(object):
         mock_format_query.assert_has_calls([
             mock.call('result1'),
             mock.call('result2')
+        ])
+
+        mock_hana_range.assert_has_calls([
+            mock.call('2.0', ['1.0']),
+            mock.call('2.0', ['3.0'])
         ])
 
         self._collector._manage_gauge.assert_has_calls([

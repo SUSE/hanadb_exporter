@@ -15,7 +15,7 @@ import json
 
 METRICMODEL = collections.namedtuple(
     'Metric',
-    'name description labels value unit type enabled hana_version'
+    'name description labels value unit type enabled hana_version_range'
 )
 
 
@@ -27,9 +27,14 @@ class Metric(METRICMODEL):
     # pylint:disable=R0913
     # pylint:disable=W0622
     def __new__(
-            cls, name, description, labels, value, unit, type, enabled=True, hana_version="1.0"):
+            cls, name, description, labels, value, unit, type,
+            enabled=True, hana_version_range=None):
+        if not value:
+            raise ValueError('No value specified in metrics.json for {}'.format(name))
+        if not hana_version_range:
+            hana_version_range = ['1.0.0']
         return super(Metric, cls).__new__(
-            cls, name, description, labels, value, unit, type, enabled, hana_version)
+            cls, name, description, labels, value, unit, type, enabled, hana_version_range)
 
 
 class Query(object):
@@ -41,7 +46,7 @@ class Query(object):
         self.query = None
         self.metrics = []
         self.enabled = True
-        self.hana_version = '1.0.0.0'
+        self.hana_version_range = ['1.0.0']
 
     def parse(self, query, query_data):
         """
@@ -50,7 +55,7 @@ class Query(object):
         self.query = query
         self.metrics = []
         self.enabled = query_data.get('enabled', True)
-        self.hana_version = query_data.get('hana_version', '1.0.0.0')
+        self.hana_version_range = query_data.get('hana_version', ['1.0.0'])
         for metric in query_data['metrics']:
             modeled_data = Metric(**metric)
             self.metrics.append(modeled_data)

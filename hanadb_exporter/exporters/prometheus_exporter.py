@@ -38,10 +38,6 @@ class SapHanaCollector(object):
         """
         metric_obj = core.GaugeMetricFamily(
             metric.name, metric.description, None, metric.labels, metric.unit)
-        # TODO: This should be done in the sanity check in prometheus_metrics.py
-        if metric.value == '':
-            raise ValueError('No value specified in metrics.json for {}'.format(
-                metric.name))
         for row in formatted_query_result:
             labels = []
             metric_value = None
@@ -65,8 +61,14 @@ class SapHanaCollector(object):
         """
 
         for query in self._metrics_config.queries:
-            #  execute each query once (only if enabled)
-            if query.enabled and self._hana_version >= query.hana_version:
+            if not query.enabled:
+                self._logger.info(
+                    'Query %s is disabled', query.query)
+            elif not utils.check_hana_range(self._hana_version, query.hana_version_range):
+                self._logger.info(
+                    'Query %s out of the provided hana version range: %s',
+                    query.query, query.hana_version_range)
+            else:
                 # TODO: manage query error in an exception
                 query_result = self._hdb_connector.query(query.query)
                 formatted_query_result = utils.format_query_result(query_result)
@@ -76,6 +78,3 @@ class SapHanaCollector(object):
                         yield metric_obj
                     else:
                         raise NotImplementedError('{} type not implemented'.format(metric.type))
-            else:
-                self._logger.info(
-                    'Query %s is disabled or only available in higher hana versions', query.query)

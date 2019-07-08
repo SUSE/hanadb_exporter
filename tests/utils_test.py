@@ -50,3 +50,32 @@ class TestUtils(object):
             {'column1':'data4', 'column2':'data5', 'column3':'data6'},
             {'column1':'data7', 'column2':'data8', 'column3':'data9'}
         ]
+
+    def test_check_hana_range(self):
+
+        assert utils.check_hana_range('1.0.0.0', ['1.0.0.1']) == False
+        assert utils.check_hana_range('1.0.0.0', ['1.0.0']) == True
+        assert utils.check_hana_range('1.0.0.0', ['1.0.0']) == True
+        assert utils.check_hana_range('1.0.0.1', ['1.0.0.0']) == True
+
+        assert utils.check_hana_range('1.0.0.0', ['1.0.0.1', '2.0.0']) == False
+        assert utils.check_hana_range('2.0.1.0', ['1.0.0.1', '2.0.0.0']) == False
+        assert utils.check_hana_range('1.0.0.0', ['1.0.1.0', '2.0.0.0']) == False
+        assert utils.check_hana_range('1.0.1.0', ['1.0.1.1', '2.0.0.0']) == False
+        assert utils.check_hana_range('1.0.0.1', ['1.0.1', '2.0.0.0']) == False
+
+        assert utils.check_hana_range('1.0.0.0', ['1.0.0', '2.0.0']) == True
+        assert utils.check_hana_range('1.0.1', ['1.0.0.1', '2.0.0']) == True
+        assert utils.check_hana_range('1.0.1', ['1.0.0.0', '2.0.0']) == True
+        assert utils.check_hana_range('2.0.0.0', ['1.0.0.1', '2.0.0.0']) == True
+        assert utils.check_hana_range('1.0.0.1', ['1.0.0', '2.0.0.0']) == True
+
+        with pytest.raises(ValueError) as err:
+            utils.check_hana_range('1.0.0.0', [])
+
+        assert 'provided availability range does not have the correct number of elements' in str(err.value)
+
+        with pytest.raises(ValueError) as err:
+            utils.check_hana_range('1.0.0.0', ['1.0.0.0', '2.0.0.0', '3.0.0.0'])
+
+        assert 'provided availability range does not have the correct number of elements' in str(err.value)

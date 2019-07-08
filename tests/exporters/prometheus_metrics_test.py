@@ -47,6 +47,7 @@ class TestMetric(object):
         assert modeled_metric.unit == 'unit'
         assert modeled_metric.type == 'type'
         assert modeled_metric.enabled == True
+        assert modeled_metric.hana_version_range == ['1.0.0']
 
         correct_data = {
             'name': 'name',
@@ -55,7 +56,8 @@ class TestMetric(object):
             'value': 'value',
             'unit': 'unit',
             'type': 'type',
-            'enabled': False
+            'enabled': False,
+            'hana_version_range': ['1.0.0', '2.0.0']
         }
 
         modeled_metric = prometheus_metrics.Metric(**correct_data)
@@ -66,6 +68,7 @@ class TestMetric(object):
         assert modeled_metric.unit == 'unit'
         assert modeled_metric.type == 'type'
         assert modeled_metric.enabled == False
+        assert modeled_metric.hana_version_range == ['1.0.0', '2.0.0']
 
         missing_data = {
             'name': 'name',
@@ -102,6 +105,20 @@ class TestMetric(object):
         with pytest.raises(TypeError) as err:
             modeled_metric = prometheus_metrics.Metric(**missing_data)
 
+    def test_metric_new_error(self):
+        correct_data = {
+            'name': 'name',
+            'description': 'description',
+            'labels': list(),
+            'value': '',
+            'unit': 'unit',
+            'type': 'type'
+        }
+
+        with pytest.raises(ValueError) as err:
+            prometheus_metrics.Metric(**correct_data)
+
+        assert 'No value specified in metrics.json for {}'.format('name') in str(err.value)
 
 class TestQuery(object):
     """
