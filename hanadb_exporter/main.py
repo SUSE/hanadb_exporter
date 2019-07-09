@@ -35,7 +35,7 @@ def parse_config(config_file):
 
 def parse_arguments():
     """
-    Parase command line arguments
+    Parse command line arguments
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
