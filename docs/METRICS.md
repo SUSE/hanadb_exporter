@@ -9,7 +9,8 @@ to create the correct structure:
 
 Each entry in the JSON file is formed by a SAP HANA SQL query (key) and the metrics/additional information (value). The additional information is composed by:
 
-* `enabled (boolean, optional)`: If the query is executed or not (`true` by default is the `enabled` entry is not set). If set to `false` the metrics for this query won't be exported.
+* `enabled (boolean, optional)`: If the query is executed or not (`true` by default is the `enabled` entry is not set). If set to `false` the metrics for this query won't be executed.
+* `hana_version_range (list, optional)`: The SAP HANA database versions range where the query is available (`[1.0.0]` by default). If the current database version is not inside the provided range, the query won't be executed. If the list has only one element, all versions beyond this value (this included) will be queried.
 * `metrics (list)`: A list of metrics for this query. Each metric will need the next information;
 * `name (str):`: The name used to export the metric.
 * `description (str)`: The description of the metric (available as `# HELP`).
@@ -25,6 +26,7 @@ Here an example of a query and some metrics:
   "SELECT TOP 10 host, LPAD(port, 5) port, SUBSTRING(REPLACE_REGEXPR('\n' IN statement_string WITH ' ' OCCURRENCE ALL), 1,30) sql_string, statement_hash sql_hash, execution_count, total_execution_time + total_preparation_time total_elapsed_time FROM sys.m_sql_plan_cache ORDER BY total_elapsed_time, execution_count DESC;":
   {
     "enabled": true,
+    "hana_version_range": ["1.0"]
     "metrics": [
       {
         "name": "hanadb_sql_top_time_consumers",

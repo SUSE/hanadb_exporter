@@ -8,4 +8,4 @@ SAP HANA database data exporter
 :since: 2019-05-09
 """
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
