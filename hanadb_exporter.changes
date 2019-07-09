@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Jul  9 09:56:38 UTC 2019 - Xabier Arbulu Insausti <xarbulu@suse.com>
+
+- Version 0.3.2 adding the option to filter the queries by current
+SAP HANA database version 
+
+-------------------------------------------------------------------
 Wed Jul  3 07:40:46 UTC 2019 - Xabier Arbulu Insausti <xarbulu@suse.com>
 
 - Version 0.3.1 updating how the exporter is executed as a daemon 
