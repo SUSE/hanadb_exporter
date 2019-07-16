@@ -579,27 +579,6 @@
       }
     ]
   },
-  "SELECT TOP 10 host, LPAD(port, 5) port, SUBSTRING(REPLACE_REGEXPR('\n' IN statement_string WITH ' ' OCCURRENCE ALL), 1,30) sql_string, statement_hash sql_hash, execution_count, total_execution_memory_size FROM sys.m_sql_plan_cache ORDER BY total_execution_memory_size, execution_count  DESC;":
-  {
-    "metrics": [
-      {
-        "name": "hanadb_sql_top_mem_consumers",
-        "description": "Top statements memory consumers. Specifies the total size of tracked actual memory consumption in bytes",
-        "labels": ["HOST", "PORT", "SQL_STRING", "SQL_HASH"],
-        "value": "TOTAL_EXECUTION_MEMORY_SIZE",
-        "unit": "byte",
-        "type": "gauge"
-      },
-      {
-        "name": "hanadb_sql_top_mem_consumers",
-        "description": "Top statements time consumers. Number of total executions of the SQL Statement",
-        "labels": ["HOST", "PORT", "SQL_STRING", "SQL_HASH"],
-        "value": "EXECUTION_COUNT",
-        "unit": "count",
-        "type": "gauge"
-      }
-    ]
-  },
   "SELECT TOP 10 ct.host, LPAD(ct.port,5) port, ct.schema_name, ct.table_name, TO_DECIMAL(ct.memory_size_in_total / 1024 / 1024, 10, 2) memory_size_in_total_mb, TO_DECIMAL(ct.estimated_max_memory_size_in_total / 1024 / 1024, 10, 2) estimated_max_mem_total_mb, ct.record_count, TO_DECIMAL(tps.disk_size / 1024 / 1024, 10, 2) disk_size_mb FROM sys.m_cs_tables ct, sys.m_table_persistence_statistics tps WHERE ct.schema_name = tps.schema_name AND ct.table_name = tps.table_name ORDER BY ct.memory_size_in_total DESC;":
   {
     "metrics": [
