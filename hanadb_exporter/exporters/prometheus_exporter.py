@@ -11,9 +11,10 @@ SAP HANA database prometheus data exporter
 import logging
 
 from prometheus_client import core
-
+from shaptools import hdb_connector
 from hanadb_exporter.exporters import prometheus_metrics
 from hanadb_exporter import utils
+
 
 
 class SapHanaCollector(object):
@@ -59,7 +60,7 @@ class SapHanaCollector(object):
         """
         Collect data from database
         """
-
+        logger = logging.getLogger(__name__)
         for query in self._metrics_config.queries:
             if not query.enabled:
                 self._logger.info(
@@ -69,12 +70,15 @@ class SapHanaCollector(object):
                     'Query %s out of the provided hana version range: %s',
                     query.query, query.hana_version_range)
             else:
-                # TODO: manage query error in an exception
-                query_result = self._hdb_connector.query(query.query)
-                formatted_query_result = utils.format_query_result(query_result)
-                for metric in query.metrics:
-                    if metric.type == "gauge":
-                        metric_obj = self._manage_gauge(metric, formatted_query_result)
-                        yield metric_obj
-                    else:
-                        raise NotImplementedError('{} type not implemented'.format(metric.type))
+                try:
+                    query_result = self._hdb_connector.query(query.query)
+                    formatted_query_result = utils.format_query_result(query_result)
+                    for metric in query.metrics:
+                        if metric.type == "gauge":
+                            metric_obj = self._manage_gauge(metric, formatted_query_result)
+                            yield metric_obj
+                        else:
+                            raise NotImplementedError('{} type not implemented'.format(metric.type))
+                except hdb_connector.connectors.base_connector.QueryError as err:
+                    logger.error('Failure in query: %s, skipping...', query.query)
+                    logger.error(err)
