@@ -86,7 +86,6 @@ def run():
    
     logger = logging.getLogger(__name__)
     metrics = args.metrics
-   
     connector = hdb_connector.HdbConnector()
     try:
         hana_config = config['hana']
@@ -98,12 +97,12 @@ def run():
         )
     except KeyError as err:
         raise KeyError('Configuration file {} is malformed: {} not found'.format(args.config, err))
-    logger.info('connection to hanadb sucessfully initialized')
+
     collector = exporter_factory.SapHanaExporter.create(
         exporter_type='prometheus', metrics_file=metrics, hdb_connector=connector)
     REGISTRY.register(collector)
     logger.info('exporter sucessfully registered')
-    logger.info('starting to serving metrics')
+    logger.info('starting to serve metrics')
     start_http_server(config.get('exposition_port', 8001), '0.0.0.0')
     while True:
         time.sleep(1)
