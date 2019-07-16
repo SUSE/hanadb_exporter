@@ -43,7 +43,7 @@ def parse_arguments():
     parser.add_argument(
         "-m", "--metrics", help="Path to hanadb_exporter metrics file", required=True)
     parser.add_argument(
-        "--verbosity",
+        "-v", "--verbosity",
         help="Python logging level. Options: DEBUG, INFO, WARN, ERROR (INFO by default)")
     args = parser.parse_args()
     return args
