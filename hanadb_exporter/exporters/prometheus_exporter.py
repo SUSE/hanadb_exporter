@@ -62,12 +62,10 @@ class SapHanaCollector(object):
 
         for query in self._metrics_config.queries:
             if not query.enabled:
-                self._logger.info(
-                    'Query %s is disabled', query.query)
+                self._logger.info('Query %s is disabled', query.query)
             elif not utils.check_hana_range(self._hana_version, query.hana_version_range):
-                self._logger.info(
-                    'Query %s out of the provided hana version range: %s',
-                    query.query, query.hana_version_range)
+                self._logger.info('Query %s out of the provided hana version range: %s',
+                                  query.query, query.hana_version_range)
             else:
                 # TODO: manage query error in an exception
                 query_result = self._hdb_connector.query(query.query)
