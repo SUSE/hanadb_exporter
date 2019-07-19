@@ -436,7 +436,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{CONNECTION_TYPE}} : {{CONNECTION_STATUS}}",
+          "legendFormat": "{{connection_type}} : {{connection_status}}",
           "refId": "A"
         }
       ],
@@ -817,7 +817,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "count (count by (CORE) (hanadb_cpu_busy_percent{host=~\"$hana_node\"}))",
+          "expr": "count (count by (core) (hanadb_cpu_busy_percent{host=~\"$hana_node\"}))",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "",
@@ -1590,7 +1590,7 @@
           "expr": "hanadb_memory_service_total_used_mb{host=~\"$hana_node\"}",
           "format": "time_series",
           "intervalFactor": 1,
-          "legendFormat": "{{SERVICE}}",
+          "legendFormat": "{{service}}",
           "refId": "A"
         }
       ],
@@ -2001,12 +2001,12 @@
       ],
       "targets": [
         {
-          "expr": "sort(sum(hanadb_schema_used_memory_mb{host=~\"$hana_node\"}) by (SCHEMA_NAME))",
+          "expr": "sort(sum(hanadb_schema_used_memory_mb{host=~\"$hana_node\"}) by (schema_name))",
           "format": "time_series",
           "instant": true,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{SCHEMA_NAME}}",
+          "legendFormat": "{{schema_name}}",
           "refId": "A"
         }
       ],
@@ -2759,7 +2759,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{HOST}}:{{PORT}} -> {{SECONDARY_HOST}}:{{SECONDARY_PORT}}",
+          "legendFormat": "{{host}}:{{port}} -> {{secondary_host}}:{{secondary_port}}",
           "refId": "A"
         }
       ],
@@ -2849,7 +2849,7 @@
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{HOST}}:{{PORT}} -> {{SECONDARY_HOST}}:{{SECONDARY_PORT}}",
+          "legendFormat": "{{host}}:{{port}} -> {{secondary_host}}:{{secondary_port}}",
           "refId": "A"
         }
       ],
@@ -3250,7 +3250,7 @@
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{INTERFACE}}",
+              "legendFormat": "{{interface}}",
               "refId": "A"
             }
           ],
@@ -3340,7 +3340,7 @@
               "expr": "hanadb_network_transmission_rate_kb_per_seconds{host=~\"$hana_node\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{INTERFACE}}",
+              "legendFormat": "{{interface}}",
               "refId": "A"
             }
           ],
@@ -3429,14 +3429,14 @@
               "expr": "hanadb_network_receive_rate_errors_per_seconds{host=~\"$hana_node\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{INTERFACE}} - Rec. rate",
+              "legendFormat": "{{interface}} - Rec. rate",
               "refId": "A"
             },
             {
               "expr": "hanadb_network_transmission_rate_errors_per_seconds{host=~\"$hana_node\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{INTERFACE}} - Trans. rate",
+              "legendFormat": "{{interface}} - Trans. rate",
               "refId": "B"
             }
           ],
@@ -3526,7 +3526,7 @@
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{INTERFACE}}",
+              "legendFormat": "{{interface}}",
               "refId": "A"
             }
           ],
@@ -3616,7 +3616,7 @@
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{INTERFACE}}",
+              "legendFormat": "{{interface}}",
               "refId": "A"
             }
           ],
@@ -3705,7 +3705,7 @@
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{INTERFACE}}",
+              "legendFormat": "{{interface}}",
               "refId": "A"
             }
           ],
@@ -3811,7 +3811,7 @@
               "expr": "hanadb_disk_io_throughput_kb_second{host=~\"$hana_node\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{DISK}}",
+              "legendFormat": "{{disk}}",
               "refId": "A"
             }
           ],
@@ -3900,7 +3900,7 @@
               "expr": "hanadb_disk_io_latency_ms{host=~\"$hana_node\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{DISK}}",
+              "legendFormat": "{{disk}}",
               "refId": "A"
             }
           ],
@@ -3988,7 +3988,7 @@
               "expr": "hanadb_disk_io_service_time_ms{host=~\"$hana_node\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{DISK}}",
+              "legendFormat": "{{disk}}",
               "refId": "A"
             }
           ],
@@ -4075,7 +4075,7 @@
               "expr": "hanadb_disk_io_requests_per_second{host=~\"$hana_node\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{DISK}}",
+              "legendFormat": "{{disk}}",
               "refId": "A"
             }
           ],
@@ -4163,7 +4163,7 @@
               "expr": "hanadb_disk_io_queue_length_requests{host=~\"$hana_node\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{DISK}}",
+              "legendFormat": "{{disk}}",
               "refId": "A"
             }
           ],
@@ -4252,7 +4252,7 @@
               "expr": "hanadb_disk_io_wait_time_ms{host=~\"$hana_node\"}",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{DISK}}",
+              "legendFormat": "{{disk}}",
               "refId": "A"
             }
           ],
