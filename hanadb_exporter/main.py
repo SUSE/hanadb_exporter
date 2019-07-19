@@ -83,9 +83,9 @@ def run():
         setup_logging(config)
     else:
         logging.basicConfig(level=args.verbosity or logging.INFO)
-
+   
+    logger = logging.getLogger(__name__)
     metrics = args.metrics
-
     connector = hdb_connector.HdbConnector()
     try:
         hana_config = config['hana']
@@ -101,6 +101,8 @@ def run():
     collector = exporter_factory.SapHanaExporter.create(
         exporter_type='prometheus', metrics_file=metrics, hdb_connector=connector)
     REGISTRY.register(collector)
+    logger.info('exporter sucessfully registered')
+    logger.info('starting to serve metrics')
     start_http_server(config.get('exposition_port', 8001), '0.0.0.0')
     while True:
         time.sleep(1)
