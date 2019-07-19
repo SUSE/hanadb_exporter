@@ -57,7 +57,7 @@ class TestMain(object):
             mock.call(
                 "-m", "--metrics", help="Path to hanadb_exporter metrics file", required=True),
             mock.call(
-                "--verbosity",
+                "-v", "--verbosity",
                 help="Python logging level. Options: DEBUG, INFO, WARN, ERROR (INFO by default)")
         ])
 
