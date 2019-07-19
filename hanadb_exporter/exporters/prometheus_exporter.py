@@ -37,6 +37,7 @@ class SapHanaCollector(object):
             metric (dict): a dictionary containing information about the metric
             formatted_query_result (nested list): query formated by _format_query_result method
         """
+        logger = logging.getLogger(__name__)
         metric_obj = core.GaugeMetricFamily(
             metric.name, metric.description, None, metric.labels, metric.unit)
         for row in formatted_query_result:
@@ -50,8 +51,11 @@ class SapHanaCollector(object):
                 except ValueError: # Received data is not a label, check for the value
                     if column_name == metric.value:
                         metric_value = column_value
-
-            metric_obj.add_metric(labels, metric_value)
+            if metric_value != None:
+                metric_obj.add_metric(labels, metric_value)
+            else:
+                logger.error('Specified value in metrics.json for metric'
+                ' "%s": (%s) not found in the query result', metric.name, metric.value)
 
         self._logger.debug('%s \n', metric_obj.samples)
         return metric_obj
