@@ -60,19 +60,29 @@ class SapHanaCollector(object):
         Collect data from database
         """
 
-        for query in self._metrics_config.queries:
-            if not query.enabled:
-                self._logger.info('Query %s is disabled', query.query)
-            elif not utils.check_hana_range(self._hana_version, query.hana_version_range):
-                self._logger.info('Query %s out of the provided hana version range: %s',
-                                  query.query, query.hana_version_range)
-            else:
-                # TODO: manage query error in an exception
-                query_result = self._hdb_connector.query(query.query)
-                formatted_query_result = utils.format_query_result(query_result)
-                for metric in query.metrics:
-                    if metric.type == "gauge":
-                        metric_obj = self._manage_gauge(metric, formatted_query_result)
-                        yield metric_obj
-                    else:
-                        raise NotImplementedError('{} type not implemented'.format(metric.type))
+        def select_enabled_queries(query):
+            if query.enabled:
+                return query
+            self._logger.info('Query %s is disabled', query.query)
+      
+        def select_queries_in_hanadb_range(query):
+            if utils.check_hana_range(self._hana_version, query.hana_version_range):
+                return query    
+            self._logger.info('Query %s out of the provided hana version range: %s',
+                              query.query, query.hana_version_range)
+
+        # filter out all disable queries, retains only enabled = True
+        enabled_queries = [select_enabled_queries(query) for query in self._metrics_config.queries]
+        # filter out queries, which doesn't have the range specified by API/CONF
+        enabled_in_range_queries = [select_enabled_queries(query) for query in enabled_queries]
+
+        for query in enabled_in_range_queries:
+           # TODO: manage query error in an exception
+           query_result = self._hdb_connector.query(query.query)
+           formatted_query_result = utils.format_query_result(query_result)
+           for metric in query.metrics:
+               if metric.type == "gauge":
+                   metric_obj = self._manage_gauge(metric, formatted_query_result)
+                   yield metric_obj
+               else:
+                   raise NotImplementedError('{} type not implemented'.format(metric.type))
