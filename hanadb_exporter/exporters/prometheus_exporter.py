@@ -63,13 +63,25 @@ class SapHanaCollector(object):
         a prometheus metric_object, which will be served over http for scraping e.g gauge, etc.
         """
 
-        for query in self._metrics_config.queries:
+       
+        def select_enabled_queries(query):
             if not query.enabled:
                 self._logger.info('Query %s is disabled', query.query)
-            elif not utils.check_hana_range(self._hana_version, query.hana_version_range):
+                return False
+            return True
+
+        enabled_queries = [query for query in self._metrics_config.queries if select_enabled_queries(query)]
+
+        def only_range_vers_queries(query):
+            if not utils.check_hana_range(self._hana_version, query.hana_version_range):
                 self._logger.info('Query %s out of the provided hana version range: %s',
                                   query.query, query.hana_version_range)
-            else:
+                return False
+            return True
+        
+        in_hanadb_range_queries = [query for query in enabled_queries if only_range_vers_queries(query)]
+
+        for query in in_hanadb_range_queries:
                 # TODO: manage query error in an exception
                 query_result = self._hdb_connector.query(query.query)
                 formatted_query_result = utils.format_query_result(query_result)

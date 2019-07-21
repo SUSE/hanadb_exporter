@@ -98,7 +98,7 @@ class TestSapHanaCollector(object):
         self._collector._manage_gauge.side_effect = [
             'gauge1', 'gauge2', 'gauge3', 'gauge4', 'gauge5']
 
-        metrics1_1 = mock.Mock(type='gauge')
+        metrics1_1 = mock.Mock(type='gauge', hana_version_range=['1.0'])
         metrics1_2 = mock.Mock(type='gauge')
         metrics1 = [metrics1_1, metrics1_2]
         query1 = mock.Mock(enabled=True, query='query1', metrics=metrics1, hana_version_range=['1.0'])
@@ -108,7 +108,7 @@ class TestSapHanaCollector(object):
         query2 = mock.Mock(enabled=False, query='query2', metrics=metrics2, hana_version_range=['2.0'])
         metrics3_1 = mock.Mock(type='gauge')
         metrics3_2 = mock.Mock(type='gauge')
-        metrics3_3 = mock.Mock(type='gauge')
+        metrics3_3 = mock.Mock(type='gauge', hana_version_range=['3.0'])
         metrics3 = [metrics3_1, metrics3_2, metrics3_3]
         query3 = mock.Mock(enabled=True, query='query3', metrics=metrics3, hana_version_range=['3.0'])
         metrics4_1 = mock.Mock(type='gauge')
