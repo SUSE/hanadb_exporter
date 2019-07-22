@@ -21,20 +21,22 @@ METRICMODEL = collections.namedtuple(
 
 class Metric(METRICMODEL):
     """
-    Class to store the loaded prometheus metrics inherited from namedtuple
+    store loaded prometheus metrics from the config/api (structure inherited from namedtuple)
     """
 
     # pylint:disable=R0913
     # pylint:disable=W0622
-    def __new__(
-            cls, name, description, labels, value, unit, type,
-            enabled=True, hana_version_range=None):
+    def __new__(cls, name, description, labels, value, unit, type,
+                enabled=True, hana_version_range=None):
         if not value:
             raise ValueError('No value specified in metrics.json for {}'.format(name))
         if not hana_version_range:
             hana_version_range = ['1.0.0']
-        return super(Metric, cls).__new__(
-            cls, name, description, labels, value, unit, type, enabled, hana_version_range)
+        # lowercase labels and values
+        labels = [label.lower() for label in labels]
+        value = value.lower()
+        return super(Metric, cls).__new__(cls, name, description, labels, value,
+                                          unit, type, enabled, hana_version_range)
 
 
 class Query(object):
