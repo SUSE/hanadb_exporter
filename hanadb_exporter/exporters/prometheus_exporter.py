@@ -25,14 +25,16 @@ class SapHanaCollector(object):
     def __init__(self, connector, metrics_file, hana_version):
         self._logger = logging.getLogger(__name__)
         self._hdb_connector = connector
-        # load metric configuration
+        # metrics_config contains the configuration api/json data
         self._metrics_config = prometheus_metrics.PrometheusMetrics(metrics_file)
         self._hana_version = hana_version
 
     def _manage_gauge(self, metric, formatted_query_result):
         """
-        Manage Gauge type metric
-
+        Manage Gauge type metric: 
+        metric is the json.file object for example
+        parse a SQL query and fullfill(formatted_query_result) the metric object from prometheus
+        
         Args:
             metric (dict): a dictionary containing information about the metric
             formatted_query_result (nested list): query formated by _format_query_result method
@@ -47,9 +49,9 @@ class SapHanaCollector(object):
                 # TODO: exception labels not found
                 # TODO: exception value not found
                 try:
-                    labels.insert(metric.labels.index(column_name), column_value)
-                except ValueError: # Received data is not a label, check for the value
-                    if column_name == metric.value:
+                    labels.insert(metric.labels.index(column_name.lower()), column_value)
+                except ValueError: # Received data is not a label, check for the lowercased value
+                    if column_name.lower() == metric.value.lower():
                         metric_value = column_value
             if metric_value != None:
                 metric_obj.add_metric(labels, metric_value)
@@ -62,7 +64,8 @@ class SapHanaCollector(object):
 
     def collect(self):
         """
-        Collect data from database
+        execute db queries defined by metrics_config/api file, and store them in
+        a prometheus metric_object, which will be served over http for scraping e.g gauge, etc.
         """
         logger = logging.getLogger(__name__)
         for query in self._metrics_config.queries:
