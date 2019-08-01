@@ -31,28 +31,31 @@ class SapHanaCollector(object):
 
     def _manage_gauge(self, metric, formatted_query_result):
         """
-        Manage Gauge type metric: 
+        Manage Gauge type metric:
         metric is the json.file object for example
         parse a SQL query and fullfill(formatted_query_result) the metric object from prometheus
-        
+
         Args:
             metric (dict): a dictionary containing information about the metric
             formatted_query_result (nested list): query formated by _format_query_result method
         """
         metric_obj = core.GaugeMetricFamily(
             metric.name, metric.description, None, metric.labels, metric.unit)
-        for row in formatted_query_result:
+        for row in formatted_query_result: # Each row is a metric
             labels = []
             metric_value = None
             for column_name, column_value in row.items():
-                # TODO: exception labels not found
-                # TODO: exception value not found
                 try:
                     labels.insert(metric.labels.index(column_name.lower()), column_value)
                 except ValueError: # Received data is not a label, check for the lowercased value
                     if column_name.lower() == metric.value.lower():
                         metric_value = column_value
             if metric_value != None:
+                # Log when a label(s) specified in metrics.json is not found in the query result
+                if len(labels) == len(metric.labels):
+                    self._logger.error('One or more label(s) specified in metrics.json'
+                                   ' for metric: "%s" is not found in the the query result',
+                                   metric.name)
                 metric_obj.add_metric(labels, metric_value)
             else:
                 self._logger.error('Specified value in metrics.json for metric'
