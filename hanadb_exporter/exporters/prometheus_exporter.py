@@ -56,7 +56,8 @@ class SapHanaCollector(object):
                 metric_obj.add_metric(labels, metric_value)
             else:
                 self._logger.error('Specified value in metrics.json for metric'
-                ' "%s": (%s) not found in the query result', metric.name, metric.value)
+                                   ' "%s": (%s) not found in the query result',
+                                   metric.name, metric.value)
 
         self._logger.debug('%s \n', metric_obj.samples)
         return metric_obj
