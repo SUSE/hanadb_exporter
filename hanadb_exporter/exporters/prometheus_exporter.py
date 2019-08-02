@@ -41,7 +41,7 @@ class SapHanaCollector(object):
         """
         metric_obj = core.GaugeMetricFamily(
             metric.name, metric.description, None, metric.labels, metric.unit)
-        for row in formatted_query_result: # Each row is a metric
+        for row in formatted_query_result:
             labels = []
             metric_value = None
             for column_name, column_value in row.items():
@@ -54,11 +54,13 @@ class SapHanaCollector(object):
                 self._logger.error('Specified value in metrics.json for metric'
                                    ' "%s": (%s) not found in the query result',
                                    metric.name, metric.value)
+                return None # Skip the metric
             elif len(labels) != len(metric.labels):
                 # Log when a label(s) specified in metrics.json is not found in the query result
                 self._logger.error('One or more label(s) specified in metrics.json'
                                     ' for metric: "%s" is not found in the the query result',
                                     metric.name)
+                return None # Skip the metric
             else:
                 metric_obj.add_metric(labels, metric_value)
         self._logger.debug('%s \n', metric_obj.samples)
@@ -82,7 +84,10 @@ class SapHanaCollector(object):
                     for metric in query.metrics:
                         if metric.type == "gauge":
                             metric_obj = self._manage_gauge(metric, formatted_query_result)
-                            yield metric_obj
+                            if metric_obj is None:
+                                continue # If _manage_gauge returns None, skip the metric and go on to complete the rest of the loop
+                            else:
+                                yield metric_obj
                         else:
                             raise NotImplementedError('{} type not implemented'.format(metric.type))
                 except hdb_connector.connectors.base_connector.QueryError as err:
