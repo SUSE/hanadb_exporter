@@ -50,18 +50,17 @@ class SapHanaCollector(object):
                 except ValueError: # Received data is not a label, check for the lowercased value
                     if column_name.lower() == metric.value.lower():
                         metric_value = column_value
-            if metric_value != None:
-                # Log when a label(s) specified in metrics.json is not found in the query result
-                if len(labels) == len(metric.labels):
-                    self._logger.error('One or more label(s) specified in metrics.json'
-                                   ' for metric: "%s" is not found in the the query result',
-                                   metric.name)
-                metric_obj.add_metric(labels, metric_value)
-            else:
+            if metric_value is None:
                 self._logger.error('Specified value in metrics.json for metric'
                                    ' "%s": (%s) not found in the query result',
                                    metric.name, metric.value)
-
+            elif len(labels) != len(metric.labels):
+                # Log when a label(s) specified in metrics.json is not found in the query result
+                self._logger.error('One or more label(s) specified in metrics.json'
+                                    ' for metric: "%s" is not found in the the query result',
+                                    metric.name)
+            else:
+                metric_obj.add_metric(labels, metric_value)
         self._logger.debug('%s \n', metric_obj.samples)
         return metric_obj
 

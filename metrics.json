@@ -7,7 +7,7 @@
       {
         "name": "hanadb_column_tables_used_memory",
         "description": "Column tables total memory used in MB",
-        "labels": ["HOSTd"],
+        "labels": ["HOST"],
         "value": "COLUMN_TABLES_USED_MB",
         "unit": "mb",
         "type": "gauge"
