@@ -91,5 +91,5 @@ class SapHanaCollector(object):
                         else:
                             raise NotImplementedError('{} type not implemented'.format(metric.type))
                 except hdb_connector.connectors.base_connector.QueryError as err:
-                    self._logger.logger.error('Failure in query: %s, skipping...', query.query)
-                    self._logger.logger.error(err)
+                    self._logger.error('Failure in query: %s, skipping...', query.query)
+                    self._logger.error(err)
