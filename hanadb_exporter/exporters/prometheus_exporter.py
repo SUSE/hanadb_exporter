@@ -84,12 +84,12 @@ class SapHanaCollector(object):
                     for metric in query.metrics:
                         if metric.type == "gauge":
                             metric_obj = self._manage_gauge(metric, formatted_query_result)
-                            if metric_obj is None:
-                                continue # If _manage_gauge returns None, skip the metric and go on to complete the rest of the loop
-                            else:
-                                yield metric_obj
                         else:
                             raise NotImplementedError('{} type not implemented'.format(metric.type))
+                        if metric_obj is None:
+                                continue # If _manage_gauge returns None, skip the metric and go on to complete the rest of the loop
+                        else:
+                            yield metric_obj
                 except hdb_connector.connectors.base_connector.QueryError as err:
                     self._logger.error('Failure in query: %s, skipping...', query.query)
                     self._logger.error(err)
