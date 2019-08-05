@@ -83,7 +83,7 @@ class TestSapHanaCollector(object):
 
 
     @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
-    @mock.patch('logging.Logger.debug')
+    @mock.patch('logging.Logger.error')
     def test_incorrect_label(self, mock_logger, mock_core):
 
         mock_gauge_instance = mock.Mock()
@@ -116,7 +116,7 @@ class TestSapHanaCollector(object):
 
 
     @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
-    @mock.patch('logging.Logger.debug')
+    @mock.patch('logging.Logger.error')
     def test_incorrect_value(self, mock_logger, mock_core):
 
         mock_gauge_instance = mock.Mock()
