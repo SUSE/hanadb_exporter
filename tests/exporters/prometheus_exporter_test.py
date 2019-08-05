@@ -81,6 +81,73 @@ class TestSapHanaCollector(object):
         mock_logger.assert_called_once_with('%s \n', 'samples')
         assert metric_obj == mock_gauge_instance
 
+
+    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
+    @mock.patch('logging.Logger.debug')
+    def test_incorrect_label(self, mock_logger, mock_core):
+
+        mock_gauge_instance = mock.Mock()
+        mock_gauge_instance.samples = 'samples'
+        mock_core.GaugeMetricFamily = mock.Mock()
+        mock_core.GaugeMetricFamily.return_value = mock_gauge_instance
+
+        mock_metric = mock.Mock()
+        mock_metric.name = 'name'
+        mock_metric.description = 'description'
+        mock_metric.labels = ['column4', 'column5']
+        mock_metric.unit = 'mb'
+        mock_metric.value = 'column3'
+
+        formatted_query = [
+            {'column1':'data1', 'column2':'data2', 'column3':'data3'},
+            {'column1':'data4', 'column2':'data5', 'column3':'data6'},
+            {'column1':'data7', 'column2':'data8', 'column3':'data9'}
+        ]
+
+        metric_obj = self._collector._manage_gauge(mock_metric, formatted_query)
+
+        mock_core.GaugeMetricFamily.assert_called_once_with(
+            'name', 'description', None, ['column4', 'column5'], 'mb')
+
+        mock_logger.assert_called_once_with('One or more label(s) specified in metrics.json'
+                                            ' for metric: "%s" is not found in the the query result',
+                                            'name')
+        assert metric_obj == None
+
+
+    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
+    @mock.patch('logging.Logger.debug')
+    def test_incorrect_value(self, mock_logger, mock_core):
+
+        mock_gauge_instance = mock.Mock()
+        mock_gauge_instance.samples = 'samples'
+        mock_core.GaugeMetricFamily = mock.Mock()
+        mock_core.GaugeMetricFamily.return_value = mock_gauge_instance
+
+        mock_metric = mock.Mock()
+        mock_metric.name = 'name'
+        mock_metric.description = 'description'
+        mock_metric.labels = ['column1', 'column2']
+        mock_metric.unit = 'mb'
+        mock_metric.value = 'column4'
+
+        formatted_query = [
+            {'column1':'data1', 'column2':'data2', 'column3':'data3'},
+            {'column1':'data4', 'column2':'data5', 'column3':'data6'},
+            {'column1':'data7', 'column2':'data8', 'column3':'data9'}
+        ]
+
+        metric_obj = self._collector._manage_gauge(mock_metric, formatted_query)
+
+        mock_core.GaugeMetricFamily.assert_called_once_with(
+            'name', 'description', None, ['column1', 'column2'], 'mb')
+
+        mock_logger.assert_called_once_with('Specified value in metrics.json for metric'
+                                            ' "%s": (%s) not found in the query result',
+                                            'name', 'column4')
+        assert metric_obj == None
+
+
     @mock.patch('hanadb_exporter.utils.format_query_result')
     @mock.patch('hanadb_exporter.utils.check_hana_range')
     @mock.patch('logging.Logger.info')
