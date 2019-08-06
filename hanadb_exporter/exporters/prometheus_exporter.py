@@ -16,7 +16,6 @@ from hanadb_exporter.exporters import prometheus_metrics
 from hanadb_exporter import utils
 
 
-
 class SapHanaCollector(object):
     """
     SAP HANA database data exporter
@@ -47,20 +46,18 @@ class SapHanaCollector(object):
             for column_name, column_value in row.items():
                 try:
                     labels.insert(metric.labels.index(column_name.lower()), column_value)
-                except ValueError: # Received data is not a label, check for the lowercased value
+                except ValueError:  # Received data is not a label, check for the lowercased value
                     if column_name.lower() == metric.value.lower():
                         metric_value = column_value
             if metric_value is None:
-                self._logger.error('Specified value in metrics.json for metric'
-                                   ' "%s": (%s) not found in the query result',
-                                   metric.name, metric.value)
-                return None # Skip the metric
+                raise ValueError('Specified value in metrics.json for metric'
+                                 ' "{}": ({}) not found in the query result'.format(
+                                  metric.name, metric.value))
             elif len(labels) != len(metric.labels):
                 # Log when a label(s) specified in metrics.json is not found in the query result
-                self._logger.error('One or more label(s) specified in metrics.json'
-                                    ' for metric: "%s" is not found in the the query result',
-                                    metric.name)
-                return None # Skip the metric
+                raise ValueError('One or more label(s) specified in metrics.json'
+                                 ' for metric: "{}" is not found in the the query result'.format(
+                                  metric.name))
             else:
                 metric_obj.add_metric(labels, metric_value)
         self._logger.debug('%s \n', metric_obj.samples)
@@ -83,15 +80,16 @@ class SapHanaCollector(object):
                 except hdb_connector.connectors.base_connector.QueryError as err:
                     self._logger.error('Failure in query: %s, skipping...', query.query)
                     self._logger.error(err)
-                    continue # Moving to the next iteration (query)
+                    continue  # Moving to the next iteration (query)
                 formatted_query_result = utils.format_query_result(query_result)
                 for metric in query.metrics:
                     if metric.type == "gauge":
-                        metric_obj = self._manage_gauge(metric, formatted_query_result)
+                        try:
+                            metric_obj = self._manage_gauge(metric, formatted_query_result)
+                        except ValueError as err:
+                            self._logger.error(err)
+                            continue  # If an a ValueError exception is caught, skip the metric and go on to complete the rest of the loop
                     else:
                         raise NotImplementedError('{} type not implemented'.format(metric.type))
-                    if metric_obj is None:
-                            continue # If _manage_gauge returns None, skip the metric and go on to complete the rest of the loop
-                    else:
-                        yield metric_obj
+                    yield metric_obj
 
