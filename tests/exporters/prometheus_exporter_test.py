@@ -23,9 +23,16 @@ except ImportError:
 
 import pytest
 
+sys.modules['shaptools'] = mock.MagicMock()
 sys.modules['prometheus_client'] = mock.MagicMock()
 
 from hanadb_exporter.exporters import prometheus_exporter
+
+
+class QueryError(Exception):
+    """
+    query mock exception
+    """
 
 
 class TestSapHanaCollector(object):
@@ -269,3 +276,33 @@ class TestSapHanaCollector(object):
             mock.call(metrics1_2, 'form_result1'),
             mock.call(metrics3_1, 'form_result2')
         ])
+
+    @mock.patch('hanadb_exporter.utils.check_hana_range')
+    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.hdb_connector.connectors.base_connector')
+    @mock.patch('logging.Logger.error')
+    def test_incorrect_query(self, mock_logger, mock_base_connector, mock_hana_range):
+
+        mock_base_connector.QueryError = Exception
+
+        self._mock_connector.query.side_effect = Exception('error')
+        mock_hana_range.return_value = True
+
+        query1 = mock.Mock(enabled=True, query='query1', hana_version_range=['1.0'])
+
+        self._collector._metrics_config.queries = [query1]
+
+        for _ in self._collector.collect():
+            continue
+
+        self._mock_connector.query.assert_called_once_with('query1')
+
+        mock_hana_range.assert_has_calls([
+            mock.call('2.0', ['1.0']),
+        ])
+
+        mock_logger.assert_has_calls([
+            mock.call('Failure in query: %s, skipping...', 'query1'),
+        ])
+
+
+
