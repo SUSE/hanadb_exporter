@@ -148,6 +148,31 @@ class TestSapHanaCollector(object):
 
     @mock.patch('hanadb_exporter.utils.format_query_result')
     @mock.patch('hanadb_exporter.utils.check_hana_range')
+    @mock.patch('logging.Logger.error')
+    def test_value_error(self, mock_logger, mock_hana_range, mock_format_query):
+        """
+        Test that when _manage_gauge is called and return ValueError (labels or value)
+        are incorrect, that the ValueError is catched by collect() and a error is raised
+        """
+
+        self._collector._manage_gauge = mock.Mock()
+
+        self._collector._manage_gauge.side_effect = ValueError('test')
+        mock_hana_range.return_value = True
+
+        metrics1_1 = mock.Mock(type='gauge')
+        metrics1 = [metrics1_1]
+        query1 = mock.Mock(enabled=True, query='query1', metrics=metrics1, hana_version_range=['1.0'])
+
+        self._collector._metrics_config.queries = [query1]
+
+        for _ in self._collector.collect():
+            continue
+
+        mock_logger.assert_called_once()
+
+    @mock.patch('hanadb_exporter.utils.format_query_result')
+    @mock.patch('hanadb_exporter.utils.check_hana_range')
     @mock.patch('logging.Logger.info')
     def test_collect(self, mock_logger, mock_hana_range, mock_format_query):
 
@@ -303,6 +328,3 @@ class TestSapHanaCollector(object):
         mock_logger.assert_has_calls([
             mock.call('Failure in query: %s, skipping...', 'query1'),
         ])
-
-
-
