@@ -87,7 +87,6 @@ class TestSapHanaCollector(object):
     def test_incorrect_label(self, mock_logger, mock_core):
 
         mock_gauge_instance = mock.Mock()
-        mock_gauge_instance.samples = 'samples'
         mock_core.GaugeMetricFamily = mock.Mock()
         mock_core.GaugeMetricFamily.return_value = mock_gauge_instance
 
@@ -107,9 +106,9 @@ class TestSapHanaCollector(object):
         with pytest.raises(ValueError) as err:
             metric_obj = self._collector._manage_gauge(mock_metric, formatted_query)
 
-        assert('One or more label(s) specified in metrics.json'
-               ' for metric: "{}" is not found in the the query result'.format(
-                'name')) in str(err.value)
+            assert('One or more label(s) specified in metrics.json'
+                   ' for metric: "{}" is not found in the the query result'.format(
+                    'name') in str(err.value))
 
     @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
     @mock.patch('logging.Logger.error')
@@ -138,7 +137,7 @@ class TestSapHanaCollector(object):
 
         assert('Specified value in metrics.json for metric'
                ' "{}": ({}) not found in the query result'.format(
-                'name', 'column4')) in str(err.value)
+                'name', 'column4') in str(err.value))
 
     @mock.patch('hanadb_exporter.utils.format_query_result')
     @mock.patch('hanadb_exporter.utils.check_hana_range')
