@@ -23,6 +23,7 @@ except ImportError:
 
 import pytest
 
+sys.modules['shaptools'] = mock.MagicMock()
 sys.modules['prometheus_client'] = mock.MagicMock()
 
 from hanadb_exporter.exporters import prometheus_exporter
@@ -80,6 +81,88 @@ class TestSapHanaCollector(object):
 
         mock_logger.assert_called_once_with('%s \n', 'samples')
         assert metric_obj == mock_gauge_instance
+
+    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
+    @mock.patch('logging.Logger.error')
+    def test_incorrect_label(self, mock_logger, mock_core):
+
+        mock_gauge_instance = mock.Mock()
+        mock_core.GaugeMetricFamily = mock.Mock()
+        mock_core.GaugeMetricFamily.return_value = mock_gauge_instance
+
+        mock_metric = mock.Mock()
+        mock_metric.name = 'name'
+        mock_metric.description = 'description'
+        mock_metric.labels = ['column4', 'column5']
+        mock_metric.unit = 'mb'
+        mock_metric.value = 'column3'
+
+        formatted_query = [
+            {'column1': 'data1', 'column2': 'data2', 'column3': 'data3'},
+            {'column1': 'data4', 'column2': 'data5', 'column3': 'data6'},
+            {'column1': 'data7', 'column2': 'data8', 'column3': 'data9'}
+        ]
+
+        with pytest.raises(ValueError) as err:
+            metric_obj = self._collector._manage_gauge(mock_metric, formatted_query)
+
+            assert('One or more label(s) specified in metrics.json'
+                   ' for metric: "{}" is not found in the the query result'.format(
+                    'name') in str(err.value))
+
+    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
+    @mock.patch('logging.Logger.error')
+    def test_incorrect_value(self, mock_logger, mock_core):
+
+        mock_gauge_instance = mock.Mock()
+        mock_gauge_instance.samples = 'samples'
+        mock_core.GaugeMetricFamily = mock.Mock()
+        mock_core.GaugeMetricFamily.return_value = mock_gauge_instance
+
+        mock_metric = mock.Mock()
+        mock_metric.name = 'name'
+        mock_metric.description = 'description'
+        mock_metric.labels = ['column1', 'column2']
+        mock_metric.unit = 'mb'
+        mock_metric.value = 'column4'
+
+        formatted_query = [
+            {'column1': 'data1', 'column2': 'data2', 'column3': 'data3'},
+            {'column1': 'data4', 'column2': 'data5', 'column3': 'data6'},
+            {'column1': 'data7', 'column2': 'data8', 'column3': 'data9'}
+        ]
+
+        with pytest.raises(ValueError) as err:
+            metric_obj = self._collector._manage_gauge(mock_metric, formatted_query)
+
+        assert('Specified value in metrics.json for metric'
+               ' "{}": ({}) not found in the query result'.format(
+                'name', 'column4') in str(err.value))
+
+    @mock.patch('hanadb_exporter.utils.format_query_result')
+    @mock.patch('hanadb_exporter.utils.check_hana_range')
+    @mock.patch('logging.Logger.error')
+    def test_value_error(self, mock_logger, mock_hana_range, mock_format_query):
+        """
+        Test that when _manage_gauge is called and return ValueError (labels or value)
+        are incorrect, that the ValueError is catched by collect() and a error is raised
+        """
+
+        self._collector._manage_gauge = mock.Mock()
+
+        self._collector._manage_gauge.side_effect = ValueError('test')
+        mock_hana_range.return_value = True
+
+        metrics1_1 = mock.Mock(type='gauge')
+        metrics1 = [metrics1_1]
+        query1 = mock.Mock(enabled=True, query='query1', metrics=metrics1, hana_version_range=['1.0'])
+
+        self._collector._metrics_config.queries = [query1]
+
+        for _ in self._collector.collect():
+            continue
+
+        mock_logger.assert_called_once_with('test')
 
     @mock.patch('hanadb_exporter.utils.format_query_result')
     @mock.patch('hanadb_exporter.utils.check_hana_range')
@@ -210,4 +293,31 @@ class TestSapHanaCollector(object):
             mock.call(metrics1_1, 'form_result1'),
             mock.call(metrics1_2, 'form_result1'),
             mock.call(metrics3_1, 'form_result2')
+        ])
+
+    @mock.patch('hanadb_exporter.utils.check_hana_range')
+    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.hdb_connector.connectors.base_connector')
+    @mock.patch('logging.Logger.error')
+    def test_incorrect_query(self, mock_logger, mock_base_connector, mock_hana_range):
+
+        mock_base_connector.QueryError = Exception
+
+        self._mock_connector.query.side_effect = Exception('error')
+        mock_hana_range.return_value = True
+
+        query1 = mock.Mock(enabled=True, query='query1', hana_version_range=['1.0'])
+
+        self._collector._metrics_config.queries = [query1]
+
+        for _ in self._collector.collect():
+            continue
+
+        self._mock_connector.query.assert_called_once_with('query1')
+
+        mock_hana_range.assert_has_calls([
+            mock.call('2.0', ['1.0']),
+        ])
+
+        mock_logger.assert_has_calls([
+            mock.call('Failure in query: %s, skipping...', 'query1'),
         ])

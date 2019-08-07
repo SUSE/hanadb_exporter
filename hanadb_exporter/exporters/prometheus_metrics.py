@@ -96,7 +96,7 @@ class PrometheusMetrics(object):
                 queries.append(modeled_query)
         except TypeError as err:
             logger.error('Malformed %s file in query %s ...', metrics_file, query[:50])
-            logger.error(err)
+            logger.error(str(err))
             raise
 
         return queries

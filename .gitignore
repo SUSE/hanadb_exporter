@@ -10,3 +10,4 @@ dist/*
 config.json
 /virt
 .vscode
+.pytest_cache
