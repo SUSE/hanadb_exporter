@@ -29,12 +29,6 @@ sys.modules['prometheus_client'] = mock.MagicMock()
 from hanadb_exporter.exporters import prometheus_exporter
 
 
-class QueryError(Exception):
-    """
-    query mock exception
-    """
-
-
 class TestSapHanaCollector(object):
     """
     Unitary tests for SapHanaCollector.
@@ -169,7 +163,7 @@ class TestSapHanaCollector(object):
         for _ in self._collector.collect():
             continue
 
-        mock_logger.assert_called_once()
+        mock_logger.assert_called_once_with('test')
 
     @mock.patch('hanadb_exporter.utils.format_query_result')
     @mock.patch('hanadb_exporter.utils.check_hana_range')

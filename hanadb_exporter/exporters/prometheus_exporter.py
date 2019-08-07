@@ -79,7 +79,7 @@ class SapHanaCollector(object):
                     query_result = self._hdb_connector.query(query.query)
                 except hdb_connector.connectors.base_connector.QueryError as err:
                     self._logger.error('Failure in query: %s, skipping...', query.query)
-                    self._logger.error(err)
+                    self._logger.error(str(err))
                     continue  # Moving to the next iteration (query)
                 formatted_query_result = utils.format_query_result(query_result)
                 for metric in query.metrics:
@@ -87,7 +87,7 @@ class SapHanaCollector(object):
                         try:
                             metric_obj = self._manage_gauge(metric, formatted_query_result)
                         except ValueError as err:
-                            self._logger.error(err)
+                            self._logger.error(str(err))
                             continue  # If an a ValueError exception is caught, skip the metric and go on to complete the rest of the loop
                     else:
                         raise NotImplementedError('{} type not implemented'.format(metric.type))
