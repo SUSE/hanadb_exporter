@@ -38,6 +38,14 @@ pip install .
 # pip install -e . # To install in development mode
 # deactivate # to exit from the virtualenv
 ```
+If you prefer, you can install a RPM package for the PyHDB SAP HANA connector doing (example for Tumbleweed, but available for other versions):
+
+```
+# All the command must be executed as root user
+zypper addrepo https://download.opensuse.org/repositories/network:/ha-clustering:/Factory/openSUSE_Tumbleweed/network:ha-clustering:Factory.repo
+zypper ref
+zypper in python3-PyHDB
+```
 
 ## Configuring and running the exporter
 
@@ -69,7 +77,9 @@ project using a rpm package. This can be done following the next steps (this exa
 
 ```
 # All the command must be executed as root user
+# The hanadb_exporter uses the prometheus_client for python. You can find it on the ha-clustering:Factory Repository.
 zypper addrepo https://download.opensuse.org/repositories/network:/ha-clustering:/Factory/openSUSE_Tumbleweed/network:ha-clustering:Factory.repo
+zypper addrepo https://download.opensuse.org/repositories/server:/monitoring/openSUSE_Tumbleweed/server:monitoring.repo
 zypper ref
 zypper in hanadb_exporter
 ```
