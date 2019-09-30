@@ -16,6 +16,7 @@
   },
   "SELECT host, schema_name, ROUND(SUM(memory_size_in_total)/1024/1024) schema_memory_used_mb FROM sys.m_cs_tables GROUP BY host, schema_name;":
   {
+    "enabled": true,
     "hana_version_range": ["1.0.0"],
     "metrics": [
       {
@@ -30,6 +31,7 @@
   },
   "SELECT MAX(TIMESTAMP) TIMESTAMP, HOST, MEASURED_ELEMENT_NAME CORE, SUM(MAP(CAPTION, 'User Time', TO_NUMBER(VALUE), 0)) USER_PCT, SUM(MAP(CAPTION, 'System Time', TO_NUMBER(VALUE), 0)) SYSTEM_PCT, SUM(MAP(CAPTION, 'Wait Time', TO_NUMBER(VALUE), 0)) WAITIO_PCT, SUM(MAP(CAPTION, 'Idle Time', 0, TO_NUMBER(VALUE))) BUSY_PCT, SUM(MAP(CAPTION, 'Idle Time', TO_NUMBER(VALUE), 0)) IDLE_PCT FROM sys.M_HOST_AGENT_METRICS WHERE MEASURED_ELEMENT_TYPE = 'Processor' GROUP BY HOST, MEASURED_ELEMENT_NAME;":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_cpu_user",
@@ -75,6 +77,7 @@
   },
   "SELECT MAX(timestamp) timestamp, host, measured_element_name interface, MAX(MAP(caption, 'Collision Rate', TO_NUMBER(value), 0)) coll_per_s, MAX(MAP(caption, 'Receive Rate', TO_NUMBER(value), 0)) recv_kb_per_s, MAX(MAP(caption, 'Transmit Rate', TO_NUMBER(value), 0)) trans_kb_per_s,MAX(MAP(caption, 'Packet Receive Rate', TO_NUMBER(value), 0)) recv_pack_per_s, MAX(MAP(caption, 'Packet Transmit Rate', TO_NUMBER(value), 0)) trans_pack_per_s, MAX(MAP(caption, 'Receive Error Rate', TO_NUMBER(value), 0)) recv_err_per_s, MAX(MAP(caption, 'Transmit Error Rate', TO_NUMBER(value), 0)) trans_err_per_s FROM sys.m_host_agent_metrics WHERE measured_element_type = 'NetworkPort' GROUP BY host, measured_element_name;":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_network_collisions_per",
@@ -136,6 +139,7 @@
   },
   "SELECT host, LPAD(port,5) port, file_name, file_type, used_size/1024/1024 used_size_mb, total_size/1024/1024 total_size_mb, (total_size - used_size)/1024/1024 available_size_mb, LPAD(TO_DECIMAL(MAP(total_size, 0, 0, ( 1 - used_size / total_size ) * 100), 10, 2), 8) frag_pct FROM sys.m_volume_files WHERE file_type = 'DATA';":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_disk_data_files_used_size",
@@ -173,6 +177,7 @@
   },
   "SELECT md.host, md.usage_type, md.path, md.filesystem_type, TO_DECIMAL(md.total_device_size / 1024 / 1024, 10, 2) total_device_size_mb, TO_DECIMAL(md.total_size / 1024 / 1024, 10, 2) total_size_mb, TO_DECIMAL(md.used_size / 1024 / 1024, 10, 2) total_used_size_mb, TO_DECIMAL(du.used_size / 1024 / 1024, 10, 2) used_size_mb FROM sys.m_disk_usage du, sys.m_disks md WHERE du.host = md.host AND du.usage_type = md.usage_type;":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_disk_total_device_size",
@@ -210,6 +215,7 @@
   },
   "SELECT host, disk, queue_length, srv_ms + wait_ms latency_ms, srv_ms, wait_ms, io_per_s, tp_kbps FROM( SELECT MAX(TIMESTAMP) timestamp, host,     measured_element_name disk, MAX(MAP(caption, 'Queue Length', TO_NUMBER(value), 0)) queue_length, MAX(MAP(caption, 'Service Time', TO_NUMBER(value), 0)) srv_ms, MAX(MAP(caption, 'Wait Time', TO_NUMBER(value), 0)) wait_ms, MAX(MAP(caption, 'I/O Rate', TO_NUMBER(value), 0)) io_per_s, MAX(MAP(caption, 'Total Throughput', TO_NUMBER(value), 0)) tp_kbps FROM sys.m_host_agent_metrics WHERE measured_element_type = 'Disk' GROUP BY host, measured_element_name);":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_disk_io_queue_length",
@@ -263,6 +269,7 @@
   },
   "SELECT m.host, LPAD(m.port, 5) port, m.service_name service, TO_DECIMAL(m.shared_memory_allocated_size / 1024 / 1024, 10, 2) shm_alloc_mb, TO_DECIMAL(m.shared_memory_used_size / 1024 / 1024, 10, 2) shm_used_mb, TO_DECIMAL(MAP(m.shared_memory_allocated_size, 0, 0, m.shared_memory_used_size / m.shared_memory_allocated_size * 100), 10, 2) shm_used_pct, TO_DECIMAL(m.heap_memory_allocated_size / 1024 / 1024, 10, 2) heap_alloc_mb, TO_DECIMAL(m.heap_memory_used_size / 1024 / 1024, 10, 2) heap_used_mb, TO_DECIMAL(MAP(m.heap_memory_allocated_size, 0, 0, m.heap_memory_used_size / m.heap_memory_allocated_size * 100), 10, 2) heap_used_pct, TO_DECIMAL(m.total_memory_used_size / 1024 / 1024, 10, 2) total_memory_used_mb, TO_DECIMAL(m.physical_memory_size / 1024 / 1024, 10, 2) total_phys_mem_mb, TO_DECIMAL(m.logical_memory_size / 1024 / 1024, 10, 2) total_logical_mem_mb, TO_DECIMAL(m.code_size / 1024 / 1024, 10, 2) code_size_mem_mb, TO_DECIMAL(m.stack_size / 1024 / 1024, 10, 2) stack_size_mem_mb, TO_DECIMAL(m.compactors_freeable_size / 1024 / 1024, 10, 2) compactors_freeable_size_mem_mb,   TO_DECIMAL(m.compactors_allocated_size / 1024 / 1024, 10, 2) compactors_allocated_size_mem_mb, TO_DECIMAL(m.allocation_limit / 1024 / 1024, 10, 2) process_alloc_limit_mb, TO_DECIMAL(m.effective_allocation_limit / 1024 / 1024, 10, 2) effective_proc_alloc_limit_mb FROM sys.m_service_memory m;":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_memory_service_shared_allocated",
@@ -388,6 +395,7 @@
   },
   "SELECT host, ROUND((used_physical_memory + free_physical_memory) / 1024 / 1024, 2) host_physical_mem_mb, ROUND(used_physical_memory / 1024 / 1024, 2) host_resident_mem_mb, ROUND(free_physical_memory / 1024 / 1024, 2) host_free_physical_mem_mb, ROUND(free_swap_space / 1024 / 1024, 2) host_free_swap_mb, ROUND(used_swap_space / 1024 / 1024, 2) host_used_swap_mb, ROUND(allocation_limit / 1024 / 1024, 2) host_alloc_limit_mb, ROUND(instance_total_memory_used_size / 1024 / 1024, 2) host_total_used_mem_mb, ROUND(instance_total_memory_peak_used_size / 1024 / 1024, 2) host_total_peak_used_mem_mb, ROUND(instance_total_memory_allocated_size / 1024 / 1024, 2) host_total_alloc_mem_mb, ROUND(instance_code_size / 1024 / 1024, 2) host_code_size_mb, ROUND(instance_shared_memory_allocated_size / 1024 / 1024, 2) host_shr_mem_alloc_mb FROM sys.m_host_resource_utilization;":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_host_memory_physical_total",
@@ -481,6 +489,7 @@
   },
   "SELECT HOST, LPAD(PORT, 5) PORT, SERVICE_NAME SERVICE, SQL_TYPE, EXECUTIONS EXECUTIONS, ROUND(ELAPSED_MS) ELAPSED_MS, TO_DECIMAL(ELA_PER_EXEC_MS, 10, 2) ELA_PER_EXEC_MS, TO_DECIMAL(LOCK_PER_EXEC_MS, 10, 2) LOCK_PER_EXEC_MS, ROUND(MAX_ELA_MS) MAX_ELA_MS FROM( SELECT S.HOST, S.PORT, S.SERVICE_NAME, L.SQL_TYPE, CASE L.SQL_TYPE WHEN 'SELECT' THEN SUM(C.SELECT_EXECUTION_COUNT) WHEN 'SELECT FOR UPDATE' THEN SUM(C.SELECT_FOR_UPDATE_COUNT) WHEN 'INSERT/UPDATE/DELETE' THEN SUM(C.UPDATE_COUNT) WHEN 'READ ONLY TRANSACTION' THEN SUM(C.READ_ONLY_TRANSACTION_COUNT) WHEN 'UPDATE TRANSACTION' THEN SUM(C.UPDATE_TRANSACTION_COUNT) WHEN 'ROLLBACK' THEN SUM(C.ROLLBACK_COUNT) WHEN 'OTHERS' THEN SUM(C.OTHERS_COUNT) WHEN 'PREPARE' THEN SUM(C.TOTAL_PREPARATION_COUNT) END EXECUTIONS, CASE L.SQL_TYPE WHEN 'SELECT' THEN SUM(C.SELECT_TOTAL_EXECUTION_TIME) / 1000 WHEN 'SELECT FOR UPDATE' THEN SUM(C.SELECT_FOR_UPDATE_TOTAL_EXECUTION_TIME) / 1000 WHEN 'INSERT/UPDATE/DELETE' THEN SUM(C.UPDATE_TOTAL_EXECUTION_TIME) / 1000 WHEN 'READ ONLY TRANSACTION' THEN SUM(C.READ_ONLY_TRANSACTION_TOTAL_EXECUTION_TIME) / 1000 WHEN 'UPDATE TRANSACTION' THEN SUM(C.UPDATE_TRANSACTION_TOTAL_EXECUTION_TIME) / 1000 WHEN 'ROLLBACK' THEN SUM(C.ROLLBACK_TOTAL_EXECUTION_TIME) / 1000 WHEN 'OTHERS' THEN SUM(C.OTHERS_TOTAL_EXECUTION_TIME) / 1000 WHEN 'PREPARE' THEN SUM(C.TOTAL_PREPARATION_TIME) / 1000 END ELAPSED_MS, CASE L.SQL_TYPE WHEN 'SELECT' THEN MAP(SUM(C.SELECT_EXECUTION_COUNT), 0, 0, SUM(C.SELECT_TOTAL_EXECUTION_TIME) / 1000 / SUM(C.SELECT_EXECUTION_COUNT)) WHEN 'SELECT FOR UPDATE' THEN MAP(SUM(C.SELECT_FOR_UPDATE_COUNT), 0, 0, SUM(C.SELECT_FOR_UPDATE_TOTAL_EXECUTION_TIME) / 1000 / SUM(C.SELECT_FOR_UPDATE_COUNT)) WHEN 'INSERT/UPDATE/DELETE' THEN MAP(SUM(C.UPDATE_COUNT), 0, 0, SUM(C.UPDATE_TOTAL_EXECUTION_TIME) / 1000 / SUM(C.UPDATE_COUNT)) WHEN 'READ ONLY TRANSACTION' THEN MAP(SUM(C.READ_ONLY_TRANSACTION_COUNT), 0, 0, SUM(C.READ_ONLY_TRANSACTION_TOTAL_EXECUTION_TIME) / 1000 / SUM(C.READ_ONLY_TRANSACTION_COUNT)) WHEN 'UPDATE TRANSACTION' THEN MAP(SUM(C.UPDATE_TRANSACTION_COUNT), 0, 0, SUM(C.UPDATE_TRANSACTION_TOTAL_EXECUTION_TIME) / 1000 / SUM(C.UPDATE_TRANSACTION_COUNT)) WHEN 'ROLLBACK' THEN MAP(SUM(C.ROLLBACK_COUNT), 0, 0, SUM(C.ROLLBACK_TOTAL_EXECUTION_TIME) / 1000 / SUM(C.ROLLBACK_COUNT)) WHEN 'OTHERS' THEN MAP(SUM(C.OTHERS_COUNT), 0, 0, SUM(C.OTHERS_TOTAL_EXECUTION_TIME) / 1000 / SUM(C.OTHERS_COUNT)) WHEN 'PREPARE' THEN MAP(SUM(C.TOTAL_PREPARATION_COUNT), 0, 0, SUM(C.TOTAL_PREPARATION_TIME) / 1000 / SUM(C.TOTAL_PREPARATION_COUNT)) END ELA_PER_EXEC_MS, CASE L.SQL_TYPE WHEN 'SELECT' THEN 0 WHEN 'SELECT FOR UPDATE' THEN MAP(SUM(C.SELECT_FOR_UPDATE_COUNT), 0, 0, SUM(C.SELECT_FOR_UPDATE_TOTAL_LOCK_WAIT_TIME) / 1000 / SUM(C.SELECT_FOR_UPDATE_COUNT)) WHEN 'INSERT/UPDATE/DELETE' THEN MAP(SUM(C.UPDATE_COUNT), 0, 0, SUM(C.UPDATE_TOTAL_LOCK_WAIT_TIME) / 1000 / SUM(C.UPDATE_COUNT)) WHEN 'READ ONLY TRANSACTION' THEN 0 WHEN 'UPDATE TRANSACTION' THEN 0 WHEN 'ROLLBACK' THEN 0 WHEN 'OTHERS' THEN MAP(SUM(C.OTHERS_COUNT), 0, 0, SUM(C.OTHERS_TOTAL_LOCK_WAIT_TIME) / 1000 / SUM(C.OTHERS_COUNT)) WHEN 'PREPARE' THEN 0 END LOCK_PER_EXEC_MS, CASE L.SQL_TYPE WHEN 'SELECT' THEN MAX(C.SELECT_MAX_EXECUTION_TIME) / 1000 WHEN 'SELECT FOR UPDATE' THEN MAX(C.SELECT_FOR_UPDATE_MAX_EXECUTION_TIME) / 1000 WHEN 'INSERT/UPDATE/DELETE' THEN MAX(C.UPDATE_MAX_EXECUTION_TIME) / 1000 WHEN 'READ ONLY TRANSACTION' THEN MAX(C.READ_ONLY_TRANSACTION_MAX_EXECUTION_TIME) / 1000 WHEN 'UPDATE TRANSACTION' THEN MAX(C.UPDATE_TRANSACTION_MAX_EXECUTION_TIME) / 1000 WHEN 'ROLLBACK' THEN MAX(C.ROLLBACK_MAX_EXECUTION_TIME) / 1000 WHEN 'OTHERS' THEN MAX(C.OTHERS_MAX_EXECUTION_TIME) / 1000 WHEN 'PREPARE' THEN MAX(C.MAX_PREPARATION_TIME) / 1000 END MAX_ELA_MS FROM SYS.M_SERVICES S, ( SELECT 1 LINE_NO, 'SELECT' SQL_TYPE FROM DUMMY UNION ALL ( SELECT 2, 'SELECT FOR UPDATE' FROM DUMMY ) UNION ALL ( SELECT 3, 'INSERT/UPDATE/DELETE' FROM DUMMY ) UNION ALL ( SELECT 4, 'READ ONLY TRANSACTION' FROM DUMMY ) UNION ALL ( SELECT 5, 'UPDATE TRANSACTION' FROM DUMMY ) UNION ALL ( SELECT 6, 'ROLLBACK' FROM DUMMY ) UNION ALL ( SELECT 7, 'OTHERS' FROM DUMMY ) UNION ALL ( SELECT 8, 'PREPARE' FROM DUMMY ) ) L, SYS.M_CONNECTION_STATISTICS C WHERE C.HOST = S.HOST AND C.PORT = S.PORT GROUP BY S.HOST, S.PORT, S.SERVICE_NAME, L.SQL_TYPE, L.LINE_NO);":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_sql_service_executions",
@@ -526,6 +535,7 @@
   },
   "SELECT TOP 10 host, LPAD(port, 5) port, SUBSTRING(REPLACE_REGEXPR('\n' IN statement_string WITH ' ' OCCURRENCE ALL), 1,30) sql_string, statement_hash sql_hash, execution_count, total_execution_time + total_preparation_time total_elapsed_time FROM sys.m_sql_plan_cache ORDER BY total_elapsed_time, execution_count DESC;":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_sql_top_time_consumers",
@@ -547,6 +557,7 @@
   },
   "SELECT TOP 10 host, LPAD(port, 5) port, SUBSTRING(REPLACE_REGEXPR('\n' IN statement_string WITH ' ' OCCURRENCE ALL), 1,30) sql_string, statement_hash sql_hash, execution_count, total_execution_memory_size FROM sys.m_sql_plan_cache ORDER BY total_execution_memory_size, execution_count  DESC;":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_sql_top_mem_consumers",
@@ -568,6 +579,7 @@
   },
   "SELECT host, LPAD(port, 5) port, connection_type, MAP(connection_status,'','N/A', connection_status) connection_status, COUNT(1) total_connections FROM SYS.M_CONNECTIONS  GROUP BY host, port, connection_status, connection_type;":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_connections_total",
@@ -579,29 +591,9 @@
       }
     ]
   },
-  "SELECT TOP 10 host, LPAD(port, 5) port, SUBSTRING(REPLACE_REGEXPR('\n' IN statement_string WITH ' ' OCCURRENCE ALL), 1,30) sql_string, statement_hash sql_hash, execution_count, total_execution_memory_size FROM sys.m_sql_plan_cache ORDER BY total_execution_memory_size, execution_count  DESC;":
-  {
-    "metrics": [
-      {
-        "name": "hanadb_sql_top_mem_consumers",
-        "description": "Top statements memory consumers. Specifies the total size of tracked actual memory consumption in bytes",
-        "labels": ["HOST", "PORT", "SQL_STRING", "SQL_HASH"],
-        "value": "TOTAL_EXECUTION_MEMORY_SIZE",
-        "unit": "byte",
-        "type": "gauge"
-      },
-      {
-        "name": "hanadb_sql_top_mem_consumers",
-        "description": "Top statements time consumers. Number of total executions of the SQL Statement",
-        "labels": ["HOST", "PORT", "SQL_STRING", "SQL_HASH"],
-        "value": "EXECUTION_COUNT",
-        "unit": "count",
-        "type": "gauge"
-      }
-    ]
-  },
   "SELECT TOP 10 ct.host, LPAD(ct.port,5) port, ct.schema_name, ct.table_name, TO_DECIMAL(ct.memory_size_in_total / 1024 / 1024, 10, 2) memory_size_in_total_mb, TO_DECIMAL(ct.estimated_max_memory_size_in_total / 1024 / 1024, 10, 2) estimated_max_mem_total_mb, ct.record_count, TO_DECIMAL(tps.disk_size / 1024 / 1024, 10, 2) disk_size_mb FROM sys.m_cs_tables ct, sys.m_table_persistence_statistics tps WHERE ct.schema_name = tps.schema_name AND ct.table_name = tps.table_name ORDER BY ct.memory_size_in_total DESC;":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_table_cs_top_mem_total",
@@ -639,6 +631,7 @@
   },
   "SELECT host, LPAD(port, 5) port, site_name, secondary_site_name, secondary_host, LPAD(secondary_port, 5) secondary_port, replication_mode, MAP(secondary_active_status, 'YES', 1,0) secondary_active_status, MAP(UPPER(replication_status),'ACTIVE',0,'ERROR', 4, 'SYNCING',2, 'INITIALIZING',1,'UNKNOWN', 3, 99) replication_status, TO_DECIMAL(SECONDS_BETWEEN(SHIPPED_LOG_POSITION_TIME, LAST_LOG_POSITION_TIME), 10, 2) ship_delay_s, TO_DECIMAL((LAST_LOG_POSITION - SHIPPED_LOG_POSITION) * 64 / 1024 / 1024, 10, 2) async_buff_used_mb, secondary_reconnect_count, secondary_failover_count FROM sys.m_service_replication;":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_sr_ship_delay",
@@ -692,6 +685,7 @@
   },
   "SELECT TOP 10 TO_VARCHAR(RT.TAKEOVER_START_TIME) START_TIME, MAP(RT.TAKEOVER_END_TIME, NULL, 'N/A', TO_VARCHAR(RT.TAKEOVER_END_TIME)) END_TIME, MAP(SECONDS_BETWEEN(RT.TAKEOVER_START_TIME, RT.TAKEOVER_END_TIME),NULL, -1,SECONDS_BETWEEN(RT.TAKEOVER_START_TIME, RT.TAKEOVER_END_TIME)) DURATION_S, RT.SOURCE_SITE_NAME SRC_SITE_NAME, RT.SOURCE_MASTER_NAMESERVER_HOST SRC_HOST, RT.SITE_NAME TGT_SITE_NAME, RT.MASTER_NAMESERVER_HOST TGT_HOST, RT.TAKEOVER_TYPE TYPE, RT.OPERATION_MODE, MAP(RT.REPLICATION_STATUS,'ACTIVE',0,'ERROR', 4, 'SYNCING',2, 'INITIALIZING',1,'UNKNOWN', 3, 99) REPLICATION_STATUS, TO_VARCHAR(RT.LOG_POSITION_TIME) LOG_POS_TIME, TO_VARCHAR(RT.SHIPPED_LOG_POSITION_TIME) SHIPPED_LOG_POS_TIME, RT.LOG_POSITION, RT.SHIPPED_LOG_POSITION  FROM M_SYSTEM_REPLICATION_TAKEOVER_HISTORY RT;":
   {
+    "enabled": true,
     "metrics": [
       {
         "name": "hanadb_sr_takeover_replication",

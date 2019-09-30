@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Aug  7 14:47:46 UTC 2019 - Ayoub Belarbi <abelarbi@suse.de>
+
+- Version 0.3.3 Better handling of query failures and incorrect labels
+and values 
+
+-------------------------------------------------------------------
 Tue Jul  9 09:56:38 UTC 2019 - Xabier Arbulu Insausti <xarbulu@suse.com>
 
 - Version 0.3.2 adding the option to filter the queries by current

@@ -23,6 +23,7 @@ except ImportError:
 
 import pytest
 
+sys.modules['shaptools'] = mock.MagicMock()
 sys.modules['prometheus_client'] = mock.MagicMock()
 
 from hanadb_exporter import exporter_factory
