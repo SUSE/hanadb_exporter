@@ -50,14 +50,16 @@ class SapHanaCollector(object):
                     if column_name.lower() == metric.value.lower():
                         metric_value = column_value
             if metric_value is None:
-                raise ValueError('Specified value in metrics.json for metric'
-                                 ' "{}": ({}) not found in the query result'.format(
-                                  metric.name, metric.value))
+                raise ValueError(
+                    'Specified value in metrics.json for metric'
+                    ' "{}": ({}) not found in the query result'.format(
+                        metric.name, metric.value))
             elif len(labels) != len(metric.labels):
                 # Log when a label(s) specified in metrics.json is not found in the query result
-                raise ValueError('One or more label(s) specified in metrics.json'
-                                 ' for metric: "{}" is not found in the the query result'.format(
-                                  metric.name))
+                raise ValueError(
+                    'One or more label(s) specified in metrics.json'
+                    ' for metric: "{}" is not found in the the query result'.format(
+                        metric.name))
             else:
                 metric_obj.add_metric(labels, metric_value)
         self._logger.debug('%s \n', metric_obj.samples)
@@ -68,6 +70,9 @@ class SapHanaCollector(object):
         execute db queries defined by metrics_config/api file, and store them in
         a prometheus metric_object, which will be served over http for scraping e.g gauge, etc.
         """
+        # Try to reconnect if the connection is lost. It will raise an exception is case of error
+        self._hdb_connector.reconnect()
+
         for query in self._metrics_config.queries:
             if not query.enabled:
                 self._logger.info('Query %s is disabled', query.query)
@@ -88,8 +93,9 @@ class SapHanaCollector(object):
                             metric_obj = self._manage_gauge(metric, formatted_query_result)
                         except ValueError as err:
                             self._logger.error(str(err))
-                            continue  # If an a ValueError exception is caught, skip the metric and go on to complete the rest of the loop
+                            # If an a ValueError exception is caught, skip the metric and go on to
+                            # complete the rest of the loop
+                            continue
                     else:
                         raise NotImplementedError('{} type not implemented'.format(metric.type))
                     yield metric_obj
-

@@ -147,7 +147,7 @@ class TestSapHanaCollector(object):
         Test that when _manage_gauge is called and return ValueError (labels or value)
         are incorrect, that the ValueError is catched by collect() and a error is raised
         """
-
+        self._collector._hdb_connector.reconnect = mock.Mock()
         self._collector._manage_gauge = mock.Mock()
 
         self._collector._manage_gauge.side_effect = ValueError('test')
@@ -162,6 +162,7 @@ class TestSapHanaCollector(object):
         for _ in self._collector.collect():
             continue
 
+        self._collector._hdb_connector.reconnect.assert_called_once_with()
         mock_logger.assert_called_once_with('test')
 
     @mock.patch('hanadb_exporter.utils.format_query_result')
@@ -169,6 +170,7 @@ class TestSapHanaCollector(object):
     @mock.patch('logging.Logger.info')
     def test_collect(self, mock_logger, mock_hana_range, mock_format_query):
 
+        self._collector._hdb_connector.reconnect = mock.Mock()
         self._collector._manage_gauge = mock.Mock()
 
         self._mock_connector.query.side_effect = [
@@ -206,6 +208,7 @@ class TestSapHanaCollector(object):
         for index, element in enumerate(self._collector.collect()):
             assert element == 'gauge{}'.format(index+1)
 
+        self._collector._hdb_connector.reconnect.assert_called_once_with()
         self._mock_connector.query.assert_has_calls([
             mock.call('query1'),
             mock.call('query3')])
@@ -239,6 +242,7 @@ class TestSapHanaCollector(object):
     @mock.patch('hanadb_exporter.utils.check_hana_range')
     def test_collect_incorrect_type(self, mock_hana_range, mock_format_query):
 
+        self._collector._hdb_connector.reconnect = mock.Mock()
         self._collector._manage_gauge = mock.Mock()
 
         self._mock_connector.query.side_effect = [
@@ -273,6 +277,7 @@ class TestSapHanaCollector(object):
             for index, element in enumerate(self._collector.collect()):
                 assert element == 'gauge{}'.format(index+1)
 
+        self._collector._hdb_connector.reconnect.assert_called_once_with()
         assert '{} type not implemented'.format('other') in str(err.value)
 
         self._mock_connector.query.assert_has_calls([
@@ -300,6 +305,7 @@ class TestSapHanaCollector(object):
     @mock.patch('logging.Logger.error')
     def test_incorrect_query(self, mock_logger, mock_base_connector, mock_hana_range):
 
+        self._collector._hdb_connector.reconnect = mock.Mock()
         mock_base_connector.QueryError = Exception
 
         self._mock_connector.query.side_effect = Exception('error')
@@ -312,6 +318,7 @@ class TestSapHanaCollector(object):
         for _ in self._collector.collect():
             continue
 
+        self._collector._hdb_connector.reconnect.assert_called_once_with()
         self._mock_connector.query.assert_called_once_with('query1')
 
         mock_hana_range.assert_has_calls([

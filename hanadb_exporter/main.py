@@ -71,6 +71,30 @@ def setup_logging(config):
     sys.excepthook = handle_exception
 
 
+def connect(connector, config, logger):
+    """
+    Connect to HANA. This operation is repeated until successfull connection. The exporter will
+    start working after that
+    """
+    hana_config = config['hana']
+    logger.info(
+        'connecting to the hana database (%s:%s)',
+        hana_config['host'], hana_config.get('port', 30015))
+    while True:
+        try:
+            connector.connect(
+                hana_config['host'],
+                hana_config.get('port', 30015),
+                user=hana_config['user'],
+                password=hana_config['password']
+            )
+            break
+        except hdb_connector.connectors.base_connector.ConnectionError as err:
+            logger.error(
+                'the connection to the database failed. error message: %s', str(err))
+            time.sleep(15)
+
+
 # Start up the server to expose the metrics.
 def run():
     """
@@ -83,18 +107,13 @@ def run():
         setup_logging(config)
     else:
         logging.basicConfig(level=args.verbosity or logging.INFO)
-   
+
     logger = logging.getLogger(__name__)
     metrics = args.metrics
     connector = hdb_connector.HdbConnector()
+
     try:
-        hana_config = config['hana']
-        connector.connect(
-            hana_config['host'],
-            hana_config.get('port', 30015),
-            user=hana_config['user'],
-            password=hana_config['password']
-        )
+        connect(connector, config, logger)
     except KeyError as err:
         raise KeyError('Configuration file {} is malformed: {} not found'.format(args.config, err))
 
