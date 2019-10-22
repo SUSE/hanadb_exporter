@@ -106,7 +106,7 @@ class TestMain(object):
         mock_logger.info.assert_called_once_with(
             'connecting to the hana database (%s:%s)', '123.123.123.123', 1234)
         mock_connector.connect.assert_called_once_with(
-            '123.123.123.123', 1234, user='user', password='pass')
+            '123.123.123.123', 1234, user='user', password='pass', RECONNECT='FALSE')
 
     @mock.patch('hanadb_exporter.main.hdb_connector.connectors.base_connector')
     @mock.patch('time.sleep')
@@ -131,9 +131,9 @@ class TestMain(object):
         mock_logger.info.assert_called_once_with(
             'connecting to the hana database (%s:%s)', '123.123.123.123', 30015)
         mock_connector.connect.assert_has_calls([
-            mock.call('123.123.123.123', 30015, user='user', password='pass'),
-            mock.call('123.123.123.123', 30015, user='user', password='pass'),
-            mock.call('123.123.123.123', 30015, user='user', password='pass')
+            mock.call('123.123.123.123', 30015, user='user', password='pass', RECONNECT='FALSE'),
+            mock.call('123.123.123.123', 30015, user='user', password='pass', RECONNECT='FALSE'),
+            mock.call('123.123.123.123', 30015, user='user', password='pass', RECONNECT='FALSE')
         ])
 
         mock_logger.error.assert_has_calls([

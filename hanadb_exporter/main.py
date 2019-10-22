@@ -86,7 +86,8 @@ def connect(connector, config, logger):
                 hana_config['host'],
                 hana_config.get('port', 30015),
                 user=hana_config['user'],
-                password=hana_config['password']
+                password=hana_config['password'],
+                RECONNECT='FALSE'
             )
             break
         except hdb_connector.connectors.base_connector.ConnectionError as err:
