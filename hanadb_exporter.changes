@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Tue Oct 22 06:57:42 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
+
+- Version 0.3.4 Add reconnection to the database to avoid issues
+when the hana database is stopped and restarted 
+
+-------------------------------------------------------------------
 Wed Aug  7 14:47:46 UTC 2019 - Ayoub Belarbi <abelarbi@suse.de>
 
 - Version 0.3.3 Better handling of query failures and incorrect labels
