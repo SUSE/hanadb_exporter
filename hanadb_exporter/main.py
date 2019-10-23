@@ -21,7 +21,7 @@ from shaptools import hdb_connector
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 
-from hanadb_exporter import exporter_factory
+from hanadb_exporter import prometheus_exporter
 
 RECONNECTION_INTERVAL = 15
 LOGGER = logging.getLogger(__name__)
@@ -120,8 +120,12 @@ def run():
     except KeyError as err:
         raise KeyError('Configuration file {} is malformed: {} not found'.format(args.config, err))
 
-    collector = exporter_factory.SapHanaExporter.create(
-        exporter_type='prometheus', metrics_file=metrics, hdb_connector=connector)
+    hana_version = prometheus_exporter.SapHanaCollector.get_hana_version(connector)
+    LOGGER.info('SAP HANA database version: %s', hana_version)
+
+    collector = prometheus_exporter.SapHanaCollector(
+        connector=connector, metrics_file=metrics, hana_version=hana_version)
+
     REGISTRY.register(collector)
     LOGGER.info('exporter sucessfully registered')
     LOGGER.info('starting to serve metrics')
