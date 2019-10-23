@@ -88,7 +88,8 @@ class TestMain(object):
             mock.call('my_config_file', defaults={'logfilename': '/var/log/hanadb_exporter_123.123.123.123_1234'})
         ])
 
-    def test_connect(self):
+    @mock.patch('hanadb_exporter.main.LOGGER')
+    def test_connect(self, mock_logger):
 
         mock_connector = mock.Mock()
         config = {
@@ -99,18 +100,18 @@ class TestMain(object):
                 'password': 'pass'
             }
         }
-        mock_logger = mock.Mock()
 
-        main.connect(mock_connector, config, mock_logger)
+        main.connect(mock_connector, config)
 
         mock_logger.info.assert_called_once_with(
             'connecting to the hana database (%s:%s)', '123.123.123.123', 1234)
         mock_connector.connect.assert_called_once_with(
             '123.123.123.123', 1234, user='user', password='pass', RECONNECT='FALSE')
 
+    @mock.patch('hanadb_exporter.main.LOGGER')
     @mock.patch('hanadb_exporter.main.hdb_connector.connectors.base_connector')
     @mock.patch('time.sleep')
-    def test_connect_loop(self, mock_sleep, mock_connection_error):
+    def test_connect_loop(self, mock_sleep, mock_connection_error, mock_logger):
 
         mock_exception = Exception
         mock_connection_error.ConnectionError = mock_exception
@@ -122,11 +123,10 @@ class TestMain(object):
                 'password': 'pass'
             }
         }
-        mock_logger = mock.Mock()
 
         mock_connector.connect.side_effect = [mock_exception('err1'), mock_exception('err2'), True]
 
-        main.connect(mock_connector, config, mock_logger)
+        main.connect(mock_connector, config)
 
         mock_logger.info.assert_called_once_with(
             'connecting to the hana database (%s:%s)', '123.123.123.123', 30015)
@@ -146,6 +146,7 @@ class TestMain(object):
             mock.call(15)
         ])
 
+    @mock.patch('hanadb_exporter.main.LOGGER')
     @mock.patch('hanadb_exporter.main.connect')
     @mock.patch('hanadb_exporter.main.parse_arguments')
     @mock.patch('hanadb_exporter.main.parse_config')
@@ -159,7 +160,7 @@ class TestMain(object):
     def test_run(
             self, mock_sleep, mock_get_logger, mock_start_server, mock_registry,
             mock_exporter, mock_hdb, mock_setup_loggin,
-            mock_parse_config, mock_parse_arguments, mock_connect):
+            mock_parse_config, mock_parse_arguments, mock_connect, mock_logger):
 
         mock_arguments = mock.Mock(config='config', metrics='metrics')
         mock_parse_arguments.return_value = mock_arguments
@@ -170,8 +171,6 @@ class TestMain(object):
                 'config_file': 'my_config_file'
             }
         }
-        mock_logger = mock.Mock()
-        mock_get_logger.return_value = mock_logger
         mock_parse_config.return_value = config
 
         mock_connector = mock.Mock()
@@ -189,7 +188,7 @@ class TestMain(object):
         mock_parse_config.assert_called_once_with(mock_arguments.config)
         mock_setup_loggin.assert_called_once_with(config)
         mock_hdb.assert_called_once_with()
-        mock_connect.assert_called_once_with(mock_connector, config, mock_logger)
+        mock_connect.assert_called_once_with(mock_connector, config)
         mock_exporter.assert_called_once_with(
             exporter_type='prometheus', metrics_file='metrics', hdb_connector=mock_connector)
         mock_registry.assert_called_once_with(mock_collector)
@@ -200,6 +199,7 @@ class TestMain(object):
         mock_start_server.assert_called_once_with(8001, '0.0.0.0')
         mock_sleep.assert_called_once_with(1)
 
+    @mock.patch('hanadb_exporter.main.LOGGER')
     @mock.patch('hanadb_exporter.main.connect')
     @mock.patch('hanadb_exporter.main.parse_arguments')
     @mock.patch('hanadb_exporter.main.parse_config')
@@ -208,7 +208,7 @@ class TestMain(object):
     @mock.patch('logging.basicConfig')
     def test_run_malformed(
             self, mock_logging, mock_get_logger, mock_hdb,
-            mock_parse_config, mock_parse_arguments, mock_connect):
+            mock_parse_config, mock_parse_arguments, mock_connect, mock_logger):
 
         mock_arguments = mock.Mock(config='config', metrics='metrics', verbosity='DEBUG')
         mock_parse_arguments.return_value = mock_arguments
@@ -221,8 +221,6 @@ class TestMain(object):
                 'password': 'pass'
             }
         }
-        mock_logger = mock.Mock()
-        mock_get_logger.return_value = mock_logger
         mock_parse_config.return_value = config
         mock_connect.side_effect = KeyError('error')
         hdb_instance = mock.Mock()
@@ -235,6 +233,6 @@ class TestMain(object):
         mock_parse_config.assert_called_once_with(mock_arguments.config)
         mock_logging.assert_called_once_with(level='DEBUG')
         mock_hdb.assert_called_once_with()
-        mock_connect.assert_called_once_with(hdb_instance, config, mock_logger)
+        mock_connect.assert_called_once_with(hdb_instance, config)
         assert 'Configuration file {} is malformed: {} not found'.format(
             'config', '\'error\'') in str(err.value)

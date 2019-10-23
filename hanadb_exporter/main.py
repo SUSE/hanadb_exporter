@@ -23,6 +23,9 @@ from prometheus_client import start_http_server
 
 from hanadb_exporter import exporter_factory
 
+RECONNECTION_INTERVAL = 15
+LOGGER = logging.getLogger(__name__)
+
 
 def parse_config(config_file):
     """
@@ -71,13 +74,13 @@ def setup_logging(config):
     sys.excepthook = handle_exception
 
 
-def connect(connector, config, logger):
+def connect(connector, config):
     """
     Connect to HANA. This operation is repeated until successfull connection. The exporter will
     start working after that
     """
     hana_config = config['hana']
-    logger.info(
+    LOGGER.info(
         'connecting to the hana database (%s:%s)',
         hana_config['host'], hana_config.get('port', 30015))
     while True:
@@ -91,9 +94,9 @@ def connect(connector, config, logger):
             )
             break
         except hdb_connector.connectors.base_connector.ConnectionError as err:
-            logger.error(
+            LOGGER.error(
                 'the connection to the database failed. error message: %s', str(err))
-            time.sleep(15)
+            time.sleep(RECONNECTION_INTERVAL)
 
 
 # Start up the server to expose the metrics.
@@ -109,20 +112,19 @@ def run():
     else:
         logging.basicConfig(level=args.verbosity or logging.INFO)
 
-    logger = logging.getLogger(__name__)
     metrics = args.metrics
     connector = hdb_connector.HdbConnector()
 
     try:
-        connect(connector, config, logger)
+        connect(connector, config)
     except KeyError as err:
         raise KeyError('Configuration file {} is malformed: {} not found'.format(args.config, err))
 
     collector = exporter_factory.SapHanaExporter.create(
         exporter_type='prometheus', metrics_file=metrics, hdb_connector=connector)
     REGISTRY.register(collector)
-    logger.info('exporter sucessfully registered')
-    logger.info('starting to serve metrics')
+    LOGGER.info('exporter sucessfully registered')
+    LOGGER.info('starting to serve metrics')
     start_http_server(config.get('exposition_port', 8001), '0.0.0.0')
     while True:
         time.sleep(1)
