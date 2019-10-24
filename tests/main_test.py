@@ -152,7 +152,7 @@ class TestMain(object):
     @mock.patch('hanadb_exporter.main.parse_config')
     @mock.patch('hanadb_exporter.main.setup_logging')
     @mock.patch('hanadb_exporter.main.hdb_connector.HdbConnector')
-    @mock.patch('hanadb_exporter.main.exporter_factory.SapHanaExporter.create')
+    @mock.patch('hanadb_exporter.main.prometheus_exporter.SapHanaCollector')
     @mock.patch('hanadb_exporter.main.REGISTRY.register')
     @mock.patch('hanadb_exporter.main.start_http_server')
     @mock.patch('logging.getLogger')
@@ -178,6 +178,7 @@ class TestMain(object):
 
         mock_collector = mock.Mock()
         mock_exporter.return_value = mock_collector
+        mock_exporter.get_hana_version.return_value = '1.0.0'
 
         mock_sleep.side_effect = Exception
 
@@ -189,8 +190,9 @@ class TestMain(object):
         mock_setup_loggin.assert_called_once_with(config)
         mock_hdb.assert_called_once_with()
         mock_connect.assert_called_once_with(mock_connector, config)
+        mock_exporter.get_hana_version.assert_called_once_with(mock_connector)
         mock_exporter.assert_called_once_with(
-            exporter_type='prometheus', metrics_file='metrics', hdb_connector=mock_connector)
+            connector=mock_connector, metrics_file='metrics', hana_version='1.0.0')
         mock_registry.assert_called_once_with(mock_collector)
         mock_logger.info.assert_has_calls([
             mock.call('exporter sucessfully registered'),

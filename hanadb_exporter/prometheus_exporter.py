@@ -12,7 +12,7 @@ import logging
 
 from prometheus_client import core
 from shaptools import hdb_connector
-from hanadb_exporter.exporters import prometheus_metrics
+from hanadb_exporter import prometheus_metrics
 from hanadb_exporter import utils
 
 
@@ -27,6 +27,18 @@ class SapHanaCollector(object):
         # metrics_config contains the configuration api/json data
         self._metrics_config = prometheus_metrics.PrometheusMetrics(metrics_file)
         self._hana_version = hana_version
+
+    @staticmethod
+    def get_hana_version(connector):
+        """
+        Query the SAP HANA database version
+
+        Args:
+            connector: HANA database api connector
+        """
+        query = 'SELECT * FROM sys.m_database;'
+        query_result = connector.query(query)
+        return utils.format_query_result(query_result)[0]['VERSION']
 
     def _manage_gauge(self, metric, formatted_query_result):
         """

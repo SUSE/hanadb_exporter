@@ -26,7 +26,7 @@ import pytest
 sys.modules['shaptools'] = mock.MagicMock()
 sys.modules['prometheus_client'] = mock.MagicMock()
 
-from hanadb_exporter.exporters import prometheus_exporter
+from hanadb_exporter import prometheus_exporter
 
 
 class TestSapHanaCollector(object):
@@ -34,7 +34,7 @@ class TestSapHanaCollector(object):
     Unitary tests for SapHanaCollector.
     """
 
-    @mock.patch('hanadb_exporter.exporters.prometheus_metrics.PrometheusMetrics')
+    @mock.patch('hanadb_exporter.prometheus_metrics.PrometheusMetrics')
     def setup(self, mock_metrics):
         """
         Test setUp.
@@ -46,7 +46,18 @@ class TestSapHanaCollector(object):
         self._collector = prometheus_exporter.SapHanaCollector(
             self._mock_connector, 'metrics.json', hana_version)
 
-    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
+    @mock.patch('hanadb_exporter.utils.format_query_result')
+    def test_get_hana_version(self, mock_format_query):
+        mock_connector = mock.Mock()
+        mock_connector.query.return_value = 'query_result'
+        mock_format_query.return_value = [{'VERSION': '2.0'}]
+        version = prometheus_exporter.SapHanaCollector.get_hana_version(mock_connector)
+
+        mock_connector.query.assert_called_once_with('SELECT * FROM sys.m_database;')
+        mock_format_query.assert_called_once_with('query_result')
+        assert version == '2.0'
+
+    @mock.patch('hanadb_exporter.prometheus_exporter.core')
     @mock.patch('logging.Logger.debug')
     def test_manage_gauge(self, mock_logger, mock_core):
 
@@ -82,7 +93,7 @@ class TestSapHanaCollector(object):
         mock_logger.assert_called_once_with('%s \n', 'samples')
         assert metric_obj == mock_gauge_instance
 
-    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
+    @mock.patch('hanadb_exporter.prometheus_exporter.core')
     @mock.patch('logging.Logger.error')
     def test_incorrect_label(self, mock_logger, mock_core):
 
@@ -110,7 +121,7 @@ class TestSapHanaCollector(object):
                    ' for metric: "{}" is not found in the the query result'.format(
                     'name') in str(err.value))
 
-    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.core')
+    @mock.patch('hanadb_exporter.prometheus_exporter.core')
     @mock.patch('logging.Logger.error')
     def test_incorrect_value(self, mock_logger, mock_core):
 
@@ -301,7 +312,7 @@ class TestSapHanaCollector(object):
         ])
 
     @mock.patch('hanadb_exporter.utils.check_hana_range')
-    @mock.patch('hanadb_exporter.exporters.prometheus_exporter.hdb_connector.connectors.base_connector')
+    @mock.patch('hanadb_exporter.prometheus_exporter.hdb_connector.connectors.base_connector')
     @mock.patch('logging.Logger.error')
     def test_incorrect_query(self, mock_logger, mock_base_connector, mock_hana_range):
 
