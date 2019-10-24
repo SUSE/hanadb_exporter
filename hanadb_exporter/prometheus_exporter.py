@@ -21,24 +21,54 @@ class SapHanaCollector(object):
     SAP HANA database data exporter
     """
 
-    def __init__(self, connector, metrics_file, hana_version):
+    METADATA_LABEL_HEADERS = ['sid', 'insnr', 'database_name']
+
+    def __init__(self, connector, metrics_file, **kwargs):
         self._logger = logging.getLogger(__name__)
         self._hdb_connector = connector
         # metrics_config contains the configuration api/json data
         self._metrics_config = prometheus_metrics.PrometheusMetrics(metrics_file)
-        self._hana_version = hana_version
 
-    @staticmethod
-    def get_hana_version(connector):
-        """
-        Query the SAP HANA database version
+        self.hana_version = kwargs.get('hana_version', None)
+        self.sid = kwargs.get('sid', None)
+        self.insnr = kwargs.get('insnr', None)
+        self.database_name = kwargs.get('database_name', None)
 
-        Args:
-            connector: HANA database api connector
+    @property
+    def metadata_labels(self):
         """
-        query = 'SELECT * FROM sys.m_database;'
-        query_result = connector.query(query)
-        return utils.format_query_result(query_result)[0]['VERSION']
+        Get metadata labels data
+        """
+        return [self.sid, self.insnr, self.database_name]
+
+    def retrieve_metadata(self):
+        """
+        Retrieve database metadata: sid, instance number, database name and hana version
+        """
+        query = \
+"""SELECT
+(SELECT value
+FROM M_SYSTEM_OVERVIEW
+WHERE section = 'System'
+AND name = 'Instance ID') SID,
+(SELECT value
+FROM M_SYSTEM_OVERVIEW
+WHERE section = 'System'
+AND name = 'Instance Number') INSNR,
+m.database_name,
+m.version
+FROM m_database m;"""
+
+        self._logger.info('Querying database metadata...')
+        query_result = self._hdb_connector.query(query)
+        formatted_result = utils.format_query_result(query_result)[0]
+        self.hana_version = formatted_result['VERSION']
+        self.sid = formatted_result['SID']
+        self.insnr = formatted_result['INSNR']
+        self.database_name = formatted_result['DATABASE_NAME']
+        self._logger.info(
+            'Metadata retrieved. version: %s, sid: %s, insnr: %s, database: %s',
+            self.hana_version, self.sid, self.insnr, self.database_name)
 
     def _manage_gauge(self, metric, formatted_query_result):
         """
@@ -50,8 +80,10 @@ class SapHanaCollector(object):
             metric (dict): a dictionary containing information about the metric
             formatted_query_result (nested list): query formated by _format_query_result method
         """
+        # Add sid, insnr and database_name labels
+        combined_label_headers = self.METADATA_LABEL_HEADERS + metric.labels
         metric_obj = core.GaugeMetricFamily(
-            metric.name, metric.description, None, metric.labels, metric.unit)
+            metric.name, metric.description, None, combined_label_headers, metric.unit)
         for row in formatted_query_result:
             labels = []
             metric_value = None
@@ -73,7 +105,9 @@ class SapHanaCollector(object):
                     ' for metric: "{}" is not found in the the query result'.format(
                         metric.name))
             else:
-                metric_obj.add_metric(labels, metric_value)
+                # Add sid, insnr and database_name labels
+                combined_labels = self.metadata_labels + labels
+                metric_obj.add_metric(combined_labels, metric_value)
         self._logger.debug('%s \n', metric_obj.samples)
         return metric_obj
 
@@ -88,7 +122,7 @@ class SapHanaCollector(object):
         for query in self._metrics_config.queries:
             if not query.enabled:
                 self._logger.info('Query %s is disabled', query.query)
-            elif not utils.check_hana_range(self._hana_version, query.hana_version_range):
+            elif not utils.check_hana_range(self.hana_version, query.hana_version_range):
                 self._logger.info('Query %s out of the provided hana version range: %s',
                                   query.query, query.hana_version_range)
             else:
