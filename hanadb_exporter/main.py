@@ -16,14 +16,12 @@ import time
 import json
 import argparse
 
-from shaptools import hdb_connector
-
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 
 from hanadb_exporter import prometheus_exporter
+from hanadb_exporter import db_manager
 
-RECONNECTION_INTERVAL = 15
 LOGGER = logging.getLogger(__name__)
 
 
@@ -74,31 +72,6 @@ def setup_logging(config):
     sys.excepthook = handle_exception
 
 
-def connect(connector, config):
-    """
-    Connect to HANA. This operation is repeated until successfull connection. The exporter will
-    start working after that
-    """
-    hana_config = config['hana']
-    LOGGER.info(
-        'connecting to the hana database (%s:%s)',
-        hana_config['host'], hana_config.get('port', 30015))
-    while True:
-        try:
-            connector.connect(
-                hana_config['host'],
-                hana_config.get('port', 30015),
-                user=hana_config['user'],
-                password=hana_config['password'],
-                RECONNECT='FALSE'
-            )
-            break
-        except hdb_connector.connectors.base_connector.ConnectionError as err:
-            LOGGER.error(
-                'the connection to the database failed. error message: %s', str(err))
-            time.sleep(RECONNECTION_INTERVAL)
-
-
 # Start up the server to expose the metrics.
 def run():
     """
@@ -113,18 +86,23 @@ def run():
         logging.basicConfig(level=args.verbosity or logging.INFO)
 
     metrics = args.metrics
-    connector = hdb_connector.HdbConnector()
 
     try:
-        connect(connector, config)
+        hana_config = config['hana']
+        dbs = db_manager.DatabaseManager()
+        dbs.start(
+            hana_config['host'], hana_config.get('port', 30013),
+            hana_config['user'], hana_config['password'],
+            multi_tenant=config.get('multi_tenant', True),
+            timeout=config.get('timeout', 600))
     except KeyError as err:
         raise KeyError('Configuration file {} is malformed: {} not found'.format(args.config, err))
 
-    collector = prometheus_exporter.SapHanaCollector(connector=connector, metrics_file=metrics)
-    collector.retrieve_metadata()
-
+    connectors = dbs.get_connectors()
+    collector = prometheus_exporter.SapHanaCollectors(connectors=connectors, metrics_file=metrics)
     REGISTRY.register(collector)
     LOGGER.info('exporter sucessfully registered')
+
     LOGGER.info('starting to serve metrics')
     start_http_server(config.get('exposition_port', 8001), '0.0.0.0')
     while True:

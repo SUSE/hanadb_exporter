@@ -16,6 +16,27 @@ from hanadb_exporter import prometheus_metrics
 from hanadb_exporter import utils
 
 
+class SapHanaCollectors(object):
+    """
+    SAP HANA database data exporter using multiple db connectors
+    """
+
+    def __init__(self, connectors, metrics_file):
+        self._logger = logging.getLogger(__name__)
+        self._collectors = []
+        for connector in connectors:
+            collector = SapHanaCollector(connector, metrics_file)
+            self._collectors.append(collector)
+
+    def collect(self):
+        """
+        Collect metrics for each collector
+        """
+        for collector in self._collectors:
+            for metric in collector.collect():
+                yield metric
+
+
 class SapHanaCollector(object):
     """
     SAP HANA database data exporter
@@ -23,16 +44,12 @@ class SapHanaCollector(object):
 
     METADATA_LABEL_HEADERS = ['sid', 'insnr', 'database_name']
 
-    def __init__(self, connector, metrics_file, **kwargs):
+    def __init__(self, connector, metrics_file):
         self._logger = logging.getLogger(__name__)
         self._hdb_connector = connector
         # metrics_config contains the configuration api/json data
         self._metrics_config = prometheus_metrics.PrometheusMetrics(metrics_file)
-
-        self.hana_version = kwargs.get('hana_version', None)
-        self.sid = kwargs.get('sid', None)
-        self.insnr = kwargs.get('insnr', None)
-        self.database_name = kwargs.get('database_name', None)
+        self.retrieve_metadata()
 
     @property
     def metadata_labels(self):
@@ -66,6 +83,8 @@ FROM m_database m;"""
         self.sid = formatted_result['SID']
         self.insnr = formatted_result['INSNR']
         self.database_name = formatted_result['DATABASE_NAME']
+        self._logger = logging.getLogger('{}_{}_{}_{}'.format(
+            __name__, self.sid, self.insnr, self.database_name))
         self._logger.info(
             'Metadata retrieved. version: %s, sid: %s, insnr: %s, database: %s',
             self.hana_version, self.sid, self.insnr, self.database_name)
