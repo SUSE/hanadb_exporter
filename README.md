@@ -7,10 +7,14 @@
 Prometheus exporter written in Python, to export SAP HANA database metrics. The
 project is based in the official prometheus exporter: [prometheus_client](https://github.com/prometheus/client_python).
 
+The exporter is able to export the metrics from more than 1 database/tenant if the `multi_tenant` option is enabled in the configuration file (enabled by default).
+
+The labels `sid` (system identifier), `insnr` (instance number), `database_name` (database name) and `host` (machine hostname) will be exported for all the metrics.
+
 
 ## Prerequisites
 
-1. A running and reachable SAP HANA database. Running the exporter in the
+1. A running and reachable SAP HANA database (single or multi container). Running the exporter in the
 same machine where the HANA database is running is recommended. Ideally each database
 should be monitored by one exporter.
 
@@ -53,6 +57,8 @@ zypper in python3-PyHDB
 An example of `config.json` available in [config.json.example](config.json.example). Here the most
 important items in the configuration file:
   - `exposition_port`: Port where the prometheus exporter will be exposed (8001 by default).
+  - `multi_tenant`: Export the metrics from other tenants. To use this the connection must be done with the System Database (port 30013).
+  - `timeout`: Timeout to connect to the database. After this time the app will fail (even in daemon mode).
   - `hana.host`: Address of the SAP HANA database.
   - `hana.port`: Port where the SAP HANA database is exposed.
   - `hana.user`: An existing user with access right to the SAP HANA database.
