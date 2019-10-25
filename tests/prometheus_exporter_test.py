@@ -34,29 +34,25 @@ class TestSapHanaCollector(object):
     Unitary tests for SapHanaCollector.
     """
 
+    @mock.patch('hanadb_exporter.prometheus_exporter.SapHanaCollector.retrieve_metadata')
     @mock.patch('hanadb_exporter.prometheus_metrics.PrometheusMetrics')
-    def setup(self, mock_metrics):
+    def setup(self, mock_metrics, mock_retrieve_metadata):
         """
         Test setUp.
         """
         self._mock_metrics_config = mock.Mock()
         mock_metrics.return_value = self._mock_metrics_config
         self._mock_connector = mock.Mock()
-        self._collector = prometheus_exporter.SapHanaCollector(
-            self._mock_connector, 'metrics.json',
-            sid='prd', insnr='00', database_name='db_name', hana_version='2.0')
+        self._collector = prometheus_exporter.SapHanaCollector(self._mock_connector, 'metrics.json')
 
-    @mock.patch('hanadb_exporter.prometheus_metrics.PrometheusMetrics')
-    def test_metadata_labels(self, mock_metrics):
-        self._mock_metrics_config = mock.Mock()
-        mock_metrics.return_value = self._mock_metrics_config
-        self._collector = prometheus_exporter.SapHanaCollector(
-            self._mock_connector, 'metrics.json')
-        assert [None, None, None] == self._collector.metadata_labels
+        self._collector._sid = 'prd'
+        self._collector._insnr = '00'
+        self._collector._database_name = 'db_name'
+        self._collector._hana_version = '2.0'
 
-        self._collector = prometheus_exporter.SapHanaCollector(
-            self._mock_connector, 'metrics.json',
-            sid='prd', insnr='00', database_name='db_name', hana_version='2.0')
+        mock_retrieve_metadata.assert_called_once_with()
+
+    def test_metadata_labels(self):
         assert ['prd', '00', 'db_name'] == self._collector.metadata_labels
 
     @mock.patch('hanadb_exporter.utils.format_query_result')
@@ -91,10 +87,10 @@ m.version
 FROM m_database m;"""
         )
         mock_format_query.assert_called_once_with(mock_result)
-        assert self._collector.sid == 'ha1'
-        assert self._collector.insnr == '10'
-        assert self._collector.database_name == 'DB_SYSTEM'
-        assert self._collector.hana_version == '1.2.3'
+        assert self._collector._sid == 'ha1'
+        assert self._collector._insnr == '10'
+        assert self._collector._database_name == 'DB_SYSTEM'
+        assert self._collector._hana_version == '1.2.3'
 
     @mock.patch('hanadb_exporter.prometheus_exporter.core')
     @mock.patch('logging.Logger.debug')
@@ -198,6 +194,20 @@ FROM m_database m;"""
                ' "{}": ({}) not found in the query result'.format(
                 'name', 'column4') in str(err.value))
 
+    def test_reconnect_connected(self):
+        self._mock_connector.isconnected.return_value = True
+        self._collector.reconnect()
+        self._mock_connector.isconnected.assert_called_once_with()
+        self._mock_connector.reconnect.assert_not_called()
+
+    def test_reconnect_not_connected(self):
+        self._mock_connector.isconnected.return_value = False
+        self._collector.retrieve_metadata = mock.Mock()
+        self._collector.reconnect()
+        self._mock_connector.isconnected.assert_called_once_with()
+        self._mock_connector.reconnect.assert_called_once_with()
+        self._collector.retrieve_metadata.assert_called_once_with()
+
     @mock.patch('hanadb_exporter.utils.format_query_result')
     @mock.patch('hanadb_exporter.utils.check_hana_range')
     @mock.patch('logging.Logger.error')
@@ -206,7 +216,7 @@ FROM m_database m;"""
         Test that when _manage_gauge is called and return ValueError (labels or value)
         are incorrect, that the ValueError is catched by collect() and a error is raised
         """
-        self._collector._hdb_connector.reconnect = mock.Mock()
+        self._collector.reconnect = mock.Mock()
         self._collector._manage_gauge = mock.Mock()
 
         self._collector._manage_gauge.side_effect = ValueError('test')
@@ -221,7 +231,7 @@ FROM m_database m;"""
         for _ in self._collector.collect():
             continue
 
-        self._collector._hdb_connector.reconnect.assert_called_once_with()
+        self._collector.reconnect.assert_called_once_with()
         mock_logger.assert_called_once_with('test')
 
     @mock.patch('hanadb_exporter.utils.format_query_result')
@@ -229,7 +239,7 @@ FROM m_database m;"""
     @mock.patch('logging.Logger.info')
     def test_collect(self, mock_logger, mock_hana_range, mock_format_query):
 
-        self._collector._hdb_connector.reconnect = mock.Mock()
+        self._collector.reconnect = mock.Mock()
         self._collector._manage_gauge = mock.Mock()
 
         self._mock_connector.query.side_effect = [
@@ -267,7 +277,7 @@ FROM m_database m;"""
         for index, element in enumerate(self._collector.collect()):
             assert element == 'gauge{}'.format(index+1)
 
-        self._collector._hdb_connector.reconnect.assert_called_once_with()
+        self._collector.reconnect.assert_called_once_with()
         self._mock_connector.query.assert_has_calls([
             mock.call('query1'),
             mock.call('query3')])
@@ -301,7 +311,7 @@ FROM m_database m;"""
     @mock.patch('hanadb_exporter.utils.check_hana_range')
     def test_collect_incorrect_type(self, mock_hana_range, mock_format_query):
 
-        self._collector._hdb_connector.reconnect = mock.Mock()
+        self._collector.reconnect = mock.Mock()
         self._collector._manage_gauge = mock.Mock()
 
         self._mock_connector.query.side_effect = [
@@ -336,7 +346,7 @@ FROM m_database m;"""
             for index, element in enumerate(self._collector.collect()):
                 assert element == 'gauge{}'.format(index+1)
 
-        self._collector._hdb_connector.reconnect.assert_called_once_with()
+        self._collector.reconnect.assert_called_once_with()
         assert '{} type not implemented'.format('other') in str(err.value)
 
         self._mock_connector.query.assert_has_calls([
@@ -364,7 +374,7 @@ FROM m_database m;"""
     @mock.patch('logging.Logger.error')
     def test_collect_incorrect_query(self, mock_logger, mock_base_connector, mock_hana_range):
 
-        self._collector._hdb_connector.reconnect = mock.Mock()
+        self._collector.reconnect = mock.Mock()
         mock_base_connector.QueryError = Exception
 
         self._mock_connector.query.side_effect = Exception('error')
@@ -377,7 +387,7 @@ FROM m_database m;"""
         for _ in self._collector.collect():
             continue
 
-        self._collector._hdb_connector.reconnect.assert_called_once_with()
+        self._collector.reconnect.assert_called_once_with()
         self._mock_connector.query.assert_called_once_with('query1')
 
         mock_hana_range.assert_has_calls([
