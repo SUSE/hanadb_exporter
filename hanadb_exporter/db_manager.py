@@ -82,7 +82,8 @@ WHERE (SERVICE_NAME='indexserver' and COORDINATOR_TYPE= 'MASTER')"""
                 time.sleep(RECONNECTION_INTERVAL)
                 current_time = time.time()
         else:
-            raise hdb_connector.ConnectionError('timeout reached connecting the System database')
+            raise hdb_connector.connectors.base_connector.ConnectionError(
+                'timeout reached connecting the System database')
 
         if multi_tenant:
             self._connect_tenants(host, user, password)

@@ -89,83 +89,30 @@ class TestMain(object):
         ])
 
     @mock.patch('hanadb_exporter.main.LOGGER')
-    def test_connect(self, mock_logger):
-
-        mock_connector = mock.Mock()
-        config = {
-            'hana': {
-                'host': '123.123.123.123',
-                'port': 1234,
-                'user': 'user',
-                'password': 'pass'
-            }
-        }
-
-        main.connect(mock_connector, config)
-
-        mock_logger.info.assert_called_once_with(
-            'connecting to the hana database (%s:%s)', '123.123.123.123', 1234)
-        mock_connector.connect.assert_called_once_with(
-            '123.123.123.123', 1234, user='user', password='pass', RECONNECT='FALSE')
-
-    @mock.patch('hanadb_exporter.main.LOGGER')
-    @mock.patch('hanadb_exporter.main.hdb_connector.connectors.base_connector')
-    @mock.patch('time.sleep')
-    def test_connect_loop(self, mock_sleep, mock_connection_error, mock_logger):
-
-        mock_exception = Exception
-        mock_connection_error.ConnectionError = mock_exception
-        mock_connector = mock.Mock()
-        config = {
-            'hana': {
-                'host': '123.123.123.123',
-                'user': 'user',
-                'password': 'pass'
-            }
-        }
-
-        mock_connector.connect.side_effect = [mock_exception('err1'), mock_exception('err2'), True]
-
-        main.connect(mock_connector, config)
-
-        mock_logger.info.assert_called_once_with(
-            'connecting to the hana database (%s:%s)', '123.123.123.123', 30015)
-        mock_connector.connect.assert_has_calls([
-            mock.call('123.123.123.123', 30015, user='user', password='pass', RECONNECT='FALSE'),
-            mock.call('123.123.123.123', 30015, user='user', password='pass', RECONNECT='FALSE'),
-            mock.call('123.123.123.123', 30015, user='user', password='pass', RECONNECT='FALSE')
-        ])
-
-        mock_logger.error.assert_has_calls([
-            mock.call('the connection to the database failed. error message: %s', 'err1'),
-            mock.call('the connection to the database failed. error message: %s', 'err2')
-        ])
-
-        mock_sleep.assert_has_calls([
-            mock.call(15),
-            mock.call(15)
-        ])
-
-    @mock.patch('hanadb_exporter.main.LOGGER')
-    @mock.patch('hanadb_exporter.main.connect')
     @mock.patch('hanadb_exporter.main.parse_arguments')
     @mock.patch('hanadb_exporter.main.parse_config')
     @mock.patch('hanadb_exporter.main.setup_logging')
-    @mock.patch('hanadb_exporter.main.hdb_connector.HdbConnector')
-    @mock.patch('hanadb_exporter.main.prometheus_exporter.SapHanaCollector')
+    @mock.patch('hanadb_exporter.main.db_manager.DatabaseManager')
+    @mock.patch('hanadb_exporter.main.prometheus_exporter.SapHanaCollectors')
     @mock.patch('hanadb_exporter.main.REGISTRY.register')
     @mock.patch('hanadb_exporter.main.start_http_server')
     @mock.patch('logging.getLogger')
     @mock.patch('time.sleep')
     def test_run(
             self, mock_sleep, mock_get_logger, mock_start_server, mock_registry,
-            mock_exporter, mock_hdb, mock_setup_loggin,
-            mock_parse_config, mock_parse_arguments, mock_connect, mock_logger):
+            mock_exporters, mock_db_manager, mock_setup_logging,
+            mock_parse_config, mock_parse_arguments, mock_logger):
 
         mock_arguments = mock.Mock(config='config', metrics='metrics')
         mock_parse_arguments.return_value = mock_arguments
 
         config = {
+            'hana': {
+                'host': '10.10.10.10',
+                'port': 1234,
+                'user': 'user',
+                'password': 'pass'
+            },
             'logging': {
                 'log_file': 'my_file',
                 'config_file': 'my_config_file'
@@ -173,12 +120,12 @@ class TestMain(object):
         }
         mock_parse_config.return_value = config
 
-        mock_connector = mock.Mock()
-        mock_hdb.return_value = mock_connector
+        db_instance = mock.Mock()
+        db_instance.get_connectors.return_value = 'connectors'
+        mock_db_manager.return_value = db_instance
 
         mock_collector = mock.Mock()
-        mock_exporter.return_value = mock_collector
-        mock_exporter.get_hana_version.return_value = '1.0.0'
+        mock_exporters.return_value = mock_collector
 
         mock_sleep.side_effect = Exception
 
@@ -187,13 +134,13 @@ class TestMain(object):
 
         mock_parse_arguments.assert_called_once_with()
         mock_parse_config.assert_called_once_with(mock_arguments.config)
-        mock_setup_loggin.assert_called_once_with(config)
-        mock_hdb.assert_called_once_with()
-        mock_connect.assert_called_once_with(mock_connector, config)
-
-        mock_exporter.assert_called_once_with(
-            connector=mock_connector, metrics_file='metrics')
-        mock_collector.retrieve_metadata.assert_called_once_with()
+        mock_setup_logging.assert_called_once_with(config)
+        mock_db_manager.assert_called_once_with()
+        db_instance.start.assert_called_once_with(
+            '10.10.10.10', 1234, 'user', 'pass', multi_tenant=True, timeout=600)
+        db_instance.get_connectors.assert_called_once_with()
+        mock_exporters.assert_called_once_with(
+            connectors='connectors', metrics_file='metrics')
 
         mock_registry.assert_called_once_with(mock_collector)
         mock_logger.info.assert_has_calls([
@@ -204,31 +151,26 @@ class TestMain(object):
         mock_sleep.assert_called_once_with(1)
 
     @mock.patch('hanadb_exporter.main.LOGGER')
-    @mock.patch('hanadb_exporter.main.connect')
     @mock.patch('hanadb_exporter.main.parse_arguments')
     @mock.patch('hanadb_exporter.main.parse_config')
-    @mock.patch('hanadb_exporter.main.hdb_connector.HdbConnector')
+    @mock.patch('hanadb_exporter.main.db_manager.DatabaseManager')
     @mock.patch('logging.getLogger')
     @mock.patch('logging.basicConfig')
     def test_run_malformed(
-            self, mock_logging, mock_get_logger, mock_hdb,
-            mock_parse_config, mock_parse_arguments, mock_connect, mock_logger):
+            self, mock_logging, mock_get_logger, mock_db_manager,
+            mock_parse_config, mock_parse_arguments, mock_logger):
 
         mock_arguments = mock.Mock(config='config', metrics='metrics', verbosity='DEBUG')
         mock_parse_arguments.return_value = mock_arguments
 
         config = {
             'hana': {
-                'host': '123.123.123.123',
                 'port': 1234,
                 'user': 'user',
                 'password': 'pass'
             }
         }
         mock_parse_config.return_value = config
-        mock_connect.side_effect = KeyError('error')
-        hdb_instance = mock.Mock()
-        mock_hdb.return_value = hdb_instance
 
         with pytest.raises(KeyError) as err:
             main.run()
@@ -236,7 +178,6 @@ class TestMain(object):
         mock_parse_arguments.assert_called_once_with()
         mock_parse_config.assert_called_once_with(mock_arguments.config)
         mock_logging.assert_called_once_with(level='DEBUG')
-        mock_hdb.assert_called_once_with()
-        mock_connect.assert_called_once_with(hdb_instance, config)
+        mock_db_manager.assert_called_once_with()
         assert 'Configuration file {} is malformed: {} not found'.format(
-            'config', '\'error\'') in str(err.value)
+            'config', '\'host\'') in str(err.value)
