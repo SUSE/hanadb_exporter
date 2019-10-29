@@ -21,24 +21,50 @@ class SapHanaCollector(object):
     SAP HANA database data exporter
     """
 
-    def __init__(self, connector, metrics_file, hana_version):
+    METADATA_LABEL_HEADERS = ['sid', 'insnr', 'database_name']
+
+    def __init__(self, connector, metrics_file):
         self._logger = logging.getLogger(__name__)
         self._hdb_connector = connector
         # metrics_config contains the configuration api/json data
         self._metrics_config = prometheus_metrics.PrometheusMetrics(metrics_file)
-        self._hana_version = hana_version
+        self.retrieve_metadata()
 
-    @staticmethod
-    def get_hana_version(connector):
+    @property
+    def metadata_labels(self):
         """
-        Query the SAP HANA database version
+        Get metadata labels data
+        """
+        return [self._sid, self._insnr, self._database_name]
 
-        Args:
-            connector: HANA database api connector
+    def retrieve_metadata(self):
         """
-        query = 'SELECT * FROM sys.m_database;'
-        query_result = connector.query(query)
-        return utils.format_query_result(query_result)[0]['VERSION']
+        Retrieve database metadata: sid, instance number, database name and hana version
+        """
+        query = \
+"""SELECT
+(SELECT value
+FROM M_SYSTEM_OVERVIEW
+WHERE section = 'System'
+AND name = 'Instance ID') SID,
+(SELECT value
+FROM M_SYSTEM_OVERVIEW
+WHERE section = 'System'
+AND name = 'Instance Number') INSNR,
+m.database_name,
+m.version
+FROM m_database m;"""
+
+        self._logger.info('Querying database metadata...')
+        query_result = self._hdb_connector.query(query)
+        formatted_result = utils.format_query_result(query_result)[0]
+        self._hana_version = formatted_result['VERSION']
+        self._sid = formatted_result['SID']
+        self._insnr = formatted_result['INSNR']
+        self._database_name = formatted_result['DATABASE_NAME']
+        self._logger.info(
+            'Metadata retrieved. version: %s, sid: %s, insnr: %s, database: %s',
+            self._hana_version, self._sid, self._insnr, self._database_name)
 
     def _manage_gauge(self, metric, formatted_query_result):
         """
@@ -50,8 +76,10 @@ class SapHanaCollector(object):
             metric (dict): a dictionary containing information about the metric
             formatted_query_result (nested list): query formated by _format_query_result method
         """
+        # Add sid, insnr and database_name labels
+        combined_label_headers = self.METADATA_LABEL_HEADERS + metric.labels
         metric_obj = core.GaugeMetricFamily(
-            metric.name, metric.description, None, metric.labels, metric.unit)
+            metric.name, metric.description, None, combined_label_headers, metric.unit)
         for row in formatted_query_result:
             labels = []
             metric_value = None
@@ -73,9 +101,22 @@ class SapHanaCollector(object):
                     ' for metric: "{}" is not found in the the query result'.format(
                         metric.name))
             else:
-                metric_obj.add_metric(labels, metric_value)
+                # Add sid, insnr and database_name labels
+                combined_labels = self.metadata_labels + labels
+                metric_obj.add_metric(combined_labels, metric_value)
         self._logger.debug('%s \n', metric_obj.samples)
         return metric_obj
+
+    def reconnect(self):
+        """
+        Reconnect if needed and retrieve new metadata
+
+        hdb_connector reconnect already checks if the connection is working, but we need to
+        recheck to run the retrieve_metadata method to update some possible changes
+        """
+        if not self._hdb_connector.isconnected():
+            self._hdb_connector.reconnect()
+            self.retrieve_metadata()
 
     def collect(self):
         """
@@ -83,7 +124,7 @@ class SapHanaCollector(object):
         a prometheus metric_object, which will be served over http for scraping e.g gauge, etc.
         """
         # Try to reconnect if the connection is lost. It will raise an exception is case of error
-        self._hdb_connector.reconnect()
+        self.reconnect()
 
         for query in self._metrics_config.queries:
             if not query.enabled:

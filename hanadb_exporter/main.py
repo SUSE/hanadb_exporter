@@ -120,11 +120,8 @@ def run():
     except KeyError as err:
         raise KeyError('Configuration file {} is malformed: {} not found'.format(args.config, err))
 
-    hana_version = prometheus_exporter.SapHanaCollector.get_hana_version(connector)
-    LOGGER.info('SAP HANA database version: %s', hana_version)
-
-    collector = prometheus_exporter.SapHanaCollector(
-        connector=connector, metrics_file=metrics, hana_version=hana_version)
+    collector = prometheus_exporter.SapHanaCollector(connector=connector, metrics_file=metrics)
+    collector.retrieve_metadata()
 
     REGISTRY.register(collector)
     LOGGER.info('exporter sucessfully registered')

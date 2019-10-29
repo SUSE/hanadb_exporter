@@ -190,9 +190,11 @@ class TestMain(object):
         mock_setup_loggin.assert_called_once_with(config)
         mock_hdb.assert_called_once_with()
         mock_connect.assert_called_once_with(mock_connector, config)
-        mock_exporter.get_hana_version.assert_called_once_with(mock_connector)
+
         mock_exporter.assert_called_once_with(
-            connector=mock_connector, metrics_file='metrics', hana_version='1.0.0')
+            connector=mock_connector, metrics_file='metrics')
+        mock_collector.retrieve_metadata.assert_called_once_with()
+
         mock_registry.assert_called_once_with(mock_collector)
         mock_logger.info.assert_has_calls([
             mock.call('exporter sucessfully registered'),
