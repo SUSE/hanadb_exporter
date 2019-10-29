@@ -28,6 +28,56 @@ sys.modules['prometheus_client'] = mock.MagicMock()
 
 from hanadb_exporter import prometheus_exporter
 
+class TestSapHanaCollectors(object):
+    """
+    Unitary tests for SapHanaCollectors.
+    """
+
+    @mock.patch('hanadb_exporter.prometheus_exporter.SapHanaCollector')
+    def test_init(self, mock_collector):
+
+        conn1 = mock.Mock()
+        conn2 = mock.Mock()
+
+        connectors = [conn1, conn2]
+
+        coll1 = mock.Mock()
+        coll2 = mock.Mock()
+        mock_collector.side_effect = [coll1, coll2]
+
+        collectors = prometheus_exporter.SapHanaCollectors(connectors, 'metrics.json')
+
+        mock_collector.assert_has_calls([
+            mock.call(conn1, 'metrics.json'),
+            mock.call(conn2, 'metrics.json')
+        ])
+
+        assert collectors._collectors == [coll1, coll2]
+
+    @mock.patch('hanadb_exporter.prometheus_exporter.SapHanaCollector')
+    def test_collect(self, mock_collector):
+
+        conn1 = mock.Mock()
+        conn2 = mock.Mock()
+
+        connectors = [conn1, conn2]
+
+        metrics = ['metric1', 'metric2', 'metric3', 'metric4']
+        coll1 = mock.Mock()
+        coll1.collect.return_value=[metrics[0], metrics[1]]
+        coll2 = mock.Mock()
+        coll2.collect.return_value=[metrics[2], metrics[3]]
+
+        mock_collector.side_effect = [coll1, coll2]
+
+        collectors = prometheus_exporter.SapHanaCollectors(connectors, 'metrics.json')
+
+        for i, metric in enumerate(collectors.collect()):
+            assert metric == metrics[i]
+
+        coll1.collect.assert_called_once_with()
+        coll2.collect.assert_called_once_with()
+
 
 class TestSapHanaCollector(object):
     """

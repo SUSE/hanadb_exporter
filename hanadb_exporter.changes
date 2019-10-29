@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Fri Oct 25 06:14:03 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
+
+- Version 0.5.0 Add the option to export metrics from multiple
+databases/tenants 
+
+-------------------------------------------------------------------
 Thu Oct 24 03:00:45 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
 
 - Version 0.4.1 Add new metadata labels to the metrics (sid, instance

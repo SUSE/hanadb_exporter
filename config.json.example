@@ -1,8 +1,10 @@
 {
   "exposition_port": 8001,
+  "multi_tenant": true,
+  "timeout": 600,
   "hana": {
     "host": "localhost",
-    "port": 30015,
+    "port": 30013,
     "user": "SYSTEM",
     "password": "PASSWORD"
   },

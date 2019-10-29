@@ -16,6 +16,27 @@ from hanadb_exporter import prometheus_metrics
 from hanadb_exporter import utils
 
 
+class SapHanaCollectors(object):
+    """
+    SAP HANA database data exporter using multiple db connectors
+    """
+
+    def __init__(self, connectors, metrics_file):
+        self._logger = logging.getLogger(__name__)
+        self._collectors = []
+        for connector in connectors:
+            collector = SapHanaCollector(connector, metrics_file)
+            self._collectors.append(collector)
+
+    def collect(self):
+        """
+        Collect metrics for each collector
+        """
+        for collector in self._collectors:
+            for metric in collector.collect():
+                yield metric
+
+
 class SapHanaCollector(object):
     """
     SAP HANA database data exporter
