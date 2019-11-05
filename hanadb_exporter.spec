@@ -26,7 +26,7 @@
 %endif
 
 Name:           hanadb_exporter
-Version:        0.3.3
+Version:        0.5.0
 Release:        0
 Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0
@@ -41,7 +41,7 @@ BuildRequires:  python3-setuptools
 BuildRequires:  fdupes
 BuildRequires:  systemd-rpm-macros
 %{?systemd_requires}
-Requires:       python3-shaptools >= 0.2.1
+Requires:       python3-shaptools >= 0.3.2
 Requires:       python3-prometheus_client >= 0.6.0
 BuildArch:      noarch
 

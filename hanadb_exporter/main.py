@@ -16,12 +16,13 @@ import time
 import json
 import argparse
 
-from shaptools import hdb_connector
-
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 
-from hanadb_exporter import exporter_factory
+from hanadb_exporter import prometheus_exporter
+from hanadb_exporter import db_manager
+
+LOGGER = logging.getLogger(__name__)
 
 
 def parse_config(config_file):
@@ -83,26 +84,26 @@ def run():
         setup_logging(config)
     else:
         logging.basicConfig(level=args.verbosity or logging.INFO)
-   
-    logger = logging.getLogger(__name__)
+
     metrics = args.metrics
-    connector = hdb_connector.HdbConnector()
+
     try:
         hana_config = config['hana']
-        connector.connect(
-            hana_config['host'],
-            hana_config.get('port', 30015),
-            user=hana_config['user'],
-            password=hana_config['password']
-        )
+        dbs = db_manager.DatabaseManager()
+        dbs.start(
+            hana_config['host'], hana_config.get('port', 30013),
+            hana_config['user'], hana_config['password'],
+            multi_tenant=config.get('multi_tenant', True),
+            timeout=config.get('timeout', 600))
     except KeyError as err:
         raise KeyError('Configuration file {} is malformed: {} not found'.format(args.config, err))
 
-    collector = exporter_factory.SapHanaExporter.create(
-        exporter_type='prometheus', metrics_file=metrics, hdb_connector=connector)
+    connectors = dbs.get_connectors()
+    collector = prometheus_exporter.SapHanaCollectors(connectors=connectors, metrics_file=metrics)
     REGISTRY.register(collector)
-    logger.info('exporter sucessfully registered')
-    logger.info('starting to serve metrics')
+    LOGGER.info('exporter sucessfully registered')
+
+    LOGGER.info('starting to serve metrics')
     start_http_server(config.get('exposition_port', 8001), '0.0.0.0')
     while True:
         time.sleep(1)

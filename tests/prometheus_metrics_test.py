@@ -23,7 +23,7 @@ except ImportError:
 
 import pytest
 
-from hanadb_exporter.exporters import prometheus_metrics
+from hanadb_exporter import prometheus_metrics
 
 class TestMetric(object):
     """
@@ -128,7 +128,7 @@ class TestQuery(object):
     def setup(self):
         self._query = prometheus_metrics.Query()
 
-    @mock.patch('hanadb_exporter.exporters.prometheus_metrics.Metric')
+    @mock.patch('hanadb_exporter.prometheus_metrics.Metric')
     def test_parse(self, mock_metric):
         mocked_data1 = {'data1': 'value1'}
         mocked_data2 = {'data2': 'value2'}
@@ -145,7 +145,7 @@ class TestQuery(object):
         assert self._query.enabled == False
         assert self._query.metrics == ['modeled_data1', 'modeled_data2']
 
-    @mock.patch('hanadb_exporter.exporters.prometheus_metrics.Query.__new__')
+    @mock.patch('hanadb_exporter.prometheus_metrics.Query.__new__')
     def test_get_model(self, mock_query):
         mock_query_instance = mock.Mock()
         mock_query.return_value = mock_query_instance
@@ -159,16 +159,16 @@ class TestPrometheusMetrics(object):
     Unitary tests for PrometheusMetrics.
     """
 
-    @mock.patch('hanadb_exporter.exporters.prometheus_metrics.PrometheusMetrics.load_metrics')
+    @mock.patch('hanadb_exporter.prometheus_metrics.PrometheusMetrics.load_metrics')
     def test_init(self, mock_load):
         mock_load.return_value = 'queries'
         metrics = prometheus_metrics.PrometheusMetrics('metrics_file')
         mock_load.assert_called_once_with('metrics_file')
         assert metrics.queries == 'queries'
 
-    @mock.patch('hanadb_exporter.exporters.prometheus_metrics.Query.get_model')
+    @mock.patch('hanadb_exporter.prometheus_metrics.Query.get_model')
     @mock.patch('json.load')
-    @mock.patch('hanadb_exporter.exporters.prometheus_metrics.open')
+    @mock.patch('hanadb_exporter.prometheus_metrics.open')
     def test_load_metrics(self, mock_open, mock_json_load, mock_get_model):
         query1_data = mock.Mock()
         query2_data = mock.Mock()
@@ -186,9 +186,9 @@ class TestPrometheusMetrics(object):
 
         assert queries == ['data1', 'data2']
 
-    @mock.patch('hanadb_exporter.exporters.prometheus_metrics.Query.get_model')
+    @mock.patch('hanadb_exporter.prometheus_metrics.Query.get_model')
     @mock.patch('json.load')
-    @mock.patch('hanadb_exporter.exporters.prometheus_metrics.open')
+    @mock.patch('hanadb_exporter.prometheus_metrics.open')
     @mock.patch('logging.Logger.error')
     def test_load_metrics_error(self, mock_logger, mock_open, mock_json_load, mock_get_model):
         query1_data = mock.Mock()

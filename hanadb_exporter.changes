@@ -1,4 +1,28 @@
 -------------------------------------------------------------------
+Fri Oct 25 06:14:03 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
+
+- Version 0.5.0 Add the option to export metrics from multiple
+databases/tenants 
+
+-------------------------------------------------------------------
+Thu Oct 24 03:00:45 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
+
+- Version 0.4.1 Add new metadata labels to the metrics (sid, instance
+number and databse name) 
+
+-------------------------------------------------------------------
+Wed Oct 23 10:53:36 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
+
+- Version 0.4.0 Remove the factory usage to gain simplicity as only 
+the prometheus exporter is used 
+
+-------------------------------------------------------------------
+Tue Oct 22 06:57:42 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
+
+- Version 0.3.4 Add reconnection to the database to avoid issues
+when the hana database is stopped and restarted 
+
+-------------------------------------------------------------------
 Wed Aug  7 14:47:46 UTC 2019 - Ayoub Belarbi <abelarbi@suse.de>
 
 - Version 0.3.3 Better handling of query failures and incorrect labels
