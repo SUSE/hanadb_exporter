@@ -1,4 +1,12 @@
 -------------------------------------------------------------------
+Wed Nov 6 12:48:03 UTC 2019 - Diego Akechi <dakechi@suse.com>
+
+- Version 0.5.1 Add the SAP HANA current alerts rating metric.
+This metric expose the current triggered alerts coming from
+inside the database and the rating (severity) of them. The rating 
+is classified between 1 and 5.
+
+-------------------------------------------------------------------
 Fri Oct 25 06:14:03 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
 
 - Version 0.5.0 Add the option to export metrics from multiple
