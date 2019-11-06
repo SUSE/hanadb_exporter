@@ -720,5 +720,19 @@
         "type": "gauge"
       }
     ]
+  },
+  "SELECT alert_host host, LPAD(alert_port,5) port, alert_details, alert_useraction,to_varchar(alert_timestamp) alert_timestamp, to_varchar(alert_rating) alert_rating FROM _SYS_STATISTICS.STATISTICS_CURRENT_ALERTS;":
+  {
+    "enabled": true,
+    "metrics": [
+      {
+        "name": "hanadb_alerts_current",
+        "description": "HANA Database current alerts rating",
+        "labels": ["HOST", "PORT", "ALERT_DETAILS", "ALERT_USERACTION", "ALERT_TIMESTAMP"],
+        "value": "ALERT_RATING",
+        "unit": "rating",
+        "type": "gauge"
+      }
+    ]
   }
 }
