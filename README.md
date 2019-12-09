@@ -51,9 +51,9 @@ zypper ref
 zypper in python3-PyHDB
 ```
 
-## Configuring and running the exporter
+## Configuring the exporter
 
-1. Create the `config.json` configuration file.
+Create the `config.json` configuration file.
 An example of `config.json` available in [config.json.example](config.json.example). Here the most
 important items in the configuration file:
   - `exposition_port`: Port where the prometheus exporter will be exposed (8001 by default).
@@ -99,14 +99,16 @@ GRANT HANADB_EXPORTER_ROLE TO HANADB_EXPORTER_USER;
 ```
 
 
-2. Start the exporter by running the following command:
+## Running the exporter
+
+Start the exporter by running the following command:
 ```
 hanadb_exporter -c config.json -m metrics.json
 # Or
 python3 hanadb_exporter/main.py -c config.json -m metrics.json
 ```
 
-## Running as a daemon
+### Running as a daemon
 The hanadb_exporter can be executed using `systemd`. For that, the best option is to install the
 project using a rpm package. This can be done following the next steps (this example is for tumbleweed):
 
