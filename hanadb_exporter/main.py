@@ -92,7 +92,9 @@ def run():
         dbs = db_manager.DatabaseManager()
         dbs.start(
             hana_config['host'], hana_config.get('port', 30013),
-            hana_config['user'], hana_config['password'],
+            user=hana_config.get('user', ''),
+            password=hana_config.get('password', ''),
+            userkey=hana_config.get('userkey', None),
             multi_tenant=config.get('multi_tenant', True),
             timeout=config.get('timeout', 600))
     except KeyError as err:

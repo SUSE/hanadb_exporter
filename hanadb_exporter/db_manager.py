@@ -17,6 +17,12 @@ from hanadb_exporter import utils
 RECONNECTION_INTERVAL = 15
 
 
+class UserKeyNotSupportedError(ValueError):
+    """
+    User key not supported error
+    """
+
+
 class DatabaseManager(object):
     """
     Manage the connection to a multi container HANA system
@@ -40,22 +46,44 @@ WHERE (SERVICE_NAME='indexserver' and COORDINATOR_TYPE= 'MASTER')"""
         for tenant_data in formatted_data:
             yield int(tenant_data['SQL_PORT'])
 
-    def _connect_tenants(self, host, user, password):
+    def _connect_tenants(self, host, connection_data):
         """
         Connect to the tenants
 
         Args:
             host (str): Host of the HANA database
-            user (str): System database user name (SYSTEM usually)
-            password (str): System database user password
+            connection_data (dict): Data retrieved from _get_connection_data
         """
         for tenant_port in self._get_tenants_port():
             conn = hdb_connector.HdbConnector()
             conn.connect(
-                host, tenant_port, user=user, password=password, RECONNECT='FALSE')
+                host, tenant_port, **connection_data)
             self._db_connectors.append(conn)
 
-    def start(self, host, port, user, password, multi_tenant=True, timeout=600):
+    def _get_connection_data(self, userkey, user, password):
+        """
+        Check that provided user data is valid. user/password pair or userkey must be provided
+        """
+        if userkey:
+            if hdb_connector.API == 'pyhdb':
+                raise UserKeyNotSupportedError(
+                    'userkey usage is not supported with pyhdb connector, hdbcli must be installed')
+            self._logger.info('stored user key %s will be used to connect to the database', userkey)
+            if user or password:
+                self._logger.warn(
+                    'userkey will be used to create the connection. user/password are omitted')
+        elif user and password:
+            self._logger.info('user/password combination will be used to connect to the databse')
+        else:
+            raise ValueError(
+                'Provided user data is not valid. userkey or user/password pair must be provided')
+
+        return {'userkey': userkey,
+                'user': user,
+                'password': password,
+                'RECONNECT': 'FALSE'}
+
+    def start(self, host, port, **kwargs):
         """
         Start de database manager. This will open a connection with the System database and
         retrieve the current environemtn tenant databases data
@@ -63,30 +91,36 @@ WHERE (SERVICE_NAME='indexserver' and COORDINATOR_TYPE= 'MASTER')"""
         Args:
             host (str): Host of the HANA database
             port (int): Port of the System database (3XX13 when XX is the instance number)
+            userkey (str): User stored key
             user (str): System database user name (SYSTEM usually)
             password (str): System database user password
             multi_tenant (bool): Connect to all tenants checking the data in the System database
             timeout (int, opt): Timeout in seconds to connect to the System database
         """
+        connection_data = self._get_connection_data(
+            kwargs.get('userkey'), kwargs.get('user'), kwargs.get('password'))
         current_time = time.time()
-        timeout = current_time + timeout
+        timeout = current_time + kwargs.get('timeout', 600)
         while current_time <= timeout:
             try:
-                self._system_db_connector.connect(
-                    host, port, user=user, password=password, RECONNECT='FALSE')
+                self._system_db_connector.connect(host, port, **connection_data)
                 self._db_connectors.append(self._system_db_connector)
                 break
             except hdb_connector.connectors.base_connector.ConnectionError as err:
                 self._logger.error(
                     'the connection to the system database failed. error message: %s', str(err))
+                # This conditions is used to stop the exporter if the provided userkey is not valid
+                if 'Invalid value for KEY' in str(err):
+                    raise hdb_connector.connectors.base_connector.ConnectionError(
+                        'provided userkey is not valid. Check if dbapi is installed correctly')
                 time.sleep(RECONNECTION_INTERVAL)
                 current_time = time.time()
         else:
             raise hdb_connector.connectors.base_connector.ConnectionError(
                 'timeout reached connecting the System database')
 
-        if multi_tenant:
-            self._connect_tenants(host, user, password)
+        if kwargs.get('multi_tenant', True):
+            self._connect_tenants(host, connection_data)
 
     def get_connectors(self):
         """
