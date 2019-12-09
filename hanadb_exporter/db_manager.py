@@ -29,8 +29,8 @@ class DatabaseManager(object):
     """
 
     TENANT_DATA_QUERY =\
-"""SELECT SQL_PORT FROM SYS_DATABASES.M_SERVICES
-WHERE (SERVICE_NAME='indexserver' and COORDINATOR_TYPE= 'MASTER')"""
+"""SELECT DATABASE_NAME,SQL_PORT FROM SYS_DATABASES.M_SERVICES
+WHERE COORDINATOR_TYPE='MASTER'"""
 
     def __init__(self):
         self._logger = logging.getLogger(__name__)
@@ -44,7 +44,8 @@ WHERE (SERVICE_NAME='indexserver' and COORDINATOR_TYPE= 'MASTER')"""
         data = self._system_db_connector.query(self.TENANT_DATA_QUERY)
         formatted_data = utils.format_query_result(data)
         for tenant_data in formatted_data:
-            yield int(tenant_data['SQL_PORT'])
+            if tenant_data['DATABASE_NAME'] != 'SYSTEMDB':
+                yield tenant_data['DATABASE_NAME'], int(tenant_data['SQL_PORT'])
 
     def _connect_tenants(self, host, connection_data):
         """
@@ -54,8 +55,11 @@ WHERE (SERVICE_NAME='indexserver' and COORDINATOR_TYPE= 'MASTER')"""
             host (str): Host of the HANA database
             connection_data (dict): Data retrieved from _get_connection_data
         """
-        for tenant_port in self._get_tenants_port():
+        for database, tenant_port in self._get_tenants_port():
             conn = hdb_connector.HdbConnector()
+            # If userkey is used database name must be added to connect to tenants
+            if connection_data.get('userkey'):
+                connection_data['databaseName'] = database
             conn.connect(
                 host, tenant_port, **connection_data)
             self._db_connectors.append(conn)

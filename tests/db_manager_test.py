@@ -44,15 +44,21 @@ class TestDatabaseManager(object):
         self._db_manager._system_db_connector = mock.Mock()
         self._db_manager._system_db_connector.query.return_value = 'result'
         ports = ['30040', '30041']
-        mock_format_query.return_value = [{'SQL_PORT': ports[0]}, {'SQL_PORT': ports[1]}]
+        dbs = ['PRD', 'QAS']
+        mock_format_query.return_value = [
+            {'DATABASE_NAME': dbs[0], 'SQL_PORT': ports[0]},
+            {'DATABASE_NAME': dbs[1], 'SQL_PORT': ports[1]},
+            {'DATABASE_NAME': 'SYSTEMDB', 'SQL_PORT': '30013'}]
 
-        for i, port in enumerate(self._db_manager._get_tenants_port()):
-            assert port == int(ports[i])
+        for i, data in enumerate(self._db_manager._get_tenants_port()):
+            assert data[0] == dbs[i]
+            assert data[1] == int(ports[i])
 
     @mock.patch('hanadb_exporter.db_manager.hdb_connector.HdbConnector')
     def test_connect_tenants(self, mock_hdb):
 
-        self._db_manager._get_tenants_port = mock.Mock(return_value=[1, 2, 3])
+        self._db_manager._get_tenants_port = mock.Mock(return_value=[
+            ('db1', 1), ('db2', 2),('db3', 3)])
 
         mock_conn1 = mock.Mock()
         mock_conn2 = mock.Mock()
@@ -69,6 +75,35 @@ class TestDatabaseManager(object):
         mock_conn1.connect.assert_called_once_with('10.10.10.10', 1, **connection_data)
         mock_conn2.connect.assert_called_once_with('10.10.10.10', 2, **connection_data)
         mock_conn3.connect.assert_called_once_with('10.10.10.10', 3, **connection_data)
+
+        assert self._db_manager._db_connectors == [mock_conn1, mock_conn2, mock_conn3]
+
+    @mock.patch('hanadb_exporter.db_manager.hdb_connector.HdbConnector')
+    def test_connect_tenants_userkey(self, mock_hdb):
+
+        self._db_manager._get_tenants_port = mock.Mock(return_value=[
+            ('db1', 1), ('db2', 2),('db3', 3)])
+
+        mock_conn1 = mock.Mock()
+        mock_conn2 = mock.Mock()
+        mock_conn3 = mock.Mock()
+
+        mock_hdb.side_effect = [mock_conn1, mock_conn2, mock_conn3]
+
+        connection_data = {'mock_data': 'data', 'userkey': 'userkey'}
+        updated_connection_data = [
+            {'mock_data': 'data', 'userkey': 'userkey', 'databaseName': 'db1'},
+            {'mock_data': 'data', 'userkey': 'userkey', 'databaseName': 'db2'},
+            {'mock_data': 'data', 'userkey': 'userkey', 'databaseName': 'db3'}
+        ]
+
+        self._db_manager._connect_tenants('10.10.10.10', connection_data)
+
+        assert mock_hdb.call_count == 3
+
+        mock_conn1.connect.assert_called_once_with('10.10.10.10', 1, **updated_connection_data[0])
+        mock_conn2.connect.assert_called_once_with('10.10.10.10', 2, **updated_connection_data[1])
+        mock_conn3.connect.assert_called_once_with('10.10.10.10', 3, **updated_connection_data[2])
 
         assert self._db_manager._db_connectors == [mock_conn1, mock_conn2, mock_conn3]
 
