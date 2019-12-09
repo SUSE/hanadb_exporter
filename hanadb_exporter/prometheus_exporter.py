@@ -111,16 +111,18 @@ FROM m_database m;"""
                     if column_name.lower() == metric.value.lower():
                         metric_value = column_value
             if metric_value is None:
-                raise ValueError(
-                    'Specified value in metrics.json for metric'
-                    ' "{}": ({}) not found in the query result'.format(
-                        metric.name, metric.value))
+                self._logger.warn(
+                    'Specified value in metrics.json for metric "%s": (%s) not found or it is '\
+                    'invalid (None) in the query result',
+                    metric.name, metric.value)
+                continue
             elif len(labels) != len(metric.labels):
                 # Log when a label(s) specified in metrics.json is not found in the query result
-                raise ValueError(
-                    'One or more label(s) specified in metrics.json'
-                    ' for metric: "{}" is not found in the the query result'.format(
-                        metric.name))
+                self._logger.warn(
+                    'One or more label(s) specified in metrics.json '
+                    'for metric "%s" that are not found in the query result',
+                    metric.name)
+                continue
             else:
                 # Add sid, insnr and database_name labels
                 combined_labels = self.metadata_labels + labels
