@@ -61,6 +61,7 @@ important items in the configuration file:
   - `timeout`: Timeout to connect to the database. After this time the app will fail (even in daemon mode).
   - `hana.host`: Address of the SAP HANA database.
   - `hana.port`: Port where the SAP HANA database is exposed.
+  - `hana.userkey`: Stored user key. This is the secure option if you don't want to have the password in the configuration file. The `userkey` and `user/password` are self exclusive.
   - `hana.user`: An existing user with access right to the SAP HANA database.
   - `hana.password`: Password of an existing user.
   - `logging.config_file`: Python logging system configuration file (by default WARN and ERROR level messages will be sent to the syslog)
@@ -69,6 +70,17 @@ important items in the configuration file:
 The logging configuration file follows the python standard logging system style: [Python logging](https://docs.python.org/3/library/logging.config.html).
 
 Using the default [configuration file](./logging_config.ini), it will redirect the logs to the file assigned in the [json configuration file](./config.json.example) and to the syslog (only logging level up to WARNING).
+
+### Using the stored user key
+
+To use the `userkey` option the `dbapi` must be installed (usually stored in `/hana/shared/PRD/hdbclient/hdbcli-N.N.N.tar.gz`).
+It cannot be used from other different client (the key is stored in the client itself). This will raise the `hdbcli.dbapi.Error: (-10104, 'Invalid value for KEY')` error.
+For that a new stored user key must be created with the user that is running python. For that (please, notice that the `hdbclient` is the same as the `dbapi` python package):
+```
+/hana/shared/PRD/hdbclient/hdbuserstore set yourkey host:30013@SYSTEMDB SYSTEM pass
+```
+**Don't use the stored user key created for the backup as this is create using the sidadm user.**
+**The usage of a user with access only to the monitoring tables is recommended instead of using SYSTEM user.**
 
 2. Start the exporter by running the following command:
 ```
