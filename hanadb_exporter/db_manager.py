@@ -98,11 +98,14 @@ WHERE (SERVICE_NAME='indexserver' and COORDINATOR_TYPE= 'MASTER')"""
             timeout (int, opt): Timeout in seconds to connect to the System database
         """
         connection_data = self._get_connection_data(
-            kwargs.get('userkey'), kwargs.get('user'), kwargs.get('password'))
+            kwargs.get('userkey', None), kwargs.get('user', ''), kwargs.get('password', ''))
         current_time = time.time()
         timeout = current_time + kwargs.get('timeout', 600)
         while current_time <= timeout:
             try:
+                # parameters are passed using kwargs to the connect method
+                # pyhdb only uses 'user' and `password`
+                # dbapi uses 'user', 'password', 'userkey' and other optional params
                 self._system_db_connector.connect(host, port, **connection_data)
                 self._db_connectors.append(self._system_db_connector)
                 break
