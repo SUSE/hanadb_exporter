@@ -137,7 +137,8 @@ class TestMain(object):
         mock_setup_logging.assert_called_once_with(config)
         mock_db_manager.assert_called_once_with()
         db_instance.start.assert_called_once_with(
-            '10.10.10.10', 1234, 'user', 'pass', multi_tenant=True, timeout=600)
+            '10.10.10.10', 1234, user='user', password='pass',
+            userkey=None, multi_tenant=True, timeout=600)
         db_instance.get_connectors.assert_called_once_with()
         mock_exporters.assert_called_once_with(
             connectors='connectors', metrics_file='metrics')
