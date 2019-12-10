@@ -23,11 +23,6 @@
 %define _prefix /usr
 %define _sysconfdir %{_prefix}/etc
 
-# Compat macro for new _fillupdir macro introduced in Nov 2017
-%if ! %{defined _fillupdir}
-  %define _fillupdir /var/adm/fillup-templates
-%endif
-
 Name:           hanadb_exporter
 Version:        0.6.0
 Release:        0
@@ -67,18 +62,12 @@ rm -r %{buildroot}%{python3_sitelib}/tests
 mkdir -p %{buildroot}%{_sysconfdir}/hanadb_exporter
 install -D -m 644 daemon/hanadb_exporter@.service %{buildroot}%{_unitdir}/hanadb_exporter@.service
 
-mkdir -p %{buildroot}%{_fillupdir}
-mkdir -p %{buildroot}%{_sysconfdir}/sysconfig
-install -D -m 0644 daemon/hanadb_exporter.sysconfig %{buildroot}%{_fillupdir}/sysconfig.hanadb_exporter
 install -D -m 0644 config.json.example %{buildroot}%{_docdir}/hanadb_exporter/config.json.example
 install -D -m 0644 metrics.json %{buildroot}%{_docdir}/hanadb_exporter/metrics.json
 install -D -m 0644 logging_config.ini %{buildroot}%{_docdir}/hanadb_exporter/logging_config.ini
 
 %post
 %service_add_post hanadb_exporter@.service
-if [ ! -e %{_sysconfdir}/sysconfig/hanadb_exporter ]; then
-    %fillup_only hanadb_exporter
-fi
 rm -rf  %{_sysconfdir}/hanadb_exporter/*
 ln -s %{_docdir}/hanadb_exporter/config.json.example %{_sysconfdir}/hanadb_exporter/config.json.example
 ln -s %{_docdir}/hanadb_exporter/metrics.json  %{_sysconfdir}/hanadb_exporter/metrics.json
@@ -111,11 +100,9 @@ pytest tests
 
 %dir %{_sysconfdir}
 %dir %{_sysconfdir}/hanadb_exporter
-%dir %{_sysconfdir}/sysconfig
 %{_docdir}/hanadb_exporter/config.json.example
 %{_docdir}/hanadb_exporter/metrics.json
 %{_docdir}/hanadb_exporter/logging_config.ini
-%{_fillupdir}/sysconfig.hanadb_exporter
 %{_unitdir}/hanadb_exporter@.service
 
 %changelog
