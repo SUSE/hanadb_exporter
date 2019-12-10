@@ -20,13 +20,16 @@
 %bcond_without test
 %endif
 
+%define _prefix /usr
+%define _sysconfdir %{_prefix}/etc
+
 # Compat macro for new _fillupdir macro introduced in Nov 2017
 %if ! %{defined _fillupdir}
   %define _fillupdir /var/adm/fillup-templates
 %endif
 
 Name:           hanadb_exporter
-Version:        0.5.3
+Version:        0.6.0
 Release:        0
 Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0
@@ -96,6 +99,7 @@ pytest tests
 %endif
 
 %files
+%defattr(-,root,root,-)
 %if 0%{?sle_version:1} && 0%{?sle_version} < 120300
 %doc README.md docs/METRICS.md LICENSE
 %else
@@ -105,7 +109,9 @@ pytest tests
 %{python3_sitelib}/*
 %{_bindir}/hanadb_exporter
 
+%dir %{_sysconfdir}
 %dir %{_sysconfdir}/hanadb_exporter
+%dir %{_sysconfdir}/sysconfig
 %{_docdir}/hanadb_exporter/config.json.example
 %{_docdir}/hanadb_exporter/metrics.json
 %{_docdir}/hanadb_exporter/logging_config.ini
