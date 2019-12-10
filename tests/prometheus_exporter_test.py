@@ -180,10 +180,12 @@ FROM m_database m;"""
         assert metric_obj == mock_gauge_instance
 
     @mock.patch('hanadb_exporter.prometheus_exporter.core')
-    @mock.patch('logging.Logger.error')
-    def test_manage_gauge_incorrect_label(self, mock_logger, mock_core):
+    @mock.patch('logging.Logger.warn')
+    @mock.patch('logging.Logger.debug')
+    def test_manage_gauge_incorrect_label(self, logger_debug, logger_warn, mock_core):
 
         mock_gauge_instance = mock.Mock()
+        mock_gauge_instance.samples = []
         mock_core.GaugeMetricFamily = mock.Mock()
         mock_core.GaugeMetricFamily.return_value = mock_gauge_instance
 
@@ -195,28 +197,30 @@ FROM m_database m;"""
         mock_metric.value = 'column3'
 
         formatted_query = [
-            {'column1': 'data1', 'column2': 'data2', 'column3': 'data3'},
-            {'column1': 'data4', 'column2': 'data5', 'column3': 'data6'},
-            {'column1': 'data7', 'column2': 'data8', 'column3': 'data9'}
+            {'column1': 'data1', 'column2': 'data2', 'column3': 'data3'}
         ]
 
-        with pytest.raises(ValueError) as err:
-            metric_obj = self._collector._manage_gauge(mock_metric, formatted_query)
+        metric_obj = self._collector._manage_gauge(mock_metric, formatted_query)
 
         mock_core.GaugeMetricFamily.assert_called_once_with(
             'name', 'description', None,
             ['sid', 'insnr', 'database_name', 'column4', 'column5'], 'mb')
 
-        assert('One or more label(s) specified in metrics.json'
-               ' for metric: "{}" is not found in the the query result'.format(
-                'name') in str(err.value))
+        logger_warn.assert_called_once_with(
+            'One or more label(s) specified in metrics.json '
+            'for metric "%s" that are not found in the query result',
+            'name')
+
+        assert mock_gauge_instance.call_count == 0
+        logger_debug.assert_called_once_with('%s \n', [])
 
     @mock.patch('hanadb_exporter.prometheus_exporter.core')
-    @mock.patch('logging.Logger.error')
-    def test_manage_gauge_incorrect_value(self, mock_logger, mock_core):
+    @mock.patch('logging.Logger.warn')
+    @mock.patch('logging.Logger.debug')
+    def test_manage_gauge_incorrect_value(self, logger_debug, logger_warn, mock_core):
 
         mock_gauge_instance = mock.Mock()
-        mock_gauge_instance.samples = 'samples'
+        mock_gauge_instance.samples = []
         mock_core.GaugeMetricFamily = mock.Mock()
         mock_core.GaugeMetricFamily.return_value = mock_gauge_instance
 
@@ -229,20 +233,27 @@ FROM m_database m;"""
 
         formatted_query = [
             {'column1': 'data1', 'column2': 'data2', 'column3': 'data3'},
-            {'column1': 'data4', 'column2': 'data5', 'column3': 'data6'},
-            {'column1': 'data7', 'column2': 'data8', 'column3': 'data9'}
+            {'column1': 'data4', 'column4': None, 'column3': 'data6'}
         ]
 
-        with pytest.raises(ValueError) as err:
-            metric_obj = self._collector._manage_gauge(mock_metric, formatted_query)
+        metric_obj = self._collector._manage_gauge(mock_metric, formatted_query)
 
         mock_core.GaugeMetricFamily.assert_called_once_with(
             'name', 'description', None,
             ['sid', 'insnr', 'database_name', 'column1', 'column2'], 'mb')
 
-        assert('Specified value in metrics.json for metric'
-               ' "{}": ({}) not found in the query result'.format(
-                'name', 'column4') in str(err.value))
+        logger_warn.assert_has_calls([
+            mock.call(
+                'Specified value in metrics.json for metric "%s": (%s) not found or it is '\
+                'invalid (None) in the query result',
+                'name', 'column4'),
+            mock.call(
+                'Specified value in metrics.json for metric "%s": (%s) not found or it is '\
+                'invalid (None) in the query result',
+                'name', 'column4')
+        ])
+        assert mock_gauge_instance.call_count == 0
+        logger_debug.assert_called_once_with('%s \n', [])
 
     def test_reconnect_connected(self):
         self._mock_connector.isconnected.return_value = True
