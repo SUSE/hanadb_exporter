@@ -51,9 +51,9 @@ zypper ref
 zypper in python3-PyHDB
 ```
 
-## Configuring and running the exporter
+## Configuring the exporter
 
-1. Create the `config.json` configuration file.
+Create the `config.json` configuration file.
 An example of `config.json` available in [config.json.example](config.json.example). Here the most
 important items in the configuration file:
   - `exposition_port`: Port where the prometheus exporter will be exposed (8001 by default).
@@ -61,6 +61,7 @@ important items in the configuration file:
   - `timeout`: Timeout to connect to the database. After this time the app will fail (even in daemon mode).
   - `hana.host`: Address of the SAP HANA database.
   - `hana.port`: Port where the SAP HANA database is exposed.
+  - `hana.userkey`: Stored user key. This is the secure option if you don't want to have the password in the configuration file. The `userkey` and `user/password` are self exclusive being the first the default if both options are set.
   - `hana.user`: An existing user with access right to the SAP HANA database.
   - `hana.password`: Password of an existing user.
   - `logging.config_file`: Python logging system configuration file (by default WARN and ERROR level messages will be sent to the syslog)
@@ -70,14 +71,44 @@ The logging configuration file follows the python standard logging system style:
 
 Using the default [configuration file](./logging_config.ini), it will redirect the logs to the file assigned in the [json configuration file](./config.json.example) and to the syslog (only logging level up to WARNING).
 
-2. Start the exporter by running the following command:
+### Using the stored user key
+
+This is the recommended option if we want to keep the database secure (for development environments the `user/password` with `SYSTEM` user can be used as it's faster to setup).
+To use the `userkey` option the `dbapi` must be installed (usually stored in `/hana/shared/PRD/hdbclient/hdbcli-N.N.N.tar.gz` and installable with pip3).
+It cannot be used from other different client (the key is stored in the client itself). This will raise the `hdbcli.dbapi.Error: (-10104, 'Invalid value for KEY')` error.
+For that a new stored user key must be created with the user that is running python. For that (please, notice that the `hdbclient` is the same as the `dbapi` python package):
+```
+/hana/shared/PRD/hdbclient/hdbuserstore set yourkey host:30013@SYSTEMDB hanadb_exporter pass
+```
+
+Some tips:
+- Set `SYSTEMDB` as default database, this way the exporter will know where to get the tenants data.
+- Don't use the stored user key created for the backup as this is created using the sidadm user.
+- The usage of a user with access only to the monitoring tables is recommended instead of using SYSTEM user.
+- If a user with monitoring role is used the user must exist in all the databases (SYSTEMDB+tenants).
+
+### Create a new user with monitoring role
+Run the next commands to create a user with moniroting roles (**the commands must be executed in all the databases**):
+```
+su - prdadm
+hdbsql -u SYSTEM -p pass -d SYSTEMDB #(PRD for the tenant in this example)
+CREATE USER HANADB_EXPORTER_USER PASSWORD MyExporterPassword NO FORCE_FIRST_PASSWORD_CHANGE;
+CREATE ROLE HANADB_EXPORTER_ROLE;
+GRANT MONITORING TO HANADB_EXPORTER_ROLE;
+GRANT HANADB_EXPORTER_ROLE TO HANADB_EXPORTER_USER;
+```
+
+
+## Running the exporter
+
+Start the exporter by running the following command:
 ```
 hanadb_exporter -c config.json -m metrics.json
 # Or
 python3 hanadb_exporter/main.py -c config.json -m metrics.json
 ```
 
-## Running as a daemon
+### Running as a daemon
 The hanadb_exporter can be executed using `systemd`. For that, the best option is to install the
 project using a rpm package. This can be done following the next steps (this example is for tumbleweed):
 
