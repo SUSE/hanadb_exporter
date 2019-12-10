@@ -26,7 +26,7 @@
 %endif
 
 Name:           hanadb_exporter
-Version:        0.5.2
+Version:        0.5.3
 Release:        0
 Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0
