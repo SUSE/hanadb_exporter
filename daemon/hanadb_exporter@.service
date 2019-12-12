@@ -4,7 +4,7 @@ Documentation=https://github.com/SUSE/hanadb_exporter
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/hanadb_exporter -c /usr/etc/hanadb_exporter/%i.json -m /usr/etc/hanadb_exporter/metrics.json
+ExecStart=/usr/bin/hanadb_exporter --identifier %i
 
 [Install]
 WantedBy=multi-user.target

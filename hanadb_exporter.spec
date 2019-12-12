@@ -21,6 +21,7 @@
 %endif
 
 %define _prefix /usr
+%define _oldsyscondir %{_sysconfdir}
 %define _sysconfdir %{_prefix}/etc
 
 Name:           hanadb_exporter
@@ -99,6 +100,7 @@ pytest tests
 %{_bindir}/hanadb_exporter
 
 %dir %{_sysconfdir}
+%dir %{_oldsyscondir}/hanadb_exporter
 %dir %{_sysconfdir}/hanadb_exporter
 %{_docdir}/hanadb_exporter/config.json.example
 %{_docdir}/hanadb_exporter/metrics.json

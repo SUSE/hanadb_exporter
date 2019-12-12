@@ -9,6 +9,7 @@ SAP HANA database prometheus data exporter app
 """
 
 import sys
+import os
 import traceback
 import logging
 from logging.config import fileConfig
@@ -23,7 +24,11 @@ from hanadb_exporter import prometheus_exporter
 from hanadb_exporter import db_manager
 
 LOGGER = logging.getLogger(__name__)
-
+CONFIG_FOLDER = '/etc/hanadb_exporter'
+METRICS_FILES = [
+    '/etc/hanadb_exporter/metrics.json',
+    '/usr/etc/hanadb_exporter/metrics.json'
+]
 
 def parse_config(config_file):
     """
@@ -40,9 +45,11 @@ def parse_arguments():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-c", "--config", help="Path to hanadb_exporter configuration file", required=True)
+        "-c", "--config", help="Path to hanadb_exporter configuration file")
     parser.add_argument(
-        "-m", "--metrics", help="Path to hanadb_exporter metrics file", required=True)
+        "-m", "--metrics", help="Path to hanadb_exporter metrics file")
+    parser.add_argument(
+        "--identifier", help="Identifier of the configuration file from /etc/hanadb_exporter")
     parser.add_argument(
         "-v", "--verbosity",
         help="Python logging level. Options: DEBUG, INFO, WARN, ERROR (INFO by default)")
@@ -72,20 +79,39 @@ def setup_logging(config):
     sys.excepthook = handle_exception
 
 
+def find_metrics_file():
+    """
+    Find metrics predefined files in default locations
+    """
+    for metric_file in METRICS_FILES:
+        if os.path.isfile(metric_file):
+            return metric_file
+    raise ValueError(
+        'metrics file does not exist in {}'.format(",".join(METRICS_FILES)))
+
+
 # Start up the server to expose the metrics.
 def run():
     """
     Main execution
     """
     args = parse_arguments()
-    config = parse_config(args.config)
+    if args.config is not None:
+        config = parse_config(args.config)
+    elif args.identifier is not None:
+        config = parse_config('{}/{}.json'.format(CONFIG_FOLDER, args.identifier))
+    else:
+        raise ValueError('configuration file or identifier must be used')
 
     if config.get('logging', None):
         setup_logging(config)
     else:
         logging.basicConfig(level=args.verbosity or logging.INFO)
 
-    metrics = args.metrics
+    if args.metrics:
+        metrics = args.metrics
+    else:
+        metrics = find_metrics_file()
 
     try:
         hana_config = config['hana']
