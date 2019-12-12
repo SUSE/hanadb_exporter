@@ -21,7 +21,7 @@
 %endif
 
 %define _prefix /usr
-%define _oldsyscondir %{_sysconfdir}
+%define oldsyscondir /etc
 %define _sysconfdir %{_prefix}/etc
 
 Name:           hanadb_exporter
@@ -60,6 +60,7 @@ python3 setup.py install --root %{buildroot} --prefix=%{_prefix}
 rm -r %{buildroot}%{python3_sitelib}/tests
 
 # Add daemon files
+mkdir -p %{buildroot}%{oldsyscondir}/hanadb_exporter
 mkdir -p %{buildroot}%{_sysconfdir}/hanadb_exporter
 install -D -m 644 daemon/hanadb_exporter@.service %{buildroot}%{_unitdir}/hanadb_exporter@.service
 
@@ -100,7 +101,7 @@ pytest tests
 %{_bindir}/hanadb_exporter
 
 %dir %{_sysconfdir}
-%dir %{_oldsyscondir}/hanadb_exporter
+%dir %{oldsyscondir}/hanadb_exporter
 %dir %{_sysconfdir}/hanadb_exporter
 %{_docdir}/hanadb_exporter/config.json.example
 %{_docdir}/hanadb_exporter/metrics.json

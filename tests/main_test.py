@@ -102,7 +102,7 @@ class TestMain(object):
         mock_isfile.side_effect = [False, False]
         with pytest.raises(ValueError) as err:
             main.find_metrics_file()
-        assert 'metrics file does not exist in {}'.format(",".join(main.METRICS_FILES)) in str(err)
+        assert 'metrics file does not exist in {}'.format(",".join(main.METRICS_FILES)) in str(err.value)
 
     @mock.patch('hanadb_exporter.main.LOGGER')
     @mock.patch('hanadb_exporter.main.parse_arguments')
