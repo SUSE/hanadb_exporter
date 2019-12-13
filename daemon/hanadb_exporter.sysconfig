@@ -1,3 +1,0 @@
-# hanadb_exporter daemon configuration file
-# Exported metrics configuration file path
-METRICS_FILE=/etc/hanadb_exporter/metrics.json

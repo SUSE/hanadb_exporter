@@ -53,9 +53,12 @@ class TestMain(object):
         mock_parser.assert_called_once_with()
         mocked_parser.add_argument.assert_has_calls([
             mock.call(
-                "-c", "--config", help="Path to hanadb_exporter configuration file", required=True),
+                "-c", "--config", help="Path to hanadb_exporter configuration file"),
             mock.call(
-                "-m", "--metrics", help="Path to hanadb_exporter metrics file", required=True),
+                "-m", "--metrics", help="Path to hanadb_exporter metrics file"),
+            mock.call(
+                "--identifier",
+                help="Identifier of the configuration file from /etc/hanadb_exporter"),
             mock.call(
                 "-v", "--verbosity",
                 help="Python logging level. Options: DEBUG, INFO, WARN, ERROR (INFO by default)")
@@ -87,6 +90,19 @@ class TestMain(object):
             mock.call('my_config_file', defaults={'logfilename': 'my_file'}),
             mock.call('my_config_file', defaults={'logfilename': '/var/log/hanadb_exporter_123.123.123.123_1234'})
         ])
+
+    @mock.patch('os.path.isfile')
+    def test_find_metrics_file(self, mock_isfile):
+        mock_isfile.return_value = True
+        metric_file = main.find_metrics_file()
+        assert metric_file == main.METRICS_FILES[0]
+
+    @mock.patch('os.path.isfile')
+    def test_find_metrics_file_error(self, mock_isfile):
+        mock_isfile.side_effect = [False, False]
+        with pytest.raises(ValueError) as err:
+            main.find_metrics_file()
+        assert 'metrics file does not exist in {}'.format(",".join(main.METRICS_FILES)) in str(err.value)
 
     @mock.patch('hanadb_exporter.main.LOGGER')
     @mock.patch('hanadb_exporter.main.parse_arguments')
@@ -150,6 +166,84 @@ class TestMain(object):
         ])
         mock_start_server.assert_called_once_with(8001, '0.0.0.0')
         mock_sleep.assert_called_once_with(1)
+
+    @mock.patch('hanadb_exporter.main.LOGGER')
+    @mock.patch('hanadb_exporter.main.find_metrics_file')
+    @mock.patch('hanadb_exporter.main.parse_arguments')
+    @mock.patch('hanadb_exporter.main.parse_config')
+    @mock.patch('hanadb_exporter.main.setup_logging')
+    @mock.patch('hanadb_exporter.main.db_manager.DatabaseManager')
+    @mock.patch('hanadb_exporter.main.prometheus_exporter.SapHanaCollectors')
+    @mock.patch('hanadb_exporter.main.REGISTRY.register')
+    @mock.patch('hanadb_exporter.main.start_http_server')
+    @mock.patch('logging.getLogger')
+    @mock.patch('time.sleep')
+    def test_run_defaults(
+            self, mock_sleep, mock_get_logger, mock_start_server, mock_registry,
+            mock_exporters, mock_db_manager, mock_setup_logging,
+            mock_parse_config, mock_parse_arguments, mock_find_metrics, mock_logger):
+
+        mock_arguments = mock.Mock(config=None, metrics=None, identifier='config')
+        mock_parse_arguments.return_value = mock_arguments
+
+        mock_find_metrics.return_value = 'new_metrics'
+
+        config = {
+            'hana': {
+                'host': '10.10.10.10',
+                'port': 1234,
+                'user': 'user',
+                'password': 'pass'
+            },
+            'logging': {
+                'log_file': 'my_file',
+                'config_file': 'my_config_file'
+            }
+        }
+        mock_parse_config.return_value = config
+
+        db_instance = mock.Mock()
+        db_instance.get_connectors.return_value = 'connectors'
+        mock_db_manager.return_value = db_instance
+
+        mock_collector = mock.Mock()
+        mock_exporters.return_value = mock_collector
+
+        mock_sleep.side_effect = Exception
+
+        with pytest.raises(Exception):
+            main.run()
+
+        mock_parse_arguments.assert_called_once_with()
+        mock_parse_config.assert_called_once_with("{}/{}.json".format(main.CONFIG_FOLDER, 'config'))
+        mock_setup_logging.assert_called_once_with(config)
+        mock_find_metrics.assert_called_once_with()
+        mock_db_manager.assert_called_once_with()
+        db_instance.start.assert_called_once_with(
+            '10.10.10.10', 1234, user='user', password='pass',
+            userkey=None, multi_tenant=True, timeout=600)
+        db_instance.get_connectors.assert_called_once_with()
+        mock_exporters.assert_called_once_with(
+            connectors='connectors', metrics_file='new_metrics')
+
+        mock_registry.assert_called_once_with(mock_collector)
+        mock_logger.info.assert_has_calls([
+            mock.call('exporter sucessfully registered'),
+            mock.call('starting to serve metrics')
+        ])
+        mock_start_server.assert_called_once_with(8001, '0.0.0.0')
+        mock_sleep.assert_called_once_with(1)
+
+    @mock.patch('hanadb_exporter.main.parse_arguments')
+    def test_run_invalid_args(self, mock_parse_arguments):
+
+        mock_arguments = mock.Mock(config=None, identifier=None)
+        mock_parse_arguments.return_value = mock_arguments
+
+        with pytest.raises(ValueError) as err:
+            main.run()
+
+        assert 'configuration file or identifier must be used' in str(err.value)
 
     @mock.patch('hanadb_exporter.main.LOGGER')
     @mock.patch('hanadb_exporter.main.parse_arguments')
