@@ -43,12 +43,11 @@ class TestDatabaseManager(object):
     def test_get_tenants_port(self, mock_format_query):
         self._db_manager._system_db_connector = mock.Mock()
         self._db_manager._system_db_connector.query.return_value = 'result'
-        ports = ['30040', '30041', '0']
-        dbs = ['PRD', 'QAS', 'PRD']
+        ports = ['30040', '30041']
+        dbs = ['PRD', 'QAS']
         mock_format_query.return_value = [
             {'DATABASE_NAME': dbs[0], 'SQL_PORT': ports[0]},
             {'DATABASE_NAME': dbs[1], 'SQL_PORT': ports[1]},
-            {'DATABASE_NAME': dbs[2], 'SQL_PORT': ports[2]},
             {'DATABASE_NAME': 'SYSTEMDB', 'SQL_PORT': '30013'}]
 
         for i, data in enumerate(self._db_manager._get_tenants_port()):

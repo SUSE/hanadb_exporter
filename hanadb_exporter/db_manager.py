@@ -30,7 +30,7 @@ class DatabaseManager(object):
 
     TENANT_DATA_QUERY =\
 """SELECT DATABASE_NAME,SQL_PORT FROM SYS_DATABASES.M_SERVICES
-WHERE COORDINATOR_TYPE='MASTER'"""
+WHERE COORDINATOR_TYPE='MASTER' AND SQL_PORT<>0"""
 
     def __init__(self):
         self._logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ WHERE COORDINATOR_TYPE='MASTER'"""
         data = self._system_db_connector.query(self.TENANT_DATA_QUERY)
         formatted_data = utils.format_query_result(data)
         for tenant_data in formatted_data:
-            if tenant_data['DATABASE_NAME'] != 'SYSTEMDB' and int(tenant_data['SQL_PORT']):
+            if tenant_data['DATABASE_NAME'] != 'SYSTEMDB':
                 yield tenant_data['DATABASE_NAME'], int(tenant_data['SQL_PORT'])
 
     def _connect_tenants(self, host, connection_data):
