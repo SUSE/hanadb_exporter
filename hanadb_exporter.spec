@@ -25,7 +25,7 @@
 %define _sysconfdir %{_prefix}/etc
 
 Name:           hanadb_exporter
-Version:        0.6.0
+Version:        0.6.1
 Release:        0
 Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0

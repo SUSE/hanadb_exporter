@@ -53,6 +53,7 @@ class TestDatabaseManager(object):
         for i, data in enumerate(self._db_manager._get_tenants_port()):
             assert data[0] == dbs[i]
             assert data[1] == int(ports[i])
+        assert i == 1 # Check only the ports 30040 and 30041 are yielded
 
     @mock.patch('hanadb_exporter.db_manager.hdb_connector.HdbConnector')
     def test_connect_tenants(self, mock_hdb):

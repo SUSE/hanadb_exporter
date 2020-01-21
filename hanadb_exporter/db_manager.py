@@ -30,7 +30,7 @@ class DatabaseManager(object):
 
     TENANT_DATA_QUERY =\
 """SELECT DATABASE_NAME,SQL_PORT FROM SYS_DATABASES.M_SERVICES
-WHERE COORDINATOR_TYPE='MASTER'"""
+WHERE COORDINATOR_TYPE='MASTER' AND SQL_PORT<>0"""
 
     def __init__(self):
         self._logger = logging.getLogger(__name__)
