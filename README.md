@@ -56,7 +56,7 @@ zypper in python3-PyHDB
 Create the `config.json` configuration file.
 An example of `config.json` available in [config.json.example](config.json.example). Here the most
 important items in the configuration file:
-  - `exposition_port`: Port where the prometheus exporter will be exposed (8001 by default).
+  - `exposition_port`: Port where the prometheus exporter will be exposed (9968 by default).
   - `multi_tenant`: Export the metrics from other tenants. To use this the connection must be done with the System Database (port 30013).
   - `timeout`: Timeout to connect to the database. After this time the app will fail (even in daemon mode).
   - `hana.host`: Address of the SAP HANA database.
