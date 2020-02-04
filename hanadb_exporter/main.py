@@ -132,7 +132,7 @@ def run():
     LOGGER.info('exporter sucessfully registered')
 
     LOGGER.info('starting to serve metrics')
-    start_http_server(config.get('exposition_port', 8001), '0.0.0.0')
+    start_http_server(config.get('exposition_port', 9968), '0.0.0.0')
     while True:
         time.sleep(1)
 
