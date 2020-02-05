@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Wed Feb  5 10:17:31 UTC 2020 - Dario Maiocchi <dmaiocchi@suse.com>
+
+- Version 0.6.2: change port of exporter for upstream compatibility.
+  See: https://github.com/prometheus/prometheus/wiki/Default-port-allocations
+
+-------------------------------------------------------------------
 Wed Jan 15 11:20:30 UTC 2020 - Xabier Arbulu <xarbulu@suse.com>
 
 - Version 0.6.1 Fix use case where TENANT_DATA_QUERY query 
