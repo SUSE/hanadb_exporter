@@ -1,5 +1,5 @@
 {
-  "exposition_port": 9968,
+  "exposition_port": 9668,
   "multi_tenant": true,
   "timeout": 600,
   "hana": {
