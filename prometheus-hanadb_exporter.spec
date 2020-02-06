@@ -37,7 +37,7 @@ BuildRequires:  python3-mock
 BuildRequires:  python3-pytest
 %endif
 BuildRequires:  python3-setuptools
-Provides:	hanadb-exporter = 0.6.1
+Provides:	hanadb-exporter
 BuildRequires:  fdupes
 BuildRequires:  systemd-rpm-macros
 %{?systemd_requires}
