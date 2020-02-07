@@ -1,5 +1,5 @@
 #
-# spec file for package hanadb_exporter
+# spec file for package prometheus-hanadb_exporter
 #
 # Copyright (c) 2019 SUSE LLC
 #
@@ -24,7 +24,7 @@
 %define oldsyscondir /etc
 %define _sysconfdir %{_prefix}/etc
 
-Name:           hanadb_exporter
+Name:           prometheus-hanadb_exporter
 Version:        0.6.1
 Release:        0
 Summary:        SAP HANA database metrics exporter
@@ -37,6 +37,7 @@ BuildRequires:  python3-mock
 BuildRequires:  python3-pytest
 %endif
 BuildRequires:  python3-setuptools
+Provides:       hanadb-exporter
 BuildRequires:  fdupes
 BuildRequires:  systemd-rpm-macros
 %{?systemd_requires}
@@ -64,9 +65,9 @@ mkdir -p %{buildroot}%{oldsyscondir}/hanadb_exporter
 mkdir -p %{buildroot}%{_sysconfdir}/hanadb_exporter
 install -D -m 644 daemon/hanadb_exporter@.service %{buildroot}%{_unitdir}/hanadb_exporter@.service
 
-install -D -m 0644 config.json.example %{buildroot}%{_docdir}/hanadb_exporter/config.json.example
-install -D -m 0644 metrics.json %{buildroot}%{_docdir}/hanadb_exporter/metrics.json
-install -D -m 0644 logging_config.ini %{buildroot}%{_docdir}/hanadb_exporter/logging_config.ini
+install -D -m 0644 config.json.example %{buildroot}%{_docdir}/%{name}/config.json.example
+install -D -m 0644 metrics.json %{buildroot}%{_docdir}/%{name}/metrics.json
+install -D -m 0644 logging_config.ini %{buildroot}%{_docdir}/%{name}/logging_config.ini
 
 %post
 %service_add_post hanadb_exporter@.service
@@ -103,9 +104,9 @@ pytest tests
 %dir %{_sysconfdir}
 %dir %{oldsyscondir}/hanadb_exporter
 %dir %{_sysconfdir}/hanadb_exporter
-%{_docdir}/hanadb_exporter/config.json.example
-%{_docdir}/hanadb_exporter/metrics.json
-%{_docdir}/hanadb_exporter/logging_config.ini
+%{_docdir}/%{name}/config.json.example
+%{_docdir}/%{name}/metrics.json
+%{_docdir}/%{name}/logging_config.ini
 %{_unitdir}/hanadb_exporter@.service
 
 %changelog

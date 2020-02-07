@@ -38,7 +38,7 @@ jobs:
       if: type != pull_request
       env:
         - FOLDER=/package
-        - PACKAGE_NAME=hanadb_exporter
+        - PACKAGE_NAME=prometheus-hanadb_exporter
         - TAR_NAME=hanadb_exporter
 
       before_install:
@@ -59,7 +59,7 @@ jobs:
     - stage: submit
       if: type != pull_request AND branch = master
       env:
-        - PACKAGE_NAME=hanadb_exporter
+        - PACKAGE_NAME=prometheus-hanadb_exporter
 
       before_install:
         - docker pull shap/continuous_deliver:latest
