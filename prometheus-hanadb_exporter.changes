@@ -1,77 +1,86 @@
 -------------------------------------------------------------------
+Tue Feb 11 13:31:52 UTC 2020 - Xabier Arbulu <xarbulu@suse.com>
+
+- Version 0.7.0 created
+- Rename the rpm package to prometheus-hanadb_exporter to follow
+the prometheus conventions
+- Update the default port from 8001 to 9668
+(jsc#SLE-10545)
+
+-------------------------------------------------------------------
 Wed Jan 15 11:20:30 UTC 2020 - Xabier Arbulu <xarbulu@suse.com>
 
-- Version 0.6.1 Fix use case where TENANT_DATA_QUERY query 
+- Version 0.6.1 Fix use case where TENANT_DATA_QUERY query
 returns columns with invalid values (0 number)
 
 -------------------------------------------------------------------
 Tue Dec 10 11:18:30 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
 
 - Version 0.6.0 Change configuration files location from /etc
-to /usr/etc 
+to /usr/etc
 
 -------------------------------------------------------------------
 Tue Dec 10 09:17:42 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
 
 - Version 0.5.3 Improve metrics collection if some of the rows
 result is None. Before, if any result was None the result was
-not exported. Now, only metrics with None value are ommitted 
+not exported. Now, only metrics with None value are ommitted
 
 -------------------------------------------------------------------
 Mon Dec  9 08:21:18 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
 
 - Version 0.5.2 Add the option to use the hanadb_exporter with
 the stored user key. This gives the option to avoid the plain
-user/password strings usage. 
+user/password strings usage.
 
 -------------------------------------------------------------------
 Wed Nov 6 12:48:03 UTC 2019 - Diego Akechi <dakechi@suse.com>
 
 - Version 0.5.1 Add the SAP HANA current alerts rating metric.
 This metric expose the current triggered alerts coming from
-inside the database and the rating (severity) of them. The rating 
+inside the database and the rating (severity) of them. The rating
 is classified between 1 and 5.
 
 -------------------------------------------------------------------
 Fri Oct 25 06:14:03 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
 
 - Version 0.5.0 Add the option to export metrics from multiple
-databases/tenants 
+databases/tenants
 
 -------------------------------------------------------------------
 Thu Oct 24 03:00:45 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
 
 - Version 0.4.1 Add new metadata labels to the metrics (sid, instance
-number and databse name) 
+number and databse name)
 
 -------------------------------------------------------------------
 Wed Oct 23 10:53:36 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
 
-- Version 0.4.0 Remove the factory usage to gain simplicity as only 
-the prometheus exporter is used 
+- Version 0.4.0 Remove the factory usage to gain simplicity as only
+the prometheus exporter is used
 
 -------------------------------------------------------------------
 Tue Oct 22 06:57:42 UTC 2019 - Xabier Arbulu <xarbulu@suse.com>
 
 - Version 0.3.4 Add reconnection to the database to avoid issues
-when the hana database is stopped and restarted 
+when the hana database is stopped and restarted
 
 -------------------------------------------------------------------
 Wed Aug  7 14:47:46 UTC 2019 - Ayoub Belarbi <abelarbi@suse.de>
 
 - Version 0.3.3 Better handling of query failures and incorrect labels
-and values 
+and values
 
 -------------------------------------------------------------------
 Tue Jul  9 09:56:38 UTC 2019 - Xabier Arbulu Insausti <xarbulu@suse.com>
 
 - Version 0.3.2 adding the option to filter the queries by current
-SAP HANA database version 
+SAP HANA database version
 
 -------------------------------------------------------------------
 Wed Jul  3 07:40:46 UTC 2019 - Xabier Arbulu Insausti <xarbulu@suse.com>
 
-- Version 0.3.1 updating how the exporter is executed as a daemon 
+- Version 0.3.1 updating how the exporter is executed as a daemon
 
 -------------------------------------------------------------------
 Tue Jul  2 09:19:00 UTC 2019 - Xabier Arbulu Insausti <xarbulu@suse.com>
@@ -79,19 +88,19 @@ Tue Jul  2 09:19:00 UTC 2019 - Xabier Arbulu Insausti <xarbulu@suse.com>
 - Version 0.3.0 created
 - Code to manage the metrics updated to have a more generic usage
 - metrics.json file structure updated to add more additional information
-- Documentation created to explain how to create/update the metrics.json 
-file 
+- Documentation created to explain how to create/update the metrics.json
+file
 
 -------------------------------------------------------------------
 Mon Jul  1 11:16:58 UTC 2019 - Xabier Arbulu Insausti <xarbulu@suse.com>
 
-- Version 0.2.2 created with a new logging system 
+- Version 0.2.2 created with a new logging system
 
 -------------------------------------------------------------------
 Wed Jun 19 07:54:10 UTC 2019 - Xabier Arbulu Insausti <xarbulu@suse.com>
 
 - Version 0.2.1 created
-- Systemd support added to daemonize the execution 
+- Systemd support added to daemonize the execution
 
 -------------------------------------------------------------------
 Thu Jun 13 15:52:08 UTC 2019 - Xabier Arbulu Insausti <xarbulu@suse.com>
@@ -104,5 +113,4 @@ Thu Jun 13 15:52:08 UTC 2019 - Xabier Arbulu Insausti <xarbulu@suse.com>
 -------------------------------------------------------------------
 Wed Jun 12 14:35:50 UTC 2019 - Xabier Arbulu Insausti <xarbulu@suse.com>
 
-- First package version 0.1.0 
-
+- First package version 0.1.0

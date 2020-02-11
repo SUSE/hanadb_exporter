@@ -164,7 +164,7 @@ class TestMain(object):
             mock.call('exporter sucessfully registered'),
             mock.call('starting to serve metrics')
         ])
-        mock_start_server.assert_called_once_with(9968, '0.0.0.0')
+        mock_start_server.assert_called_once_with(9668, '0.0.0.0')
         mock_sleep.assert_called_once_with(1)
 
     @mock.patch('hanadb_exporter.main.LOGGER')
@@ -231,7 +231,7 @@ class TestMain(object):
             mock.call('exporter sucessfully registered'),
             mock.call('starting to serve metrics')
         ])
-        mock_start_server.assert_called_once_with(9968, '0.0.0.0')
+        mock_start_server.assert_called_once_with(9668, '0.0.0.0')
         mock_sleep.assert_called_once_with(1)
 
     @mock.patch('hanadb_exporter.main.parse_arguments')
