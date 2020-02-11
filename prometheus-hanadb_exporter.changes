@@ -1,7 +1,7 @@
 -------------------------------------------------------------------
 Tue Feb 11 10:45:43 UTC 2020 - Dario Maiocchi <dmaiocchi@suse.com>
 
-- Rename service systemd to prometheus prefix 
+- Version 0.6.2: Rename service systemd to prometheus prefix 
 
 -------------------------------------------------------------------
 Wed Jan 15 11:20:30 UTC 2020 - Xabier Arbulu <xarbulu@suse.com>
