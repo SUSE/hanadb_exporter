@@ -63,27 +63,27 @@ rm -r %{buildroot}%{python3_sitelib}/tests
 # Add daemon files
 mkdir -p %{buildroot}%{oldsyscondir}/hanadb_exporter
 mkdir -p %{buildroot}%{_sysconfdir}/hanadb_exporter
-install -D -m 644 daemon/hanadb_exporter@.service %{buildroot}%{_unitdir}/hanadb_exporter@.service
+install -D -m 644 daemon/prometheus-hanadb_exporter@.service %{buildroot}%{_unitdir}/prometheus-hanadb_exporter@.service
 
 install -D -m 0644 config.json.example %{buildroot}%{_docdir}/%{name}/config.json.example
 install -D -m 0644 metrics.json %{buildroot}%{_docdir}/%{name}/metrics.json
 install -D -m 0644 logging_config.ini %{buildroot}%{_docdir}/%{name}/logging_config.ini
 
 %post
-%service_add_post hanadb_exporter@.service
+%service_add_post prometheus-hanadb_exporter@.service
 rm -rf  %{_sysconfdir}/hanadb_exporter/*
 ln -s %{_docdir}/hanadb_exporter/config.json.example %{_sysconfdir}/hanadb_exporter/config.json.example
 ln -s %{_docdir}/hanadb_exporter/metrics.json  %{_sysconfdir}/hanadb_exporter/metrics.json
 ln -s %{_docdir}/hanadb_exporter/logging_config.ini  %{_sysconfdir}/hanadb_exporter/logging_config.ini
 
 %pre
-%service_add_pre hanadb_exporter@.service
+%service_add_pre prometheus-hanadb_exporter@.service
 
 %preun
-%service_del_preun -n hanadb_exporter@.service
+%service_del_preun -n prometheus-hanadb_exporter@.service
 
 %postun
-%service_del_postun -n hanadb_exporter@.service
+%service_del_postun -n prometheus-hanadb_exporter@.service
 
 %if %{with test}
 %check
@@ -107,6 +107,6 @@ pytest tests
 %{_docdir}/%{name}/config.json.example
 %{_docdir}/%{name}/metrics.json
 %{_docdir}/%{name}/logging_config.ini
-%{_unitdir}/hanadb_exporter@.service
+%{_unitdir}/prometheus-hanadb_exporter@.service
 
 %changelog
