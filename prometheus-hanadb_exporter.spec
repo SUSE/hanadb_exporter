@@ -25,11 +25,11 @@
 %define _sysconfdir %{_prefix}/etc
 
 Name:           prometheus-hanadb_exporter
-Version:        0.6.1
+Version:        0.7.0
 Release:        0
 Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0
-Group:          Development/Languages/Python
+Group:          System/Monitoring
 Url:            https://github.com/SUSE/hanadb_exporter
 Source:         hanadb_exporter-%{version}.tar.gz
 %if %{with test}
@@ -37,7 +37,7 @@ BuildRequires:  python3-mock
 BuildRequires:  python3-pytest
 %endif
 BuildRequires:  python3-setuptools
-Provides:       hanadb-exporter
+Provides:       hanadb_exporter = %{version}-%{release}
 BuildRequires:  fdupes
 BuildRequires:  systemd-rpm-macros
 %{?systemd_requires}
@@ -48,8 +48,10 @@ BuildArch:      noarch
 %description
 SAP HANA database metrics exporter
 
+%define shortname hanadb_exporter
+
 %prep
-%setup -q -n hanadb_exporter-%{version}
+%setup -q -n %{shortname}-%{version}
 
 %build
 python3 setup.py build
@@ -61,29 +63,29 @@ python3 setup.py install --root %{buildroot} --prefix=%{_prefix}
 rm -r %{buildroot}%{python3_sitelib}/tests
 
 # Add daemon files
-mkdir -p %{buildroot}%{oldsyscondir}/hanadb_exporter
-mkdir -p %{buildroot}%{_sysconfdir}/hanadb_exporter
-install -D -m 644 daemon/hanadb_exporter@.service %{buildroot}%{_unitdir}/hanadb_exporter@.service
+mkdir -p %{buildroot}%{oldsyscondir}/%{shortname}
+mkdir -p %{buildroot}%{_sysconfdir}/%{shortname}
+install -D -m 644 daemon/%{shortname}@.service %{buildroot}%{_unitdir}/%{name}@.service
 
 install -D -m 0644 config.json.example %{buildroot}%{_docdir}/%{name}/config.json.example
 install -D -m 0644 metrics.json %{buildroot}%{_docdir}/%{name}/metrics.json
 install -D -m 0644 logging_config.ini %{buildroot}%{_docdir}/%{name}/logging_config.ini
 
 %post
-%service_add_post hanadb_exporter@.service
-rm -rf  %{_sysconfdir}/hanadb_exporter/*
-ln -s %{_docdir}/hanadb_exporter/config.json.example %{_sysconfdir}/hanadb_exporter/config.json.example
-ln -s %{_docdir}/hanadb_exporter/metrics.json  %{_sysconfdir}/hanadb_exporter/metrics.json
-ln -s %{_docdir}/hanadb_exporter/logging_config.ini  %{_sysconfdir}/hanadb_exporter/logging_config.ini
+%service_add_post %{name}@.service
+rm -rf  %{_sysconfdir}/%{shortname}/*
+ln -s %{_docdir}/%{name}/config.json.example %{_sysconfdir}/%{shortname}/config.json.example
+ln -s %{_docdir}/%{name}/metrics.json  %{_sysconfdir}/%{shortname}/metrics.json
+ln -s %{_docdir}/%{name}/logging_config.ini  %{_sysconfdir}/%{shortname}/logging_config.ini
 
 %pre
-%service_add_pre hanadb_exporter@.service
+%service_add_pre %{name}@.service
 
 %preun
-%service_del_preun -n hanadb_exporter@.service
+%service_del_preun -n %{name}@.service
 
 %postun
-%service_del_postun -n hanadb_exporter@.service
+%service_del_postun -n %{name}@.service
 
 %if %{with test}
 %check
@@ -99,14 +101,14 @@ pytest tests
 %license LICENSE
 %endif
 %{python3_sitelib}/*
-%{_bindir}/hanadb_exporter
+%{_bindir}/%{shortname}
 
 %dir %{_sysconfdir}
-%dir %{oldsyscondir}/hanadb_exporter
-%dir %{_sysconfdir}/hanadb_exporter
+%dir %{oldsyscondir}/%{shortname}
+%dir %{_sysconfdir}/%{shortname}
 %{_docdir}/%{name}/config.json.example
 %{_docdir}/%{name}/metrics.json
 %{_docdir}/%{name}/logging_config.ini
-%{_unitdir}/hanadb_exporter@.service
+%{_unitdir}/%{name}@.service
 
 %changelog
