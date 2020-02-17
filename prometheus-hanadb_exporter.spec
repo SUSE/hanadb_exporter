@@ -25,13 +25,13 @@
 %define _sysconfdir %{_prefix}/etc
 
 Name:           prometheus-hanadb_exporter
-Version:        0.7.0
+Version:        0
 Release:        0
 Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0
 Group:          System/Monitoring
 Url:            https://github.com/SUSE/hanadb_exporter
-Source:         hanadb_exporter-%{version}.tar.gz
+Source:         %{name}-%{version}.tar.gz
 %if %{with test}
 BuildRequires:  python3-mock
 BuildRequires:  python3-pytest
@@ -51,7 +51,7 @@ SAP HANA database metrics exporter
 %define shortname hanadb_exporter
 
 %prep
-%setup -q -n %{shortname}-%{version}
+%setup -q -n %{name}-%{version}
 
 %build
 python3 setup.py build
