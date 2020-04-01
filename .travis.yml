@@ -35,7 +35,7 @@ jobs:
           - ./cc-test-reporter after-build -t coverage.py --exit-code $TRAVIS_TEST_RESULT tests/coverage.xml
 
     - stage: delivery
-      if: type != pull_request AND branch = master
+      if: type != pull_request AND (branch = master or env(DELIVER_BRANCHES))
       env:
         - FOLDER=/package
         - PACKAGE_NAME=prometheus-hanadb_exporter

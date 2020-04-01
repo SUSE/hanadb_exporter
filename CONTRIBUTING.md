@@ -6,6 +6,9 @@ The CI will automatically interact with SUSE's [Open Build Service](https://buil
  
 When releasing to `openSUSE:Factory`, please ensure that tags always follow the [SemVer](https://semver.org/) scheme, and that [the changelog](prometheus-hanadb_exporter.changes) contains a new entry, otherwise the request submission might fail.
 
-Note to maintainers: the OBS projects can be changed via the `OBS_PROJECT` and `TARGET_PROJECT` environment variables in the Travis settings.
+#### Note to maintainers
+
+The OBS projects can be changed via various environment variables like `OBS_PROJECT` and `TARGET_PROJECT` in the Travis settings.
+You can enable the OBS delivery for feature branches in your own fork by setting the variable `DELIVER_BRANCHES` to a non-empty value. 
  
  
