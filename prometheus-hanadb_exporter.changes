@@ -1,4 +1,9 @@
 -------------------------------------------------------------------
+Wed Apr 29 15:00:34 UTC 2020 - Julien ADAMEK <julien.adamek@suse.com>
+
+- Version 0.7.1 Fix and improve the README file (bsc#1170843) 
+
+-------------------------------------------------------------------
 Tue Feb 11 13:31:52 UTC 2020 - Xabier Arbulu <xarbulu@suse.com>
 
 - Version 0.7.0 created
