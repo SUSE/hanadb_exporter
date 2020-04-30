@@ -24,6 +24,9 @@ should be monitored by one exporter.
 
 The installation of the connector is covered in the `Installation` section.
 
+3. Some metrics are collected on the HANA monitoring views by the [SAP Host agent](https://help.sap.com/saphelp_nwpi711/helpdata/en/21/98c443122744efae67c0352033691d/frameset.htm). Make sure to have it installed and running to have access to all the monitoring metrics.
+
+
 ## Metrics file
 
 The exporter uses an additional file to know the metrics that are going to be exported. Here more information about the [metrics file](./docs/METRICS.md).
@@ -138,9 +141,11 @@ The logging configuration file can be updated as well to customize changing the 
 Now, the exporter can be started as a daemon. As we can have multiple `hanadb_exporter` instances running in one machine, the service is created using a template file, so an extra information must be given to `systemd` (this is done adding the `@` keyword after the service name together with the name of the configuration file created previously in `/etc/hanadb_exporter/{name}.json`):
 ```
 # All the command must be executed as root user
-systemctl start hanadb_exporter@my-exporter
+systemctl start prometheus-hanadb_exporter@my-exporter
 # Check the status with
-systemctl status hanadb_exporter@my-exporter
+systemctl status prometheus-hanadb_exporter@my-exporter
+# Enable the exporter to be started at boot time
+systemctl enable prometheus-hanadb_exporter@my-exporter
 ```
 
 ## License
