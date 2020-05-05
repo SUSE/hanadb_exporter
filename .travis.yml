@@ -35,7 +35,7 @@ jobs:
           - ./cc-test-reporter after-build -t coverage.py --exit-code $TRAVIS_TEST_RESULT tests/coverage.xml
 
     - stage: delivery
-      if: type != pull_request AND (branch = master or env(DELIVER_BRANCHES))
+      if: (type != pull_request AND (branch = master or env(DELIVER_BRANCHES))) or tag IS present
       env:
         - PACKAGE_NAME=prometheus-hanadb_exporter
         - TAR_NAME=hanadb_exporter
@@ -62,4 +62,4 @@ jobs:
         - |
           docker run -t -v "$(pwd):/package" -w /package \
           -e OBS_USER -e OBS_PASS -e OBS_PROJECT -e PACKAGE_NAME -e TARGET_PROJECT shap/continuous_deliver \
-          /bin/bash -c "/scripts/upload.sh && /scripts/submit.sh"
+          /scripts/submit.sh
