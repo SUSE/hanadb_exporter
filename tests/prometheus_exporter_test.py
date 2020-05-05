@@ -297,18 +297,19 @@ FROM m_database m;"""
 
     @mock.patch('hanadb_exporter.utils.format_query_result')
     @mock.patch('hanadb_exporter.utils.check_hana_range')
+    @mock.patch('logging.Logger.warning')
     @mock.patch('logging.Logger.info')
-    def test_collect(self, mock_logger, mock_hana_range, mock_format_query):
+    def test_collect(self, mock_logger, mock_logger_warning, mock_hana_range, mock_format_query):
 
         self._collector.reconnect = mock.Mock()
         self._collector._manage_gauge = mock.Mock()
 
         self._mock_connector.query.side_effect = [
-            'result1', 'result2']
+            'result1', 'result2', '']
         mock_format_query.side_effect = [
-            'form_result1', 'form_result2']
+            'form_result1', 'form_result2', '']
 
-        mock_hana_range.side_effect = [True, True, False]
+        mock_hana_range.side_effect = [True, True, False, True]
 
         self._collector._manage_gauge.side_effect = [
             'gauge1', 'gauge2', 'gauge3', 'gauge4', 'gauge5']
@@ -330,9 +331,10 @@ FROM m_database m;"""
         metrics4_2 = mock.Mock(type='gauge')
         metrics4 = [metrics2_1, metrics2_2]
         query4 = mock.Mock(enabled=True, query='query4', metrics=metrics4, hana_version_range=['1.0.0', '2.0.0'])
+        query5 = mock.Mock(enabled=True, query='query5', metrics=[], hana_version_range=['4.0'])
 
         self._collector._metrics_config.queries = [
-            query1, query2, query3, query4
+            query1, query2, query3, query4, query5
         ]
 
         for index, element in enumerate(self._collector.collect()):
@@ -341,17 +343,20 @@ FROM m_database m;"""
         self._collector.reconnect.assert_called_once_with()
         self._mock_connector.query.assert_has_calls([
             mock.call('query1'),
-            mock.call('query3')])
+            mock.call('query3'),
+            mock.call('query5')])
 
         mock_format_query.assert_has_calls([
             mock.call('result1'),
-            mock.call('result2')
+            mock.call('result2'),
+            mock.call('')
         ])
 
         mock_hana_range.assert_has_calls([
             mock.call('2.0', ['1.0']),
             mock.call('2.0', ['3.0']),
-            mock.call('2.0', ['1.0.0', '2.0.0'])
+            mock.call('2.0', ['1.0.0', '2.0.0']),
+            mock.call('2.0', ['4.0'])
         ])
 
         self._collector._manage_gauge.assert_has_calls([
@@ -367,6 +372,9 @@ FROM m_database m;"""
             mock.call('Query %s out of the provided hana version range: %s',
                 'query4', ['1.0.0', '2.0.0'])
         ])
+
+        mock_logger_warning.assert_called_once_with(
+            'Query %s ... has not returned any record', 'query5')
 
     @mock.patch('hanadb_exporter.utils.format_query_result')
     @mock.patch('hanadb_exporter.utils.check_hana_range')

@@ -163,6 +163,10 @@ FROM m_database m;"""
                     self._logger.error(str(err))
                     continue  # Moving to the next iteration (query)
                 formatted_query_result = utils.format_query_result(query_result)
+                if not formatted_query_result:
+                    self._logger.warning(
+                        'Query %s ... has not returned any record', query.query)
+                    continue
                 for metric in query.metrics:
                     if metric.type == "gauge":
                         try:
