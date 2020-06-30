@@ -18,7 +18,7 @@ Name:           grafana-sap-hana-dashboards
 Version:        0
 Release:        0
 License:        Apache-2.0
-Summary:        Grafana Dashboards displaying metrics about a SAP NetWeaver landscape.
+Summary:        Grafana Dashboards displaying metrics about SAP HANA databases.
 Group:          System/Monitoring
 Url:            https://github.com/SUSE/hanadb_exporter
 Source:         %{name}-%{version}.tar.gz
@@ -27,7 +27,7 @@ Requires:       grafana-sap-providers
 BuildRequires:  grafana-sap-providers
 
 %description
-Grafana Dashboards displaying metrics about SAP HANA database.
+Grafana Dashboards displaying metrics about SAP HANA databases.
 
 %prep
 %setup -q
