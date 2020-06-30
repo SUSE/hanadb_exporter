@@ -1,11 +1,11 @@
 # Grafana dashboards
 
-We provide a dashboards for Grafana, leveraging the exporter.
+We provide dashboards for Grafana, leveraging the exporter.
 
 
-## SAP NetWeaver Details
+## SAP HANA Details
 
-This dashboard shows the details of a single landscape.
+This dashboard shows the details of a SAP HANA instance, with multi-tenancy support.
 
 ![SAP HANA Details](screenshot-details.png)
 
