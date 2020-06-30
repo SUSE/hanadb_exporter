@@ -59,7 +59,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1593424339545,
+  "iteration": 1593521434157,
   "links": [],
   "panels": [
     {
@@ -566,7 +566,7 @@
               },
               {
                 "color": "#d44a3a",
-                "value": 1
+                "value": 0
               }
             ]
           },
@@ -594,7 +594,7 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": false
       },
       "pluginVersion": "7.0.3",
       "targets": [
@@ -4257,7 +4257,7 @@
         "includeAll": false,
         "label": "Data Source",
         "multi": false,
-        "name": "datasource",
+        "name": "data_source",
         "options": [],
         "query": "prometheus",
         "refresh": 1,
@@ -4268,7 +4268,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "$datasource",
+        "datasource": "$data_source",
         "definition": "label_values(hanadb_host_memory_used_total_mb, host)",
         "hide": 0,
         "includeAll": false,
@@ -4290,7 +4290,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "$datasource",
+        "datasource": "$data_source",
         "definition": "label_values(node_uname_info{nodename=\"$node_name\"}, instance)",
         "hide": 2,
         "includeAll": false,
@@ -4312,7 +4312,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "$datasource",
+        "datasource": "$data_source",
         "definition": "label_values(hanadb_host_memory_used_total_mb{host=\"$node_name\"}, sid)",
         "hide": 0,
         "includeAll": false,
@@ -4334,7 +4334,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "$datasource",
+        "datasource": "$data_source",
         "definition": "label_values(hanadb_host_memory_used_total_mb{host=\"$node_name\", sid=\"$sid\"}, insnr)",
         "hide": 0,
         "includeAll": false,
@@ -4356,7 +4356,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "$datasource",
+        "datasource": "$data_source",
         "definition": "label_values(hanadb_host_memory_used_total_mb{host=\"$node_name\", sid=\"$sid\", insnr=\"$instance_number\"}, database_name)",
         "hide": 0,
         "includeAll": false,
@@ -4383,7 +4383,6 @@
   },
   "timepicker": {
     "refresh_intervals": [
-      "5s",
       "10s",
       "30s",
       "1m",
@@ -4409,5 +4408,5 @@
   "timezone": "",
   "title": "SAP HANA Details",
   "uid": "EcC4JDFWz2",
-  "version": 15
+  "version": 16
 }
