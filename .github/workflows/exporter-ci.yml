@@ -1,10 +1,9 @@
 name: Exporter CI
 
 # this workflow will
-# - check build and test the go codebase on every pull request
+# - test the codebase on every pull request
 # - commit to the OBS development upstream whenever master the master branch is updated
 # - perform an OBS Submit Request to downstream whenever a GitHub release is published
-# - attach build artifacts to GitHub releases
 
 on:
   push:
@@ -21,7 +20,7 @@ on:
     types: [ published ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
