@@ -17,6 +17,7 @@ REPOSITORY ?= SUSE/hanadb_exporter
 default: deps test
 
 deps:
+	python -m pip install --upgrade pip
 	pip install tox
 
 test:
@@ -24,6 +25,11 @@ test:
 
 test-all:
 	tox
+
+static-checks:
+	tox -e pylint
+
+checks: test static-checks
 
 coverage: tests/coverage.xml tests/htmlcov tests/.coverage
 tests/coverage.xml tests/htmlcov tests/.coverage:
@@ -66,4 +72,4 @@ dashboards-obs-commit: dashboards-obs-workdir
 	cd build/obs/grafana-sap-hana-dashboards; osc addremove
 	cd build/obs/grafana-sap-hana-dashboards; osc commit -m "Update from git rev $(REVISION)"
 
-.PHONY: clean coverage deps test test-all
+.PHONY: checks clean coverage deps static-checks test test-all
