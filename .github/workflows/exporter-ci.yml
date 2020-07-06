@@ -40,7 +40,7 @@ jobs:
       run: make test
 
   obs-commit:
-    needs: build
+    needs: test
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     container: shap/continuous_deliver
@@ -63,7 +63,7 @@ jobs:
     - run: make exporter-obs-commit
 
   obs-submit-request:
-    needs: build
+    needs: test
     if: github.event.release
     runs-on: ubuntu-latest
     container: shap/continuous_deliver

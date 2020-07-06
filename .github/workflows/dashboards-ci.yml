@@ -29,7 +29,7 @@ jobs:
       run: find dashboards -name "*.json" -type f -exec jsonlint -c {} \;
 
   obs-commit:
-    needs: build
+    needs: test
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     container: shap/continuous_deliver
