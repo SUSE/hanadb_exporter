@@ -1,7 +1,7 @@
-/htmlcov
 /tests/htmlcov
+/tests/.coverage
+/tests/coverage.*
 dist/*
-.coverage
 .cache
 .idea
 *.pyc
