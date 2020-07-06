@@ -33,7 +33,6 @@ Group:          System/Monitoring
 Url:            https://github.com/SUSE/hanadb_exporter
 Source:         %{name}-%{version}.tar.gz
 %if %{with test}
-BuildRequires:  python3-mock
 BuildRequires:  python3-pytest
 %endif
 BuildRequires:  python3-setuptools
