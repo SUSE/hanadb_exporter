@@ -36,7 +36,7 @@ jobs:
       run: make deps
     - name: static analysis
       run: make static-checks
-      continue-on-errors: true
+      continue-on-error: true
     - name: test
       run: make test
 
