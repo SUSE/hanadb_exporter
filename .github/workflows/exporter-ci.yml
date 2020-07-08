@@ -2,7 +2,7 @@ name: Exporter CI
 
 # this workflow will
 # - test the codebase on every pull request
-# - commit to the OBS development upstream whenever master the master branch is updated
+# - commit to the OBS development upstream whenever the master branch is updated
 # - perform an OBS Submit Request to downstream whenever a GitHub release is published
 
 on:
