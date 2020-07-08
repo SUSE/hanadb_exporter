@@ -4,3 +4,10 @@ omit =
     */test/*
     *setup.py*
     tests/*
+data_file = tests/.coverage
+
+[html]
+directory = tests/htmlcov
+
+[xml]
+output = tests/coverage.xml

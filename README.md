@@ -1,8 +1,7 @@
-[![Build Status](https://travis-ci.org/SUSE/hanadb_exporter.svg?branch=master)](https://travis-ci.org/SUSE/hanadb_exporter)
-[![Maintainability](https://api.codeclimate.com/v1/badges/1fc3a80d4e8342fa6f0d/maintainability)](https://codeclimate.com/github/SUSE/hanadb_exporter/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/1fc3a80d4e8342fa6f0d/test_coverage)](https://codeclimate.com/github/SUSE/hanadb_exporter/test_coverage)
-
 # SAP HANA Database exporter
+
+[![Exporter CI](https://github.com/SUSE/hanadb_exporter/workflows/Exporter%20CI/badge.svg)](https://github.com/SUSE/hanadb_exporter/actions?query=workflow%3A%22Exporter+CI%22)
+[![Dashboards CI](https://github.com/SUSE/hanadb_exporter/workflows/Dashboards%20CI/badge.svg)](https://github.com/SUSE/hanadb_exporter/actions?query=workflow%3A%22Dashboards+CI%22)
 
 Prometheus exporter written in Python, to export SAP HANA database metrics. The
 project is based in the official prometheus exporter: [prometheus_client](https://github.com/prometheus/client_python).

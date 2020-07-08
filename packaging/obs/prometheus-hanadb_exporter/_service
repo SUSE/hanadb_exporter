@@ -3,10 +3,14 @@
     <param name="url">https://github.com/%%REPOSITORY%%.git</param>
     <param name="scm">git</param>
     <param name="exclude">.git</param>
+    <param name="exclude">.ci</param>
+    <param name="exclude">.github</param>
     <param name="exclude">dashboards</param>
+    <param name="exclude">Makefile</param>
+    <param name="exclude">packaging</param>
     <param name="filename">prometheus-hanadb_exporter</param>
-    <param name="versionformat">@PARENT_TAG@+git.%ct.%h</param>
-    <param name="revision">%%VERSION%%</param>
+    <param name="version">%%VERSION%%</param>
+    <param name="revision">%%REVISION%%</param>
   </service>
 
   <service name="recompress" mode="disabled">

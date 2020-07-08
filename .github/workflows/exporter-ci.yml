@@ -1,0 +1,91 @@
+name: Exporter CI
+
+# this workflow will
+# - test the codebase on every pull request
+# - commit to the OBS development upstream whenever the master branch is updated
+# - perform an OBS Submit Request to downstream whenever a GitHub release is published
+
+on:
+  push:
+    paths-ignore:
+    - 'dashboards/**'
+    - 'packaging/obs/grafana-sap-hana-dashboards/**'
+    - '.github/workflows/dashboards*'
+  pull_request:
+    paths-ignore:
+    - 'dashboards/**'
+    - 'packaging/obs/grafana-sap-hana-dashboards/**'
+    - '.github/workflows/dashboards*'
+  release:
+    types: [ published ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.6, 3.8]
+    steps:
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - uses: actions/checkout@v2
+    - name: install deps
+      run: make deps
+    - name: static analysis
+      run: make static-checks
+      continue-on-error: true
+    - name: test
+      run: make test
+
+  obs-commit:
+    needs: test
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    container: shap/continuous_deliver
+    env:
+      OBS_USER: ${{ secrets.OBS_USER }}
+      OBS_PASS: ${{ secrets.OBS_PASS }}
+      OBS_PROJECT: ${{ secrets.OBS_PROJECT }}
+      REVISION: ${{ github.sha }}
+      REPOSITORY: ${{ github.repository }}
+      GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: configure OSC
+      run: |
+        /scripts/init_osc_creds.sh
+        mkdir -p $HOME/.config/osc
+        cp /root/.config/osc/oscrc $HOME/.config/osc
+    - run: make exporter-obs-commit
+
+  obs-submit-request:
+    needs: test
+    if: github.event.release
+    runs-on: ubuntu-latest
+    container: shap/continuous_deliver
+    env:
+      OBS_USER: ${{ secrets.OBS_USER }}
+      OBS_PASS: ${{ secrets.OBS_PASS }}
+      OBS_PROJECT: ${{ secrets.OBS_PROJECT }}
+      PACKAGE_NAME: prometheus-hanadb_exporter
+      TARGET_PROJECT: ${{ secrets.OBS_DOWNSTREAM_PROJECT }}
+      REVISION: ${{ github.event.release.tag_name }}
+      REPOSITORY: ${{ github.repository }}
+      GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: configure OSC
+      run: |
+        /scripts/init_osc_creds.sh
+        mkdir -p $HOME/.config/osc
+        cp /root/.config/osc/oscrc $HOME/.config/osc
+    - run: make exporter-obs-workdir
+    - run: make exporter-obs-changelog
+    - run: make exporter-obs-commit
+    - run: /scripts/submit.sh
