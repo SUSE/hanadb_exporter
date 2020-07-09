@@ -21,7 +21,7 @@ should be monitored by one exporter.
   - [`dbapi` (SAP/official)](https://help.sap.com/viewer/1efad1691c1f496b8b580064a6536c2d/Cloud/en-US/39eca89d94ca464ca52385ad50fc7dea.html)
   - [`pyhdb` (unofficial/open source)](https://github.com/SAP/PyHDB)
 
-The installation of the connector is covered in the `Installation` section.
+The installation of the connector is covered in the [Installation](#installation) section.
 
 3. Some metrics are collected on the HANA monitoring views by the [SAP Host agent](https://help.sap.com/saphelp_nwpi711/helpdata/en/21/98c443122744efae67c0352033691d/frameset.htm). Make sure to have it installed and running to have access to all the monitoring metrics.
 
@@ -31,24 +31,44 @@ The installation of the connector is covered in the `Installation` section.
 The exporter uses an additional file to know the metrics that are going to be exported. Here more information about the [metrics file](./docs/METRICS.md).
 
 ## Installation
-Note: The usage of a virtual environment is recommended.
+
+The project can be installed in many ways, including but not limited to:
+
+1. [RPM](#rpm)
+2. [Manual clone](#manual-clone)
+
+### RPM
+
+On openSUSE or SUSE Linux Enterprise use `zypper` package manager:
+```shell
+zypper install prometheus-hanadb_exporter
+```
+
+Find the latest development repositories at [SUSE's Open Build Service](https://build.opensuse.org/package/show/network:ha-clustering:sap-deployments:devel/prometheus-hanadb_exporter).
+
+### Manual clone
+
+> The exporter is developed to be used with Python3.\
+> The usage of a virtual environment is recommended.
 
 ```
+git clone https://github.com/SUSE/hanadb_exporter
 cd hanadb_exporter # project root folder
 virtualenv virt
 source virt/bin/activate
-# uncomment one of the next two options
+# uncomment one of the next two options (to use hdbcli, you will need to have the HANA client folder where this python package is available)
 # pip install pyhdb
 # pip install path-to-hdbcli-N.N.N.tar.gaz
 pip install .
 # pip install -e . # To install in development mode
 # deactivate # to exit from the virtualenv
 ```
-If you prefer, you can install a RPM package for the PyHDB SAP HANA connector doing (example for Tumbleweed, but available for other versions):
+
+If you prefer, you can install the PyHDB SAP HANA connector as a RPM package doing (example for Tumbleweed, but available for other versions):
 
 ```
-# All the command must be executed as root user
-zypper addrepo https://download.opensuse.org/repositories/network:/ha-clustering:/Factory/openSUSE_Tumbleweed/network:ha-clustering:Factory.repo
+# All the commands must be executed as root user
+zypper addrepo https://download.opensuse.org/repositories/network:/ha-clustering:/sap-deployments:/devel/openSUSE_Tumbleweed/network:ha-clustering:sap-deployments:devel.repo
 zypper ref
 zypper in python3-PyHDB
 ```
@@ -100,7 +120,6 @@ GRANT MONITORING TO HANADB_EXPORTER_ROLE;
 GRANT HANADB_EXPORTER_ROLE TO HANADB_EXPORTER_USER;
 ```
 
-
 ## Running the exporter
 
 Start the exporter by running the following command:
@@ -116,21 +135,10 @@ hanadb_exporter --identifier config # Notice that the identifier matches with th
 ```
 
 ### Running as a daemon
-The hanadb_exporter can be executed using `systemd`. For that, the best option is to install the
-project using a rpm package. This can be done following the next steps (this example is for tumbleweed):
 
-```
-# All the command must be executed as root user
-# The hanadb_exporter uses the prometheus_client for python. You can find it on the ha-clustering:Factory Repository.
-zypper addrepo https://download.opensuse.org/repositories/network:/ha-clustering:/Factory/openSUSE_Tumbleweed/network:ha-clustering:Factory.repo
-zypper addrepo https://download.opensuse.org/repositories/server:/monitoring/openSUSE_Tumbleweed/server:monitoring.repo
-zypper ref
-zypper in hanadb_exporter
-```
+The hanadb_exporter can be executed using `systemd`. For that, the best option is to install the project using the rpm package as described in [Installation](#installation).
 
-Even using this way, the SAP HANA database connector package must be installed independently (see [Installation](#installation)).
-
-After that we need to create the configuration file as `/etc/hanadb_exporter/my-exporter.json` (the name is relevant as we will use it to start the daemon).
+After that we need to create the configuration file as `/etc/hanadb_exporter/my-exporter.json` (the name of the file is relevant as we will use it to start the daemon).
 The [config.json.example](./config.json.example) can be used as example (the example file is stored in `/usr/etc/hanadb_exporter` folder too).
 
 The default [metrics file](./metrics.json) is stored in `/usr/etc/hanadb_exporter/metrics.json`. If a new `metrics.json` is stored in `/etc/hanadb_exporter` this will be used.
