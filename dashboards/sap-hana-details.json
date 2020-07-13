@@ -4257,7 +4257,7 @@
         "includeAll": false,
         "label": "Data Source",
         "multi": false,
-        "name": "data_source",
+        "name": "DS_PROMETHEUS",
         "options": [],
         "query": "prometheus",
         "refresh": 1,
@@ -4268,7 +4268,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "$data_source",
+        "datasource": "$DS_PROMETHEUS",
         "definition": "label_values(hanadb_host_memory_used_total_mb, host)",
         "hide": 0,
         "includeAll": false,
@@ -4290,7 +4290,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "$data_source",
+        "datasource": "$DS_PROMETHEUS",
         "definition": "label_values(node_uname_info{nodename=\"$node_name\"}, instance)",
         "hide": 2,
         "includeAll": false,
@@ -4312,7 +4312,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "$data_source",
+        "datasource": "$DS_PROMETHEUS",
         "definition": "label_values(hanadb_host_memory_used_total_mb{host=\"$node_name\"}, sid)",
         "hide": 0,
         "includeAll": false,
@@ -4334,7 +4334,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "$data_source",
+        "datasource": "$DS_PROMETHEUS",
         "definition": "label_values(hanadb_host_memory_used_total_mb{host=\"$node_name\", sid=\"$sid\"}, insnr)",
         "hide": 0,
         "includeAll": false,
@@ -4356,7 +4356,7 @@
       {
         "allValue": null,
         "current": {},
-        "datasource": "$data_source",
+        "datasource": "$DS_PROMETHEUS",
         "definition": "label_values(hanadb_host_memory_used_total_mb{host=\"$node_name\", sid=\"$sid\", insnr=\"$instance_number\"}, database_name)",
         "hide": 0,
         "includeAll": false,
@@ -4408,5 +4408,5 @@
   "timezone": "",
   "title": "SAP HANA Details",
   "uid": "EcC4JDFWz2",
-  "version": 16
+  "version": 17
 }
