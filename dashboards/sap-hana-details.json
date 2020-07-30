@@ -59,7 +59,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1593521434157,
+  "iteration": 1596106855734,
   "links": [],
   "panels": [
     {
@@ -767,7 +767,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(hanadb_disk_used_size_mb{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} / hanadb_disk_total_size_mb)",
+          "expr": "(hanadb_disk_used_size_mb{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} / hanadb_disk_total_device_size_mb)",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -875,7 +875,7 @@
           "unit": "short"
         },
         {
-          "alias": "Used Space",
+          "alias": "Usage",
           "align": "auto",
           "colorMode": null,
           "colors": [
@@ -892,7 +892,7 @@
           "unit": "mbytes"
         },
         {
-          "alias": "% Used",
+          "alias": "Device Usage %",
           "align": "auto",
           "colorMode": "cell",
           "colors": [
@@ -909,6 +909,40 @@
             "85",
             "85"
           ],
+          "type": "number",
+          "unit": "percent"
+        },
+        {
+          "alias": "Device Usage",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Value #E",
+          "thresholds": [],
+          "type": "number",
+          "unit": "mbytes"
+        },
+        {
+          "alias": "Usage %",
+          "align": "auto",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "Value #F",
+          "thresholds": [],
           "type": "number",
           "unit": "percent"
         },
@@ -930,17 +964,18 @@
       ],
       "targets": [
         {
-          "expr": "hanadb_disk_used_size_mb{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} + 0",
+          "expr": "hanadb_disk_used_size_mb{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\",usage_type!=\"ROOTKEY_BACKUP\"} + 0",
           "format": "table",
           "instant": true,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "Used Disk",
+          "legendFormat": "Usage by type",
           "refId": "A"
         },
         {
-          "expr": "hanadb_disk_total_size_mb{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} + 0",
+          "expr": "hanadb_disk_total_size_mb{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\",usage_type!=\"ROOTKEY_BACKUP\"} + 0",
           "format": "table",
+          "hide": false,
           "instant": true,
           "interval": "",
           "intervalFactor": 1,
@@ -948,18 +983,36 @@
           "refId": "B"
         },
         {
-          "expr": "(hanadb_disk_used_size_mb{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} / hanadb_disk_total_size_mb) * 100",
+          "expr": "(hanadb_disk_used_size_mb{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\",usage_type!=\"ROOTKEY_BACKUP\"} / hanadb_disk_total_size_mb) * 100",
           "format": "table",
           "instant": true,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "Percent Used",
+          "legendFormat": "Percent Used by type",
+          "refId": "F"
+        },
+        {
+          "expr": "hanadb_disk_total_used_size_mb{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\",usage_type!=\"ROOTKEY_BACKUP\"} + 0",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "Total Device Usage",
+          "refId": "E"
+        },
+        {
+          "expr": "(hanadb_disk_total_used_size_mb{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\",usage_type!=\"ROOTKEY_BACKUP\"} / hanadb_disk_total_size_mb) * 100",
+          "format": "table",
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "Device Percent Used",
           "refId": "C"
         },
         {
-          "expr": "hanadb_disk_total_device_size_mb{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"}",
+          "expr": "hanadb_disk_total_device_size_mb{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\",usage_type!=\"ROOTKEY_BACKUP\"}",
           "format": "table",
           "instant": true,
+          "interval": "",
           "intervalFactor": 1,
           "legendFormat": "Total Device Size",
           "refId": "D"
@@ -4408,5 +4461,5 @@
   "timezone": "",
   "title": "SAP HANA Details",
   "uid": "EcC4JDFWz2",
-  "version": 17
+  "version": 1
 }
