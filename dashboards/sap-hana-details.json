@@ -54,7 +54,7 @@
       }
     ]
   },
-  "description": "SAP HANA Details",
+  "description": "Shows detailed stats of a SAP HANA database. Brought to you by SUSE.",
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
@@ -4459,7 +4459,7 @@
     ]
   },
   "timezone": "",
-  "title": "SAP HANA Details",
+  "title": "SAP HANA",
   "uid": "EcC4JDFWz2",
   "version": 1
 }
