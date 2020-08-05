@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Aug  5 11:34:45 UTC 2020 - Stefano Torresi <stefano.torresi@suse.com>
+
+- Release 1.0.1
+  * Remove "detail" word from file names for simplicity
+  * Update title and description
+
+-------------------------------------------------------------------
 Wed Jul  8 11:33:47 UTC 2020 - Stefano Torresi <stefano.torresi@suse.com>
 
 - First release
