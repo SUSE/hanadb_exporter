@@ -3,13 +3,13 @@
 We provide dashboards for Grafana, leveraging the exporter.
 
 
-## SAP HANA Details
+## SAP HANA
 
 This dashboard shows the details of a SAP HANA instance.
 
 It supports both multiple instances and multi-tenancy.
 
-![SAP HANA Details](screenshot-details.png)
+![SAP HANA](screenshot.png)
 
 
 ## Installation
