@@ -35,15 +35,15 @@ Grafana Dashboards displaying metrics about SAP HANA databases.
 %build
 
 %install
-%define dasboards_dir %{_localstatedir}/lib/grafana/dashboards
-install -d -m0755 %{buildroot}%{dasboards_dir}/sles4sap
-install -m644 dashboards/*.json %{buildroot}%{dasboards_dir}/sles4sap
+%define dashboards_dir %{_localstatedir}/lib/grafana/dashboards
+install -d -m0755 %{buildroot}%{dashboards_dir}/sles4sap
+install -m644 dashboards/*.json %{buildroot}%{dashboards_dir}/sles4sap
 
 %files
 %defattr(-,root,root)
 %doc dashboards/README.md
 %license LICENSE
-%attr(0755,grafana,grafana) %dir %{dasboards_dir}/sles4sap
-%attr(0644,grafana,grafana) %config %{dasboards_dir}/sles4sap/*
+%attr(0755,grafana,grafana) %dir %{dashboards_dir}/sles4sap
+%attr(0644,grafana,grafana) %config %{dashboards_dir}/sles4sap/*
 
 %changelog
