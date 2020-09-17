@@ -25,7 +25,7 @@ Source:         %{name}-%{version}.tar.gz
 BuildArch:      noarch
 Requires:       grafana-sap-providers
 BuildRequires:  grafana-sap-providers
-BuildRequires:  shadow
+Requires(pre):  shadow
 
 %description
 Grafana Dashboards displaying metrics about SAP HANA databases.

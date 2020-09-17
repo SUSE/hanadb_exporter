@@ -1,4 +1,10 @@
 -------------------------------------------------------------------
+Thu Sep 17 13:47:04 UTC 2020 - Dario Maiocchi <dmaiocchi@suse.com>
+
+- Release 1.0.3 (jsc#SLE-10545)
+  * create grafana user to fix permission on files/dir
+
+-------------------------------------------------------------------
 Wed Sep 16 13:35:38 UTC 2020 - Dario Maiocchi <dmaiocchi@suse.com>
 
 - Release 1.0.2 (jsc#SLE-10545)
