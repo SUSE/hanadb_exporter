@@ -25,12 +25,19 @@ Source:         %{name}-%{version}.tar.gz
 BuildArch:      noarch
 Requires:       grafana-sap-providers
 BuildRequires:  grafana-sap-providers
+BuildRequires:  shadow
 
 %description
 Grafana Dashboards displaying metrics about SAP HANA databases.
 
 %prep
 %setup -q
+
+
+%pre
+echo "Creating grafana user and group if not present"
+getent group grafana > /dev/null || groupadd -r grafana
+getent passwd grafana > /dev/null || useradd -r -g grafana -d  %{_datadir}/grafana -s /sbin/nologin grafana
 
 %build
 
