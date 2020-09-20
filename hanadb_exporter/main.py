@@ -24,7 +24,11 @@ from hanadb_exporter import prometheus_exporter
 from hanadb_exporter import db_manager
 
 LOGGER = logging.getLogger(__name__)
-CONFIG_FOLDER = '/etc/hanadb_exporter'
+# in new systems /etc/ folder is not used in favor of /usr/etc
+INIT_FILES = [
+       '/usr/etc/hanadb_exporter',
+      '/etc/hanadb_exporter'
+]
 METRICS_FILES = [
     '/etc/hanadb_exporter/metrics.json',
     '/usr/etc/hanadb_exporter/metrics.json'
@@ -79,16 +83,16 @@ def setup_logging(config):
     sys.excepthook = handle_exception
 
 
-def find_metrics_file():
+def lookup_etc_folder(default_paths):
     """
-    Find metrics predefined files in default locations
+    Find predefined files in default locations (METRICS and INIT folder)
+    This is used mainly because /etc location changed to /usr/etc in new systems
     """
-    for metric_file in METRICS_FILES:
-        if os.path.isfile(metric_file):
-            return metric_file
+    for conf_file in default_paths:
+        if os.path.isfile(conf_file):
+            return conf_file
     raise ValueError(
-        'metrics file does not exist in {}'.format(",".join(METRICS_FILES)))
-
+        'configuration file does not exist in {}'.format(",".join(default_paths)))
 
 # Start up the server to expose the metrics.
 def run():
@@ -99,7 +103,9 @@ def run():
     if args.config is not None:
         config = parse_config(args.config)
     elif args.identifier is not None:
-        config = parse_config('{}/{}.json'.format(CONFIG_FOLDER, args.identifier))
+        config_dir = lookup_etc_folder(INIT_FILES)
+        config = parse_config('{}/{}.json'.format(config_dir, args.identifier))
+
     else:
         raise ValueError('configuration file or identifier must be used')
 
@@ -111,7 +117,7 @@ def run():
     if args.metrics:
         metrics = args.metrics
     else:
-        metrics = find_metrics_file()
+        metrics = lookup_etc_folder(METRICS_FILES)
 
     try:
         hana_config = config['hana']
