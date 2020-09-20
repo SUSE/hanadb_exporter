@@ -26,8 +26,8 @@ from hanadb_exporter import db_manager
 LOGGER = logging.getLogger(__name__)
 # in new systems /etc/ folder is not used in favor of /usr/etc
 INIT_FILES = [
-       '/usr/etc/hanadb_exporter',
-      '/etc/hanadb_exporter'
+    '/etc/hanadb_exporter',
+    '/usr/etc/hanadb_exporter'
 ]
 METRICS_FILES = [
     '/etc/hanadb_exporter/metrics.json',

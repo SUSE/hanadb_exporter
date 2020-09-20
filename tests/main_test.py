@@ -102,7 +102,7 @@ class TestMain(object):
         mock_isfile.side_effect = [False, False]
         with pytest.raises(ValueError) as err:
             main.lookup_etc_folder(main.METRICS_FILES)
-        assert 'metrics file does not exist in {}'.format(",".join(main.METRICS_FILES)) in str(err.value)
+        assert 'configuration file does not exist in {}'.format(",".join(main.METRICS_FILES)) in str(err.value)
 
     @mock.patch('hanadb_exporter.main.LOGGER')
     @mock.patch('hanadb_exporter.main.parse_arguments')
@@ -215,9 +215,8 @@ class TestMain(object):
             main.run()
 
         mock_parse_arguments.assert_called_once_with()
-        mock_parse_config.assert_called_once_with("{}/{}.json".format(main.INIT_FILES, 'config'))
+        mock_parse_config.assert_called_once_with("{}/{}.json".format("new_metrics", 'config'))
         mock_setup_logging.assert_called_once_with(config)
-        mock_lookup_etc_folder.assert_called_once_with()
         mock_db_manager.assert_called_once_with()
         db_instance.start.assert_called_once_with(
             '10.10.10.10', 1234, user='user', password='pass',
