@@ -92,16 +92,16 @@ class TestMain(object):
         ])
 
     @mock.patch('os.path.isfile')
-    def test_find_metrics_file(self, mock_isfile):
+    def test_lookup_etc_folder(self, mock_isfile):
         mock_isfile.return_value = True
-        metric_file = main.find_metrics_file()
+        metric_file = main.lookup_etc_folder(main.METRICS_FILES)
         assert metric_file == main.METRICS_FILES[0]
 
     @mock.patch('os.path.isfile')
-    def test_find_metrics_file_error(self, mock_isfile):
+    def test_lookup_etc_folder_error(self, mock_isfile):
         mock_isfile.side_effect = [False, False]
         with pytest.raises(ValueError) as err:
-            main.find_metrics_file()
+            main.lookup_etc_folder(main.METRICS_FILES)
         assert 'metrics file does not exist in {}'.format(",".join(main.METRICS_FILES)) in str(err.value)
 
     @mock.patch('hanadb_exporter.main.LOGGER')
@@ -168,7 +168,7 @@ class TestMain(object):
         mock_sleep.assert_called_once_with(1)
 
     @mock.patch('hanadb_exporter.main.LOGGER')
-    @mock.patch('hanadb_exporter.main.find_metrics_file')
+    @mock.patch('hanadb_exporter.main.lookup_etc_folder')
     @mock.patch('hanadb_exporter.main.parse_arguments')
     @mock.patch('hanadb_exporter.main.parse_config')
     @mock.patch('hanadb_exporter.main.setup_logging')
@@ -181,12 +181,12 @@ class TestMain(object):
     def test_run_defaults(
             self, mock_sleep, mock_get_logger, mock_start_server, mock_registry,
             mock_exporters, mock_db_manager, mock_setup_logging,
-            mock_parse_config, mock_parse_arguments, mock_find_metrics, mock_logger):
+            mock_parse_config, mock_parse_arguments, mock_lookup_etc_folder, mock_logger):
 
         mock_arguments = mock.Mock(config=None, metrics=None, identifier='config')
         mock_parse_arguments.return_value = mock_arguments
 
-        mock_find_metrics.return_value = 'new_metrics'
+        mock_lookup_etc_folder.return_value = 'new_metrics'
 
         config = {
             'hana': {
@@ -215,9 +215,9 @@ class TestMain(object):
             main.run()
 
         mock_parse_arguments.assert_called_once_with()
-        mock_parse_config.assert_called_once_with("{}/{}.json".format(main.CONFIG_FOLDER, 'config'))
+        mock_parse_config.assert_called_once_with("{}/{}.json".format(main.INIT_FILES, 'config'))
         mock_setup_logging.assert_called_once_with(config)
-        mock_find_metrics.assert_called_once_with()
+        mock_lookup_etc_folder.assert_called_once_with()
         mock_db_manager.assert_called_once_with()
         db_instance.start.assert_called_once_with(
             '10.10.10.10', 1234, user='user', password='pass',
