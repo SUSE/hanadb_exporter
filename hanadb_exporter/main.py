@@ -25,9 +25,9 @@ from hanadb_exporter import db_manager
 
 LOGGER = logging.getLogger(__name__)
 # in new systems /etc/ folder is not used in favor of /usr/etc
-CONFIG_FILES = [
-    '/etc/hanadb_exporter',
-    '/usr/etc/hanadb_exporter'
+CONFIG_FILES_DIR = [
+    '/etc/hanadb_exporter/',
+    '/usr/etc/hanadb_exporter/'
 ]
 METRICS_FILES = [
     '/etc/hanadb_exporter/metrics.json',
@@ -85,8 +85,9 @@ def setup_logging(config):
 
 def lookup_etc_folder(config_files_path):
     """
-    Find predefined files in default locations (METRICS and INIT folder)
+    Find predefined files in default locations (METRICS and CONFIG folder)
     This is used mainly because /etc location changed to /usr/etc in new systems
+    return full filename path (e.g: /etc/hanadb_exporter/filename.json)
     """
     for conf_file in config_files_path:
         if os.path.isfile(conf_file):
@@ -103,8 +104,10 @@ def run():
     if args.config is not None:
         config = parse_config(args.config)
     elif args.identifier is not None:
-        config_dir = lookup_etc_folder(CONFIG_FILES)
-        config = parse_config('{}/{}.json'.format(config_dir, args.identifier))
+        file_name = args.identifier + '.json'
+        # determine if file is /etc or /usr/etc
+        config_file = lookup_etc_folder([dirname + file_name for dirname in CONFIG_FILES_DIR])
+        config = parse_config(config_file)
 
     else:
         raise ValueError('configuration file or identifier must be used')

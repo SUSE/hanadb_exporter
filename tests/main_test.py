@@ -215,7 +215,7 @@ class TestMain(object):
             main.run()
 
         mock_parse_arguments.assert_called_once_with()
-        mock_parse_config.assert_called_once_with("{}/{}.json".format("new_metrics", 'config'))
+        mock_parse_config.assert_called_once_with("new_metrics")
         mock_setup_logging.assert_called_once_with(config)
         mock_db_manager.assert_called_once_with()
         db_instance.start.assert_called_once_with(
