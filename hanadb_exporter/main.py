@@ -24,7 +24,11 @@ from hanadb_exporter import prometheus_exporter
 from hanadb_exporter import db_manager
 
 LOGGER = logging.getLogger(__name__)
-CONFIG_FOLDER = '/etc/hanadb_exporter'
+# in new systems /etc/ folder is not used in favor of /usr/etc
+CONFIG_FILES_DIR = [
+    '/etc/hanadb_exporter/',
+    '/usr/etc/hanadb_exporter/'
+]
 METRICS_FILES = [
     '/etc/hanadb_exporter/metrics.json',
     '/usr/etc/hanadb_exporter/metrics.json'
@@ -79,16 +83,17 @@ def setup_logging(config):
     sys.excepthook = handle_exception
 
 
-def find_metrics_file():
+def lookup_etc_folder(config_files_path):
     """
-    Find metrics predefined files in default locations
+    Find predefined files in default locations (METRICS and CONFIG folder)
+    This is used mainly because /etc location changed to /usr/etc in new systems
+    return full filename path (e.g: /etc/hanadb_exporter/filename.json)
     """
-    for metric_file in METRICS_FILES:
-        if os.path.isfile(metric_file):
-            return metric_file
+    for conf_file in config_files_path:
+        if os.path.isfile(conf_file):
+            return conf_file
     raise ValueError(
-        'metrics file does not exist in {}'.format(",".join(METRICS_FILES)))
-
+        'configuration file does not exist in {}'.format(",".join(config_files_path)))
 
 # Start up the server to expose the metrics.
 def run():
@@ -99,7 +104,11 @@ def run():
     if args.config is not None:
         config = parse_config(args.config)
     elif args.identifier is not None:
-        config = parse_config('{}/{}.json'.format(CONFIG_FOLDER, args.identifier))
+        file_name = args.identifier + '.json'
+        # determine if file is /etc or /usr/etc
+        config_file = lookup_etc_folder([dirname + file_name for dirname in CONFIG_FILES_DIR])
+        config = parse_config(config_file)
+
     else:
         raise ValueError('configuration file or identifier must be used')
 
@@ -111,7 +120,7 @@ def run():
     if args.metrics:
         metrics = args.metrics
     else:
-        metrics = find_metrics_file()
+        metrics = lookup_etc_folder(METRICS_FILES)
 
     try:
         hana_config = config['hana']
