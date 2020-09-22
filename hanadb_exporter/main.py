@@ -25,7 +25,7 @@ from hanadb_exporter import db_manager
 
 LOGGER = logging.getLogger(__name__)
 # in new systems /etc/ folder is not used in favor of /usr/etc
-INIT_FILES = [
+CONFIG_FILES = [
     '/etc/hanadb_exporter',
     '/usr/etc/hanadb_exporter'
 ]
@@ -83,16 +83,16 @@ def setup_logging(config):
     sys.excepthook = handle_exception
 
 
-def lookup_etc_folder(default_paths):
+def lookup_etc_folder(config_files_path):
     """
     Find predefined files in default locations (METRICS and INIT folder)
     This is used mainly because /etc location changed to /usr/etc in new systems
     """
-    for conf_file in default_paths:
+    for conf_file in config_files_path:
         if os.path.isfile(conf_file):
             return conf_file
     raise ValueError(
-        'configuration file does not exist in {}'.format(",".join(default_paths)))
+        'configuration file does not exist in {}'.format(",".join(config_files_path)))
 
 # Start up the server to expose the metrics.
 def run():
@@ -103,7 +103,7 @@ def run():
     if args.config is not None:
         config = parse_config(args.config)
     elif args.identifier is not None:
-        config_dir = lookup_etc_folder(INIT_FILES)
+        config_dir = lookup_etc_folder(CONFIG_FILES)
         config = parse_config('{}/{}.json'.format(config_dir, args.identifier))
 
     else:
