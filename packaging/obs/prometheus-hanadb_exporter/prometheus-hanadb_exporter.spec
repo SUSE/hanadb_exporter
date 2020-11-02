@@ -81,10 +81,10 @@ ln -s %{_docdir}/%{name}/logging_config.ini  %{_sysconfdir}/%{shortname}/logging
 %service_add_pre %{name}@.service
 
 %preun
-%service_del_preun -n %{name}@.service
+%service_del_preun %{name}@.service
 
 %postun
-%service_del_postun -n %{name}@.service
+%service_del_postun %{name}@.service
 
 %if %{with test}
 %check
