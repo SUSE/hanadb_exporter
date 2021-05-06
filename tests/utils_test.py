@@ -79,3 +79,23 @@ class TestUtils(object):
             utils.check_hana_range('1.0.0.0', ['1.0.0.0', '2.0.0.0', '3.0.0.0'])
 
         assert 'provided availability range does not have the correct number of elements' in str(err.value)
+
+    @mock.patch('os.getenv')
+    @mock.patch('socket.socket')
+    def test_systemd_ready_error(self, mock_socket, mock_getenv):
+        mock_getenv.return_value = None
+        with pytest.raises(utils.NotSystemdException) as err:
+            utils.systemd_ready()
+
+        assert 'Exporter is not running as systemd deamon' in str(err.value)
+
+    @mock.patch('os.getenv')
+    @mock.patch('socket.socket')
+    def test_systemd_ready(self, mock_socket, mock_getenv):
+        mock_getenv.return_value = '@notify'
+        sock_instance = mock.Mock()
+        mock_socket.return_value = sock_instance
+        utils.systemd_ready()
+
+        sock_instance.connect.assert_called_once_with('\0notify')
+        sock_instance.sendall.assert_called_once_with(b'READY=1')

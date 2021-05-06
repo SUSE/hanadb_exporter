@@ -22,6 +22,7 @@ from prometheus_client import start_http_server
 
 from hanadb_exporter import prometheus_exporter
 from hanadb_exporter import db_manager
+from hanadb_exporter import utils
 
 LOGGER = logging.getLogger(__name__)
 # in new systems /etc/ folder is not used in favor of /usr/etc
@@ -52,6 +53,10 @@ def parse_arguments():
         "-c", "--config", help="Path to hanadb_exporter configuration file")
     parser.add_argument(
         "-m", "--metrics", help="Path to hanadb_exporter metrics file")
+    parser.add_argument(
+        "-d", "--daemon", default=False,
+        help="Start the exporter as a systemd daemon. Only used when the the application "\
+             "is managed by systemd")
     parser.add_argument(
         "--identifier", help="Identifier of the configuration file from /etc/hanadb_exporter")
     parser.add_argument(
@@ -131,9 +136,12 @@ def run():
             password=hana_config.get('password', ''),
             userkey=hana_config.get('userkey', None),
             multi_tenant=config.get('multi_tenant', True),
-            timeout=config.get('timeout', 600))
+            timeout=config.get('timeout', 30))
     except KeyError as err:
         raise KeyError('Configuration file {} is malformed: {} not found'.format(args.config, err))
+
+    if args.daemon:
+        utils.systemd_ready()
 
     connectors = dbs.get_connectors()
     collector = prometheus_exporter.SapHanaCollectors(connectors=connectors, metrics_file=metrics)

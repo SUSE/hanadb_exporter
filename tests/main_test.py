@@ -57,6 +57,9 @@ class TestMain(object):
             mock.call(
                 "-m", "--metrics", help="Path to hanadb_exporter metrics file"),
             mock.call(
+                "-d", "--daemon", default=False, help="Start the exporter as a systemd daemon. Only used when the the application "\
+                     "is managed by systemd"),
+            mock.call(
                 "--identifier",
                 help="Identifier of the configuration file from /etc/hanadb_exporter"),
             mock.call(
@@ -104,6 +107,7 @@ class TestMain(object):
             main.lookup_etc_folder(main.METRICS_FILES)
         assert 'configuration file does not exist in {}'.format(",".join(main.METRICS_FILES)) in str(err.value)
 
+    @mock.patch('hanadb_exporter.utils.systemd_ready')
     @mock.patch('hanadb_exporter.main.LOGGER')
     @mock.patch('hanadb_exporter.main.parse_arguments')
     @mock.patch('hanadb_exporter.main.parse_config')
@@ -117,9 +121,9 @@ class TestMain(object):
     def test_run(
             self, mock_sleep, mock_get_logger, mock_start_server, mock_registry,
             mock_exporters, mock_db_manager, mock_setup_logging,
-            mock_parse_config, mock_parse_arguments, mock_logger):
+            mock_parse_config, mock_parse_arguments, mock_logger, mock_systemd):
 
-        mock_arguments = mock.Mock(config='config', metrics='metrics')
+        mock_arguments = mock.Mock(config='config', metrics='metrics', daemon=False)
         mock_parse_arguments.return_value = mock_arguments
 
         config = {
@@ -154,7 +158,7 @@ class TestMain(object):
         mock_db_manager.assert_called_once_with()
         db_instance.start.assert_called_once_with(
             '10.10.10.10', 1234, user='user', password='pass',
-            userkey=None, multi_tenant=True, timeout=600)
+            userkey=None, multi_tenant=True, timeout=30)
         db_instance.get_connectors.assert_called_once_with()
         mock_exporters.assert_called_once_with(
             connectors='connectors', metrics_file='metrics')
@@ -166,7 +170,9 @@ class TestMain(object):
         ])
         mock_start_server.assert_called_once_with(9668, '0.0.0.0')
         mock_sleep.assert_called_once_with(1)
+        assert mock_systemd.call_count == 0
 
+    @mock.patch('hanadb_exporter.utils.systemd_ready')
     @mock.patch('hanadb_exporter.main.LOGGER')
     @mock.patch('hanadb_exporter.main.lookup_etc_folder')
     @mock.patch('hanadb_exporter.main.parse_arguments')
@@ -180,10 +186,10 @@ class TestMain(object):
     @mock.patch('time.sleep')
     def test_run_defaults(
             self, mock_sleep, mock_get_logger, mock_start_server, mock_registry,
-            mock_exporters, mock_db_manager, mock_setup_logging,
-            mock_parse_config, mock_parse_arguments, mock_lookup_etc_folder, mock_logger):
+            mock_exporters, mock_db_manager, mock_setup_logging, mock_parse_config,
+            mock_parse_arguments, mock_lookup_etc_folder, mock_logger, mock_systemd):
 
-        mock_arguments = mock.Mock(config=None, metrics=None, identifier='config')
+        mock_arguments = mock.Mock(config=None, metrics=None, identifier='config', daemon=True)
         mock_parse_arguments.return_value = mock_arguments
 
         mock_lookup_etc_folder.return_value = 'new_metrics'
@@ -220,7 +226,7 @@ class TestMain(object):
         mock_db_manager.assert_called_once_with()
         db_instance.start.assert_called_once_with(
             '10.10.10.10', 1234, user='user', password='pass',
-            userkey=None, multi_tenant=True, timeout=600)
+            userkey=None, multi_tenant=True, timeout=30)
         db_instance.get_connectors.assert_called_once_with()
         mock_exporters.assert_called_once_with(
             connectors='connectors', metrics_file='new_metrics')
@@ -232,6 +238,7 @@ class TestMain(object):
         ])
         mock_start_server.assert_called_once_with(9668, '0.0.0.0')
         mock_sleep.assert_called_once_with(1)
+        mock_systemd.assert_called_once_with()
 
     @mock.patch('hanadb_exporter.main.parse_arguments')
     def test_run_invalid_args(self, mock_parse_arguments):

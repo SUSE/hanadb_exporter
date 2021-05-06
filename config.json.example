@@ -1,7 +1,7 @@
 {
   "exposition_port": 9668,
   "multi_tenant": true,
-  "timeout": 600,
+  "timeout": 30,
   "hana": {
     "host": "localhost",
     "port": 30013,

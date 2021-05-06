@@ -3,8 +3,8 @@ Description=SAP HANA database metrics exporter
 Documentation=https://github.com/SUSE/hanadb_exporter
 
 [Service]
-Type=simple
-ExecStart=/usr/bin/hanadb_exporter --identifier %i
+Type=notify
+ExecStart=/usr/bin/hanadb_exporter --identifier %i --daemon
 
 [Install]
 WantedBy=multi-user.target

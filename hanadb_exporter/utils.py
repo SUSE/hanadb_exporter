@@ -8,7 +8,15 @@ Generic methods
 :since: 2019-07-04
 """
 
+import socket
+import os
+
 from distutils import version
+
+class NotSystemdException(Exception):
+    """
+    The exporter is not running as systemd daemon
+    """
 
 # TODO: this method could go in shaptools itself, providing the query return formatted if
 # it is requested (returning a list of dictionaries like this method)
@@ -50,3 +58,17 @@ def check_hana_range(hana_version, availability_range):
         return version.LooseVersion(hana_version) >= version.LooseVersion(availability_range[0]) \
             and version.LooseVersion(hana_version) <= version.LooseVersion(availability_range[1])
     raise ValueError('provided availability range does not have the correct number of elements')
+
+def systemd_ready():
+    """
+    Notify the systemd deamon that the service is READY
+    """
+    soc = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    addr = os.getenv('NOTIFY_SOCKET')
+    if not addr:
+        raise NotSystemdException("Exporter is not running as systemd deamon")
+
+    if addr[0] == '@':
+        addr = '\0' + addr[1:]
+    soc.connect(addr)
+    soc.sendall(b'READY=1')
