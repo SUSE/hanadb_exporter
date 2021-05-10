@@ -54,7 +54,7 @@ def parse_arguments():
     parser.add_argument(
         "-m", "--metrics", help="Path to hanadb_exporter metrics file")
     parser.add_argument(
-        "-d", "--daemon", default=False,
+        "-d", "--daemon", action="store_true",
         help="Start the exporter as a systemd daemon. Only used when the the application "\
              "is managed by systemd")
     parser.add_argument(

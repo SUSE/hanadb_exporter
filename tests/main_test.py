@@ -57,7 +57,7 @@ class TestMain(object):
             mock.call(
                 "-m", "--metrics", help="Path to hanadb_exporter metrics file"),
             mock.call(
-                "-d", "--daemon", default=False, help="Start the exporter as a systemd daemon. Only used when the the application "\
+                "-d", "--daemon", action="store_true", help="Start the exporter as a systemd daemon. Only used when the the application "\
                      "is managed by systemd"),
             mock.call(
                 "--identifier",
