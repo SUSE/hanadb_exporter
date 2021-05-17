@@ -1,7 +1,7 @@
 #
 # spec file for package prometheus-hanadb_exporter
 #
-# Copyright (c) 2019-2020 SUSE LLC
+# Copyright (c) 2021 SUSE LLC
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -12,7 +12,7 @@
 # license that conforms to the Open Source Definition (Version 1.9)
 # published by the Open Source Initiative.
 
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
+# Please submit bugfixes or comments via https://bugs.opensuse.org/
 
 %if 0%{?suse_version} < 1500
 %bcond_with test
@@ -30,7 +30,7 @@ Release:        0
 Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0
 Group:          System/Monitoring
-Url:            https://github.com/SUSE/hanadb_exporter
+URL:            https://github.com/SUSE/hanadb_exporter
 Source:         %{name}-%{version}.tar.gz
 %if %{with test}
 BuildRequires:  python3-pytest
@@ -40,8 +40,8 @@ Provides:       hanadb_exporter = %{version}-%{release}
 BuildRequires:  fdupes
 BuildRequires:  systemd-rpm-macros
 %{?systemd_requires}
-Requires:       python3-shaptools >= 0.3.2
 Requires:       python3-prometheus_client >= 0.6.0
+Requires:       python3-shaptools >= 0.3.2
 BuildArch:      noarch
 
 %description
