@@ -20,6 +20,7 @@ import argparse
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 
+from hanadb_exporter import __version__
 from hanadb_exporter import prometheus_exporter
 from hanadb_exporter import db_manager
 from hanadb_exporter import utils
@@ -62,6 +63,9 @@ def parse_arguments():
     parser.add_argument(
         "-v", "--verbosity",
         help="Python logging level. Options: DEBUG, INFO, WARN, ERROR (INFO by default)")
+    parser.add_argument(
+        "-V", "--version", action="store_true",
+        help="Print the hanadb_exporter version")
     args = parser.parse_args()
     return args
 
@@ -106,6 +110,10 @@ def run():
     Main execution
     """
     args = parse_arguments()
+    if args.version:
+        # pylint:disable=C0325
+        print("hanadb_exporter %s" % (__version__))
+        return
     if args.config is not None:
         config = parse_config(args.config)
     elif args.identifier is not None:
