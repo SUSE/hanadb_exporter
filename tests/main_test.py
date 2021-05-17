@@ -27,6 +27,7 @@ sys.modules['shaptools'] = mock.MagicMock()
 sys.modules['prometheus_client'] = mock.MagicMock()
 sys.modules['prometheus_client.core'] = mock.MagicMock()
 
+from hanadb_exporter import __version__
 from hanadb_exporter import main
 
 
@@ -64,12 +65,23 @@ class TestMain(object):
                 help="Identifier of the configuration file from /etc/hanadb_exporter"),
             mock.call(
                 "-v", "--verbosity",
-                help="Python logging level. Options: DEBUG, INFO, WARN, ERROR (INFO by default)")
+                help="Python logging level. Options: DEBUG, INFO, WARN, ERROR (INFO by default)"),
+            mock.call(
+                "-V", "--version", action="store_true",
+                help="Print the hanadb_exporter version")
         ])
 
         mocked_parser.parse_args.assert_called_once_with()
 
         assert parsed_arguments == 'parsed_arguments'
+
+    @mock.patch('hanadb_exporter.main.parse_arguments')
+    @mock.patch('builtins.print')
+    def test_version(self, mock_print, mock_parse_arguments):
+        mock_arguments = mock.Mock(version=True)
+        mock_parse_arguments.return_value = mock_arguments
+        main.run()
+        mock_print.assert_called_once_with('hanadb_exporter %s' % (__version__))
 
     @mock.patch('hanadb_exporter.main.fileConfig')
     def test_setup_logging(self, mock_file_config):
@@ -123,7 +135,7 @@ class TestMain(object):
             mock_exporters, mock_db_manager, mock_setup_logging,
             mock_parse_config, mock_parse_arguments, mock_logger, mock_systemd):
 
-        mock_arguments = mock.Mock(config='config', metrics='metrics', daemon=False)
+        mock_arguments = mock.Mock(config='config', metrics='metrics', daemon=False, version=False)
         mock_parse_arguments.return_value = mock_arguments
 
         config = {
@@ -189,7 +201,8 @@ class TestMain(object):
             mock_exporters, mock_db_manager, mock_setup_logging, mock_parse_config,
             mock_parse_arguments, mock_lookup_etc_folder, mock_logger, mock_systemd):
 
-        mock_arguments = mock.Mock(config=None, metrics=None, identifier='config', daemon=True)
+        mock_arguments = mock.Mock(
+            config=None, metrics=None, identifier='config', daemon=True, version=False)
         mock_parse_arguments.return_value = mock_arguments
 
         mock_lookup_etc_folder.return_value = 'new_metrics'
@@ -243,7 +256,7 @@ class TestMain(object):
     @mock.patch('hanadb_exporter.main.parse_arguments')
     def test_run_invalid_args(self, mock_parse_arguments):
 
-        mock_arguments = mock.Mock(config=None, identifier=None)
+        mock_arguments = mock.Mock(config=None, identifier=None, version=False)
         mock_parse_arguments.return_value = mock_arguments
 
         with pytest.raises(ValueError) as err:
@@ -261,7 +274,8 @@ class TestMain(object):
             self, mock_logging, mock_get_logger, mock_db_manager,
             mock_parse_config, mock_parse_arguments, mock_logger):
 
-        mock_arguments = mock.Mock(config='config', metrics='metrics', verbosity='DEBUG')
+        mock_arguments = mock.Mock(
+            config='config', metrics='metrics', verbosity='DEBUG', version=False)
         mock_parse_arguments.return_value = mock_arguments
 
         config = {
