@@ -60,9 +60,14 @@ WHERE COORDINATOR_TYPE='MASTER' AND SQL_PORT<>0"""
             # If userkey is used database name must be added to connect to tenants
             if connection_data.get('userkey'):
                 connection_data['databaseName'] = database
-            conn.connect(
-                host, tenant_port, **connection_data)
-            self._db_connectors.append(conn)
+            try:
+                conn.connect(
+                    host, tenant_port, **connection_data)
+                self._db_connectors.append(conn)
+                self._logger.info('Connected succesfully to TENANT database %s', database)
+            except hdb_connector.connectors.base_connector.ConnectionError as err:
+                self._logger.warn(
+                    'Could not connect to TENANT database %s with error: %s', database, str(err))
 
     def _get_connection_data(self, userkey, user, password):
         """
