@@ -108,6 +108,41 @@ class TestDatabaseManager(object):
 
         assert self._db_manager._db_connectors == [mock_conn1, mock_conn2, mock_conn3]
 
+    @mock.patch('logging.Logger.warn')
+    @mock.patch('hanadb_exporter.db_manager.hdb_connector.connectors.base_connector')
+    @mock.patch('hanadb_exporter.db_manager.hdb_connector.HdbConnector')
+    def test_connect_tenants_error_connecting(self, mock_hdb, mock_connector, mock_warn):
+
+        self._db_manager._get_tenants_port = mock.Mock(return_value=[
+            ('db1', 1), ('db2', 2),('db3', 3)])
+
+        mock_connector.ConnectionError = Exception
+        mock_conn1 = mock.Mock()
+        mock_conn2 = mock.Mock()
+        mock_conn3 = mock.Mock()
+        mock_conn3.connect.side_effect = mock_connector.ConnectionError('err')
+
+        mock_hdb.side_effect = [mock_conn1, mock_conn2, mock_conn3]
+
+        connection_data = {'mock_data': 'data', 'userkey': 'userkey'}
+        updated_connection_data = [
+            {'mock_data': 'data', 'userkey': 'userkey', 'databaseName': 'db1'},
+            {'mock_data': 'data', 'userkey': 'userkey', 'databaseName': 'db2'},
+            {'mock_data': 'data', 'userkey': 'userkey', 'databaseName': 'db3'}
+        ]
+
+        self._db_manager._connect_tenants('10.10.10.10', connection_data)
+
+        assert mock_hdb.call_count == 3
+
+        mock_conn1.connect.assert_called_once_with('10.10.10.10', 1, **updated_connection_data[0])
+        mock_conn2.connect.assert_called_once_with('10.10.10.10', 2, **updated_connection_data[1])
+        mock_conn3.connect.assert_called_once_with('10.10.10.10', 3, **updated_connection_data[2])
+
+        assert self._db_manager._db_connectors == [mock_conn1, mock_conn2]
+        mock_warn.assert_called_once_with(
+            'Could not connect to TENANT database %s with error: %s', 'db3', str('err'))
+
     def test_get_connection_data_invalid_data(self):
 
         with pytest.raises(ValueError) as err:
