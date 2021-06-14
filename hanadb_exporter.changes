@@ -1,8 +1,0 @@
--------------------------------------------------------------------
-Fri Jun 11 19:30:21 UTC 2021 - Bernd Schubert <bschubert@suse.com>
-
-- The HANA system replication history panel could not show data, because of 
-  the node_name variable does not match to the output string from the exporter. 
-  Changing "host=" value to "src_host=" solves the issue. Fix is tested with 
-  HANA SPS040 and HANA SPS050.
-  https://bugzilla.suse.com/show_bug.cgi?id=1187243
