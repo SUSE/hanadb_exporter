@@ -3029,7 +3029,7 @@
       ],
       "targets": [
         {
-          "expr": "hanadb_sr_takeover_replication_status{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} + 0",
+          "expr": "hanadb_sr_takeover_replication_status{src_host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} + 0",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
@@ -3037,7 +3037,7 @@
           "refId": "A"
         },
         {
-          "expr": "hanadb_sr_takeover_duration_time_seconds{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} + 0",
+          "expr": "hanadb_sr_takeover_duration_time_seconds{src_host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} + 0",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
@@ -3045,7 +3045,7 @@
           "refId": "B"
         },
         {
-          "expr": "hanadb_sr_takeover_log_position_bigint{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} + 0",
+          "expr": "hanadb_sr_takeover_log_position_bigint{src_host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} + 0",
           "format": "table",
           "instant": true,
           "interval": "",
@@ -3054,7 +3054,7 @@
           "refId": "C"
         },
         {
-          "expr": "hanadb_sr_takeover_shipped_log_position_bigint{host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} + 0",
+          "expr": "hanadb_sr_takeover_shipped_log_position_bigint{src_host=~\"$node_name\",sid=~\"$sid\",insnr=~\"$instance_number\",database_name=~\"$database_name\"} + 0",
           "format": "table",
           "instant": true,
           "intervalFactor": 1,
