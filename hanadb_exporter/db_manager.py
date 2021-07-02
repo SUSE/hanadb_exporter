@@ -15,6 +15,7 @@ from shaptools import hdb_connector
 from hanadb_exporter import utils
 
 RECONNECTION_INTERVAL = 15
+SCALE_OUT_TIME_OUT= 54000 # exporter will wait for 30 minutes for system db to be up on any other host.
 
 
 class UserKeyNotSupportedError(ValueError):
@@ -32,10 +33,14 @@ class DatabaseManager(object):
 """SELECT DATABASE_NAME,SQL_PORT FROM SYS_DATABASES.M_SERVICES
 WHERE COORDINATOR_TYPE='MASTER' AND SQL_PORT<>0"""
 
+    HOSTS_DATA_QUERY = \
+"""SELECT HOST from M_LANDSCAPE_HOST_CONFIGURATION WHERE HOST_ACTIVE='YES'"""
+
     def __init__(self):
         self._logger = logging.getLogger(__name__)
         self._system_db_connector = hdb_connector.HdbConnector()
         self._db_connectors = []
+        self._connection_data = {}
 
     def _get_tenants_port(self):
         """
@@ -87,10 +92,11 @@ WHERE COORDINATOR_TYPE='MASTER' AND SQL_PORT<>0"""
             raise ValueError(
                 'Provided user data is not valid. userkey or user/password pair must be provided')
 
-        return {'userkey': userkey,
-                'user': user,
-                'password': password,
-                'RECONNECT': 'FALSE'}
+        self._connection_data = {'userkey': userkey,
+                                 'user': user,
+                                 'password': password,
+                                 'RECONNECT': 'FALSE'}
+        return self._connection_data
 
     def start(self, host, port, **kwargs):
         """
@@ -139,3 +145,42 @@ WHERE COORDINATOR_TYPE='MASTER' AND SQL_PORT<>0"""
         Get the connectors
         """
         return self._db_connectors
+
+    def get_active_master_host(self, hosts, master_host, master_port):
+        """
+        Check if the connection to MASTER host is up, otherwise find and return the current active MASTER host.
+        """
+        if self._system_db_connector.isconnected():
+            return master_host
+        else:
+            self._logger.info('Master host=%s is not active, scale-out is enable, looking for new Master..', str(master_host))
+            current_time = time.time()
+            timeout = current_time + SCALE_OUT_TIME_OUT
+            while current_time <= timeout:
+                for host in hosts:
+                    conn = hdb_connector.HdbConnector()
+                    try:
+                        conn.connect(host, master_port, self._connection_data)
+                        self._logger.info('System database is up on a new host: %s', str(host))
+                        return host
+                    except hdb_connector.connectors.base_connector.ConnectionError:
+                        pass
+
+                time.sleep(RECONNECTION_INTERVAL)
+                current_time = time.time()
+            else:
+                raise hdb_connector.connectors.base_connector.ConnectionError(
+                    'Unable to connect to system database on any host.')
+
+    def get_database_hosts(self):
+        """
+        Get database hosts
+        """
+        hosts = []
+        data = self._system_db_connector.query(self.HOSTS_DATA_QUERY)
+        formatted_data = utils.format_query_result(data)
+        for row_data in formatted_data:
+            hosts.append(row_data['HOST'])
+
+        self._logger.info('Current HANA system hosts: %s', hosts)
+        return hosts

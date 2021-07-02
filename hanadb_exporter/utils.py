@@ -59,6 +59,7 @@ def check_hana_range(hana_version, availability_range):
             and version.LooseVersion(hana_version) <= version.LooseVersion(availability_range[1])
     raise ValueError('provided availability range does not have the correct number of elements')
 
+
 def systemd_ready():
     """
     Notify the systemd deamon that the service is READY
@@ -72,3 +73,7 @@ def systemd_ready():
         addr = '\0' + addr[1:]
     soc.connect(addr)
     soc.sendall(b'READY=1')
+
+
+def get_hostname():
+    return socket.gethostname()

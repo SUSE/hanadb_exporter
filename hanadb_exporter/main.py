@@ -105,6 +105,43 @@ def lookup_etc_folder(config_files_path):
     raise ValueError(
         'configuration file does not exist in {}'.format(",".join(config_files_path)))
 
+
+def register_connectors(hosts, current_host, master_host):
+    """
+    True: if the current host is the MASTER host, or if the exporter is running on a standalone host.
+    False: if the current host is a WORKER host.
+    """
+    if current_host == master_host or current_host not in hosts:
+        return True
+    else:
+        return False
+
+
+def start(db_manager, host, port, user, password, userkey, scale_out_mode, multi_tenant, timeout, metrics):
+    db_manager.start(
+        host, port,
+        user=user,
+        password=password,
+        userkey=userkey,
+        multi_tenant=multi_tenant,
+        timeout=timeout)
+
+    connectors = db_manager.get_connectors()
+    collector = prometheus_exporter.SapHanaCollectors(connectors=connectors, metrics_file=metrics)
+    hosts = db_manager.get_database_hosts()
+    LOGGER.info('current_host: ' + utils.get_hostname())
+    if scale_out_mode:
+        LOGGER.info('scale_out_mode mode is enabled')
+        if register_connectors(hosts, current_host=utils.get_hostname(), master_host=host):
+            REGISTRY.register(collector)
+            LOGGER.info('exporter successfully registered')
+        else:
+            LOGGER.info('Exporter is in stand by mode for scale-out handling')
+
+    else:
+        REGISTRY.register(collector)
+        LOGGER.info('exporter successfully registered')
+
 # Start up the server to expose the metrics.
 def run():
     """
@@ -139,10 +176,13 @@ def run():
     try:
         hana_config = config['hana']
         dbs = db_manager.DatabaseManager()
-        user=hana_config.get('user', '')
-        password=hana_config.get('password', '')
-        userkey=hana_config.get('userkey', None)
-        aws_secret_name=hana_config.get('aws_secret_name', '')
+        host = hana_config['host']
+        port = hana_config.get('port', 30013)
+        user = hana_config.get('user', '')
+        password = hana_config.get('password', '')
+        userkey = hana_config.get('userkey', None)
+        aws_secret_name = hana_config.get('aws_secret_name', '')
+        scale_out_mode = hana_config.get('scale_out_mode', False)
 
         if aws_secret_name:
             LOGGER.info('AWS secret name is going to be used to read the database username and password')
@@ -150,28 +190,41 @@ def run():
             user = db_credentials["username"]
             password = db_credentials["password"]
 
-        dbs.start(
-            hana_config['host'], hana_config.get('port', 30013),
+        start(
+            db_manager=dbs, host=host, port=port,
             user=user,
             password=password,
             userkey=userkey,
+            scale_out_mode=scale_out_mode,
             multi_tenant=config.get('multi_tenant', True),
-            timeout=config.get('timeout', 30))
+            timeout=config.get('timeout', 30),
+            metrics=metrics)
     except KeyError as err:
         raise KeyError('Configuration file {} is malformed: {} not found'.format(args.config, err))
 
     if args.daemon:
         utils.systemd_ready()
 
-    connectors = dbs.get_connectors()
-    collector = prometheus_exporter.SapHanaCollectors(connectors=connectors, metrics_file=metrics)
-    REGISTRY.register(collector)
-    LOGGER.info('exporter successfully registered')
+    all_database_hosts = dbs.get_database_hosts()
 
     LOGGER.info('starting to serve metrics')
     start_http_server(config.get('exposition_port', 9668), '0.0.0.0')
     while True:
+        master_host = dbs.get_active_master_host(all_database_hosts, host, port)
+
+        if host != master_host:
+            host = master_host
+            start(
+                db_manager=dbs, host=master_host, port=port,
+                user=user,
+                password=password,
+                userkey=userkey,
+                scale_out_mode=scale_out_mode,
+                multi_tenant=config.get('multi_tenant', True),
+                timeout=config.get('timeout', 30),
+                metrics=metrics)
         time.sleep(1)
 
-if __name__ == "__main__": # pragma: no cover
+
+if __name__ == "__main__":  # pragma: no cover
     run()

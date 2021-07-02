@@ -138,9 +138,10 @@ class TestMain(object):
         mock_arguments = mock.Mock(config='config', metrics='metrics', daemon=False, version=False)
         mock_parse_arguments.return_value = mock_arguments
 
+        host = '10.10.10.10'
         config = {
             'hana': {
-                'host': '10.10.10.10',
+                'host': host,
                 'port': 1234,
                 'user': 'user',
                 'password': 'pass'
@@ -154,6 +155,8 @@ class TestMain(object):
 
         db_instance = mock.Mock()
         db_instance.get_connectors.return_value = 'connectors'
+        db_instance.get_database_hosts.return_value = [host]
+        db_instance.get_active_master_host.return_value = host
         mock_db_manager.return_value = db_instance
 
         mock_collector = mock.Mock()
@@ -169,7 +172,7 @@ class TestMain(object):
         mock_setup_logging.assert_called_once_with(config)
         mock_db_manager.assert_called_once_with()
         db_instance.start.assert_called_once_with(
-            '10.10.10.10', 1234, user='user', password='pass',
+            host, 1234, user='user', password='pass',
             userkey=None, multi_tenant=True, timeout=30)
         db_instance.get_connectors.assert_called_once_with()
         mock_exporters.assert_called_once_with(
@@ -206,10 +209,10 @@ class TestMain(object):
         mock_parse_arguments.return_value = mock_arguments
 
         mock_lookup_etc_folder.return_value = 'new_metrics'
-
+        host = '10.10.10.10'
         config = {
             'hana': {
-                'host': '10.10.10.10',
+                'host': host,
                 'port': 1234,
                 'user': 'user',
                 'password': 'pass'
@@ -223,6 +226,8 @@ class TestMain(object):
 
         db_instance = mock.Mock()
         db_instance.get_connectors.return_value = 'connectors'
+        db_instance.get_database_hosts.return_value = [host]
+        db_instance.get_active_master_host.return_value = host
         mock_db_manager.return_value = db_instance
 
         mock_collector = mock.Mock()
@@ -238,7 +243,7 @@ class TestMain(object):
         mock_setup_logging.assert_called_once_with(config)
         mock_db_manager.assert_called_once_with()
         db_instance.start.assert_called_once_with(
-            '10.10.10.10', 1234, user='user', password='pass',
+            host, 1234, user='user', password='pass',
             userkey=None, multi_tenant=True, timeout=30)
         db_instance.get_connectors.assert_called_once_with()
         mock_exporters.assert_called_once_with(
@@ -321,9 +326,10 @@ class TestMain(object):
             'password': 'db_pass'
         }
 
+        host = '10.10.10.10'
         config = {
             'hana': {
-                'host': '10.10.10.10',
+                'host': host,
                 'port': 1234,
                 'aws_secret_name': 'db_secret',
                 'user': 'user',
@@ -339,6 +345,8 @@ class TestMain(object):
 
         db_instance = mock.Mock()
         db_instance.get_connectors.return_value = 'connectors'
+        db_instance.get_database_hosts.return_value = [host]
+        db_instance.get_active_master_host.return_value = host
         mock_db_manager.return_value = db_instance
 
         mock_collector = mock.Mock()
@@ -354,7 +362,7 @@ class TestMain(object):
         mock_setup_logging.assert_called_once_with(config)
         mock_db_manager.assert_called_once_with()
         db_instance.start.assert_called_once_with(
-            '10.10.10.10', 1234, user='db_user', password='db_pass',
+            host, 1234, user='db_user', password='db_pass',
             userkey=None, multi_tenant=True, timeout=30)
         db_instance.get_connectors.assert_called_once_with()
         mock_exporters.assert_called_once_with(
@@ -365,7 +373,7 @@ class TestMain(object):
             mock.call('AWS secret name is going to be used to read the database username and password'),
             mock.call('exporter successfully registered'),
             mock.call('starting to serve metrics')
-        ])
+        ], any_order=True)
         mock_start_server.assert_called_once_with(9668, '0.0.0.0')
         mock_sleep.assert_called_once_with(1)
         assert mock_systemd.call_count == 0
