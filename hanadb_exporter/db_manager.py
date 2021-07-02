@@ -82,7 +82,7 @@ WHERE COORDINATOR_TYPE='MASTER' AND SQL_PORT<>0"""
                 self._logger.warn(
                     'userkey will be used to create the connection. user/password are omitted')
         elif user and password:
-            self._logger.info('user/password combination will be used to connect to the databse')
+            self._logger.info('user/password combination will be used to connect to the database')
         else:
             raise ValueError(
                 'Provided user data is not valid. userkey or user/password pair must be provided')
