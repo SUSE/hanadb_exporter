@@ -41,7 +41,7 @@ jobs:
 
   obs-commit:
     needs: test
-    if: github.ref == 'refs/heads/master'
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     container: shap/continuous_deliver
     env:
