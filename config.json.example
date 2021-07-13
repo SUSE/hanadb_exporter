@@ -6,7 +6,8 @@
     "host": "localhost",
     "port": 30013,
     "user": "SYSTEM",
-    "password": "PASSWORD"
+    "password": "PASSWORD",
+    "ssl": false
   },
   "logging": {
     "config_file": "./logging_config.ini",
