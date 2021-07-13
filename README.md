@@ -86,6 +86,8 @@ important items in the configuration file:
   - `hana.userkey`: Stored user key. This is the secure option if you don't want to have the password in the configuration file. The `userkey` and `user/password` are self exclusive being the first the default if both options are set.
   - `hana.user`: An existing user with access right to the SAP HANA database.
   - `hana.password`: Password of an existing user.
+  - `hana.ssl`: Enable SSL connection (False by default). Only available for `dbapi` connector
+  - `hana.ssl_validate_cert`: Enable SSL certification validation. This field is required by HANA cloud. Only available for `dbapi` connector
   - `logging.config_file`: Python logging system configuration file (by default WARN and ERROR level messages will be sent to the syslog)
   - `logging.log_file`: Logging file (/var/log/hanadb_exporter.log by default)
 
