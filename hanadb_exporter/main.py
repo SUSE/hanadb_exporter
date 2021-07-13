@@ -145,7 +145,8 @@ def run():
             userkey=hana_config.get('userkey', None),
             multi_tenant=config.get('multi_tenant', True),
             timeout=config.get('timeout', 30),
-            ssl=config.get('ssl', False))
+            ssl=hana_config.get('ssl', False),
+            ssl_validate_cert=hana_config.get('ssl_validate_cert', False))
     except KeyError as err:
         raise KeyError('Configuration file {} is malformed: {} not found'.format(args.config, err))
 

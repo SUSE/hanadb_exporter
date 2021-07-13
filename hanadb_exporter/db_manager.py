@@ -108,7 +108,7 @@ WHERE COORDINATOR_TYPE='MASTER' AND SQL_PORT<>0"""
             'password': password,
             'RECONNECT': 'FALSE',
             'encrypt': ssl,
-            'sslValidateCertificate': ssl,
+            'sslValidateCertificate': kwargs.get('ssl_validate_cert', False) if ssl else False,
             'sslTrustStore': trust_store if ssl and CERTIFI_INSTALLED else None
         }
 
@@ -126,12 +126,14 @@ WHERE COORDINATOR_TYPE='MASTER' AND SQL_PORT<>0"""
             multi_tenant (bool): Connect to all tenants checking the data in the System database
             timeout (int, opt): Timeout in seconds to connect to the System database
             ssl (bool, opt): Enable SSL connection
+            ssl_validate_cert (bool, opt): Validate SSL certificate. Required in HANA cloud
         """
         connection_data = self._get_connection_data(
             kwargs.get('userkey', None),
             kwargs.get('user', ''),
             kwargs.get('password', ''),
-            ssl=kwargs.get('ssl', False)
+            ssl=kwargs.get('ssl', False),
+            ssl_validate_cert=kwargs.get('ssl_validate_cert', False)
         )
 
         current_time = time.time()

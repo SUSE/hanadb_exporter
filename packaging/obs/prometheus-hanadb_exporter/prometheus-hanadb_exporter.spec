@@ -34,6 +34,7 @@ URL:            https://github.com/SUSE/hanadb_exporter
 Source:         %{name}-%{version}.tar.gz
 %if %{with test}
 BuildRequires:  python3-pytest
+BuildRequires:  python3-certifi
 %endif
 BuildRequires:  python3-setuptools
 Provides:       hanadb_exporter = %{version}-%{release}

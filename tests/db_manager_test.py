@@ -215,7 +215,8 @@ class TestDatabaseManager(object):
     def test_get_connection_ssl(self, logger, mock_api, mock_where):
         mock_where.return_value = 'my.pem'
         mock_api.API = 'dbapi'
-        connection_data = self._db_manager._get_connection_data(None, 'user', 'pass', ssl=True)
+        connection_data = self._db_manager._get_connection_data(
+            None, 'user', 'pass', ssl=True, ssl_validate_cert=True)
         assert connection_data == {
             'userkey': None, 'user': 'user', 'password': 'pass', 'RECONNECT': 'FALSE',
             'encrypt': True, 'sslValidateCertificate': True, 'sslTrustStore': 'my.pem'}
