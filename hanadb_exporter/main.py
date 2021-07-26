@@ -24,6 +24,7 @@ from hanadb_exporter import __version__
 from hanadb_exporter import prometheus_exporter
 from hanadb_exporter import db_manager
 from hanadb_exporter import utils
+from hanadb_exporter import secrets_manager
 
 LOGGER = logging.getLogger(__name__)
 # in new systems /etc/ folder is not used in favor of /usr/etc
@@ -138,11 +139,22 @@ def run():
     try:
         hana_config = config['hana']
         dbs = db_manager.DatabaseManager()
+        user=hana_config.get('user', '')
+        password=hana_config.get('password', '')
+        userkey=hana_config.get('userkey', None)
+        aws_secret_name=hana_config.get('aws_secret_name', '')
+
+        if aws_secret_name:
+            LOGGER.info('AWS secret name is going to be used to read the database username and password')
+            db_credentials = secrets_manager.get_db_credentials(aws_secret_name)
+            user = db_credentials["username"]
+            password = db_credentials["password"]
+
         dbs.start(
             hana_config['host'], hana_config.get('port', 30013),
-            user=hana_config.get('user', ''),
-            password=hana_config.get('password', ''),
-            userkey=hana_config.get('userkey', None),
+            user=user,
+            password=password,
+            userkey=userkey,
             multi_tenant=config.get('multi_tenant', True),
             timeout=config.get('timeout', 30))
     except KeyError as err:
@@ -154,7 +166,7 @@ def run():
     connectors = dbs.get_connectors()
     collector = prometheus_exporter.SapHanaCollectors(connectors=connectors, metrics_file=metrics)
     REGISTRY.register(collector)
-    LOGGER.info('exporter sucessfully registered')
+    LOGGER.info('exporter successfully registered')
 
     LOGGER.info('starting to serve metrics')
     start_http_server(config.get('exposition_port', 9668), '0.0.0.0')

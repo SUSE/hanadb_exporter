@@ -205,7 +205,7 @@ class TestDatabaseManager(object):
         assert connection_data == {
             'userkey': None, 'user': 'user', 'password': 'pass', 'RECONNECT': 'FALSE'}
         logger.assert_called_once_with(
-            'user/password combination will be used to connect to the databse')
+            'user/password combination will be used to connect to the database')
 
     @mock.patch('hanadb_exporter.db_manager.hdb_connector.connectors.base_connector')
     @mock.patch('logging.Logger.error')
