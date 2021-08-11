@@ -42,6 +42,7 @@ BuildRequires:  systemd-rpm-macros
 %{?systemd_requires}
 Requires:       python3-prometheus_client >= 0.6.0
 Requires:       python3-shaptools >= 0.3.2
+Requires:       python3-boto3
 BuildArch:      noarch
 
 %description
