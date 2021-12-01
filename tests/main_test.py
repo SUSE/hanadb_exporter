@@ -139,6 +139,7 @@ class TestMain(object):
         mock_parse_arguments.return_value = mock_arguments
 
         config = {
+            'listen_address': '127.0.0.1',
             'hana': {
                 'host': '10.10.10.10',
                 'port': 1234,
@@ -180,7 +181,7 @@ class TestMain(object):
             mock.call('exporter successfully registered'),
             mock.call('starting to serve metrics')
         ])
-        mock_start_server.assert_called_once_with(9668, '0.0.0.0')
+        mock_start_server.assert_called_once_with(9668, '127.0.0.1')
         mock_sleep.assert_called_once_with(1)
         assert mock_systemd.call_count == 0
 
