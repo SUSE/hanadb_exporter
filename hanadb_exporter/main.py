@@ -169,7 +169,7 @@ def run():
     LOGGER.info('exporter successfully registered')
 
     LOGGER.info('starting to serve metrics')
-    start_http_server(config.get('exposition_port', 9668), '0.0.0.0')
+    start_http_server(config.get('exposition_port', 9668), config.get('listen_address', '0.0.0.0'))
     while True:
         time.sleep(1)
 

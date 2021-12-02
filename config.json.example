@@ -1,4 +1,5 @@
 {
+  "listen_address": "0.0.0.0",
   "exposition_port": 9668,
   "multi_tenant": true,
   "timeout": 30,
