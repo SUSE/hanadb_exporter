@@ -37,6 +37,7 @@ URL:            https://github.com/SUSE/hanadb_exporter
 Source:         %{name}-%{version}.tar.gz
 %if %{with test}
 BuildRequires:  %{python_module pytest}
+BuildRequires:  %{python_module boto3}
 %endif
 BuildRequires:  %{python_module setuptools}
 BuildRequires:  python-rpm-macros
