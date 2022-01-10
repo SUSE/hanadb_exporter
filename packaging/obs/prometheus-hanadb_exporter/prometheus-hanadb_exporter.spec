@@ -1,7 +1,7 @@
 #
 # spec file for package prometheus-hanadb_exporter
 #
-# Copyright (c) 2021 SUSE LLC
+# Copyright (c) 2022 SUSE LLC
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -13,6 +13,7 @@
 # published by the Open Source Initiative.
 
 # Please submit bugfixes or comments via https://bugs.opensuse.org/
+#
 
 %if 0%{?suse_version} < 1500
 %bcond_with test
@@ -23,7 +24,9 @@
 %define _prefix /usr
 %define oldsyscondir /etc
 %define _sysconfdir %{_prefix}/etc
+%define pythons python3
 
+%{?!python_module:%define python_module() python3-%{**}}
 Name:           prometheus-hanadb_exporter
 Version:        0
 Release:        0
@@ -33,16 +36,17 @@ Group:          System/Monitoring
 URL:            https://github.com/SUSE/hanadb_exporter
 Source:         %{name}-%{version}.tar.gz
 %if %{with test}
-BuildRequires:  python3-pytest
+BuildRequires:  %{python_module pytest}
 %endif
-BuildRequires:  python3-setuptools
+BuildRequires:  %{python_module setuptools}
+BuildRequires:  python-rpm-macros
 Provides:       hanadb_exporter = %{version}-%{release}
 BuildRequires:  fdupes
 BuildRequires:  systemd-rpm-macros
 %{?systemd_requires}
-Requires:       python3-prometheus_client >= 0.6.0
-Requires:       python3-shaptools >= 0.3.2
-Requires:       python3-boto3
+Requires:       %{python_module prometheus_client} >= 0.6.0
+Requires:       %{python_module shaptools}
+Requires:       %{python_module boto3}
 BuildArch:      noarch
 
 %description
@@ -54,13 +58,13 @@ SAP HANA database metrics exporter
 %setup -q -n %{name}-%{version}
 
 %build
-python3 setup.py build
+%python_build
 
 %install
-python3 setup.py install --root %{buildroot} --prefix=%{_prefix}
-%fdupes %{buildroot}%{python3_sitelib}
+%python_install
+%python_expand %fdupes %{buildroot}%{$python_sitelib}
 # do not install tests
-rm -r %{buildroot}%{python3_sitelib}/tests
+%python_expand rm -r %{buildroot}%{$python_sitelib}/tests
 
 # Add daemon files
 mkdir -p %{buildroot}%{oldsyscondir}/%{shortname}
@@ -100,7 +104,7 @@ pytest tests
 %doc README.md docs/METRICS.md
 %license LICENSE
 %endif
-%{python3_sitelib}/*
+%{python_sitelib}/*
 %{_bindir}/%{shortname}
 
 %dir %{_sysconfdir}
