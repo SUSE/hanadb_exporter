@@ -207,7 +207,7 @@ class TestDatabaseManager(object):
             'userkey': None, 'user': 'user', 'password': 'pass', 'RECONNECT': 'FALSE',
             'encrypt': False, 'sslValidateCertificate': False, 'sslTrustStore': None}
         logger.assert_called_once_with(
-            'user/password combination will be used to connect to the databse')
+            'user/password combination will be used to connect to the database')
 
     @mock.patch('certifi.where')
     @mock.patch('hanadb_exporter.db_manager.hdb_connector')

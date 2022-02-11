@@ -78,6 +78,7 @@ zypper in python3-PyHDB
 Create the `config.json` configuration file.
 An example of `config.json` available in [config.json.example](config.json.example). Here the most
 important items in the configuration file:
+  - `listen_address`: Address where the prometheus exporter will be exposed (0.0.0.0 by default).
   - `exposition_port`: Port where the prometheus exporter will be exposed (9968 by default).
   - `multi_tenant`: Export the metrics from other tenants. To use this the connection must be done with the System Database (port 30013).
   - `timeout`: Timeout to connect to the database. After this time the app will fail (even in daemon mode).
@@ -88,6 +89,7 @@ important items in the configuration file:
   - `hana.password`: Password of an existing user.
   - `hana.ssl`: Enable SSL connection (False by default). Only available for `dbapi` connector
   - `hana.ssl_validate_cert`: Enable SSL certification validation. This field is required by HANA cloud. Only available for `dbapi` connector
+  - `hana.aws_secret_name`: The secret name containing the username and password. This is a secure option to use AWS secrets manager if SAP HANA database is stored on AWS. `aws_secret_name` and `user/password` are self exclusive, `aws_secret_name` is the default if both options are set.
   - `logging.config_file`: Python logging system configuration file (by default WARN and ERROR level messages will be sent to the syslog)
   - `logging.log_file`: Logging file (/var/log/hanadb_exporter.log by default)
 
@@ -104,6 +106,36 @@ For that a new stored user key must be created with the user that is running pyt
 ```
 /hana/shared/PRD/hdbclient/hdbuserstore set yourkey host:30013@SYSTEMDB hanadb_exporter pass
 ```
+
+### Using AWS Secrets Manager
+
+If SAP HANA database is stored on AWS EC2 instance, this is a secure option to store the `user/password` without having them in the configuration file. 
+To use this option:
+- Create a [secret](https://docs.aws.amazon.com/secretsmanager/latest/userguide/manage_create-basic-secret.html) in key/value pairs format, specify Key `username` and then for Value enter the database user. Add a second Key `password` and then for Value enter the password.
+For the secret name, enter a name for your secret, and pass that name in the configuration file as a value for `aws_secret_name` item. Secret json example:
+
+```
+{
+  "username": "database_user",
+  "password": "database_password"
+}
+```
+- Allow read-only access from EC2 IAM role to the secret by attaching a [resource-based policy](https://docs.aws.amazon.com/secretsmanager/latest/userguide/auth-and-access_resource-based-policies.html) to the secret. Policy Example:
+```
+{
+  "Version" : "2012-10-17",
+  "Statement" : [
+    {
+      "Effect": "Allow",
+      "Principal": {"AWS": "arn:aws:iam::123456789012:role/EC2RoleToAccessSecrets"},
+      "Action": "secretsmanager:GetSecretValue",
+      "Resource": "*",
+    }
+  ]
+}
+```
+
+
 
 Some tips:
 - Set `SYSTEMDB` as default database, this way the exporter will know where to get the tenants data.
