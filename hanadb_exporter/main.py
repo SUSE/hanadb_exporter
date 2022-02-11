@@ -139,13 +139,14 @@ def run():
     try:
         hana_config = config['hana']
         dbs = db_manager.DatabaseManager()
-        user=hana_config.get('user', '')
-        password=hana_config.get('password', '')
-        userkey=hana_config.get('userkey', None)
-        aws_secret_name=hana_config.get('aws_secret_name', '')
+        user = hana_config.get('user', '')
+        password = hana_config.get('password', '')
+        userkey = hana_config.get('userkey', None)
+        aws_secret_name = hana_config.get('aws_secret_name', '')
 
         if aws_secret_name:
-            LOGGER.info('AWS secret name is going to be used to read the database username and password')
+            LOGGER.info(
+                'AWS secret name is going to be used to read the database username and password')
             db_credentials = secrets_manager.get_db_credentials(aws_secret_name)
             user = db_credentials["username"]
             password = db_credentials["password"]

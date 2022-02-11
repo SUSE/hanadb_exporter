@@ -221,7 +221,7 @@ class TestDatabaseManager(object):
             'userkey': None, 'user': 'user', 'password': 'pass', 'RECONNECT': 'FALSE',
             'encrypt': True, 'sslValidateCertificate': True, 'sslTrustStore': 'my.pem'}
         logger.assert_has_calls([
-            mock.call('user/password combination will be used to connect to the databse'),
+            mock.call('user/password combination will be used to connect to the database'),
             mock.call('Using ssl connection...')
         ])
 

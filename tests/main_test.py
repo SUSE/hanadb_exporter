@@ -358,7 +358,7 @@ class TestMain(object):
         mock_db_manager.assert_called_once_with()
         db_instance.start.assert_called_once_with(
             '10.10.10.10', 1234, user='db_user', password='db_pass',
-            userkey=None, multi_tenant=True, timeout=30)
+            userkey=None, multi_tenant=True, timeout=30, ssl=False, ssl_validate_cert=False)
         db_instance.get_connectors.assert_called_once_with()
         mock_exporters.assert_called_once_with(
             connectors='connectors', metrics_file='metrics')
