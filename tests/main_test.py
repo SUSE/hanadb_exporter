@@ -144,7 +144,9 @@ class TestMain(object):
                 'host': '10.10.10.10',
                 'port': 1234,
                 'user': 'user',
-                'password': 'pass'
+                'password': 'pass',
+                'ssl': True,
+                'ssl_validate_cert': True
             },
             'logging': {
                 'log_file': 'my_file',
@@ -171,7 +173,7 @@ class TestMain(object):
         mock_db_manager.assert_called_once_with()
         db_instance.start.assert_called_once_with(
             '10.10.10.10', 1234, user='user', password='pass',
-            userkey=None, multi_tenant=True, timeout=30)
+            userkey=None, multi_tenant=True, timeout=30, ssl=True, ssl_validate_cert=True)
         db_instance.get_connectors.assert_called_once_with()
         mock_exporters.assert_called_once_with(
             connectors='connectors', metrics_file='metrics')
@@ -240,7 +242,7 @@ class TestMain(object):
         mock_db_manager.assert_called_once_with()
         db_instance.start.assert_called_once_with(
             '10.10.10.10', 1234, user='user', password='pass',
-            userkey=None, multi_tenant=True, timeout=30)
+            userkey=None, multi_tenant=True, timeout=30, ssl=False, ssl_validate_cert=False)
         db_instance.get_connectors.assert_called_once_with()
         mock_exporters.assert_called_once_with(
             connectors='connectors', metrics_file='new_metrics')

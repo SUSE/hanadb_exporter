@@ -38,6 +38,7 @@ Source:         %{name}-%{version}.tar.gz
 %if %{with test}
 BuildRequires:  %{python_module pytest}
 BuildRequires:  %{python_module boto3}
+BuildRequires:  %{python_module certifi}
 %endif
 BuildRequires:  %{python_module setuptools}
 BuildRequires:  python-rpm-macros
@@ -48,6 +49,7 @@ BuildRequires:  systemd-rpm-macros
 Requires:       %{python_module prometheus_client} >= 0.6.0
 Requires:       %{python_module shaptools}
 Requires:       %{python_module boto3}
+Recommends:     %{python_module certifi}
 BuildArch:      noarch
 
 %description

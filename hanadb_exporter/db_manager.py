@@ -14,6 +14,12 @@ import time
 from shaptools import hdb_connector
 from hanadb_exporter import utils
 
+try:
+    import certifi
+    CERTIFI_INSTALLED = True
+except ImportError:
+    CERTIFI_INSTALLED = False
+
 RECONNECTION_INTERVAL = 15
 
 
@@ -69,7 +75,7 @@ WHERE COORDINATOR_TYPE='MASTER' AND SQL_PORT<>0"""
                 self._logger.warn(
                     'Could not connect to TENANT database %s with error: %s', database, str(err))
 
-    def _get_connection_data(self, userkey, user, password):
+    def _get_connection_data(self, userkey, user, password, **kwargs):
         """
         Check that provided user data is valid. user/password pair or userkey must be provided
         """
@@ -87,10 +93,24 @@ WHERE COORDINATOR_TYPE='MASTER' AND SQL_PORT<>0"""
             raise ValueError(
                 'Provided user data is not valid. userkey or user/password pair must be provided')
 
-        return {'userkey': userkey,
-                'user': user,
-                'password': password,
-                'RECONNECT': 'FALSE'}
+        ssl = kwargs.get('ssl', False)
+        if ssl:
+            self._logger.info('Using ssl connection...')
+
+        if ssl and CERTIFI_INSTALLED:
+            trust_store = certifi.where()
+        elif ssl:
+            self._logger.warn('certifi package is not installed. Using the default ssl pem key...')
+
+        return {
+            'userkey': userkey,
+            'user': user,
+            'password': password,
+            'RECONNECT': 'FALSE',
+            'encrypt': ssl,
+            'sslValidateCertificate': kwargs.get('ssl_validate_cert', False) if ssl else False,
+            'sslTrustStore': trust_store if ssl and CERTIFI_INSTALLED else None
+        }
 
     def start(self, host, port, **kwargs):
         """
@@ -105,9 +125,17 @@ WHERE COORDINATOR_TYPE='MASTER' AND SQL_PORT<>0"""
             password (str): System database user password
             multi_tenant (bool): Connect to all tenants checking the data in the System database
             timeout (int, opt): Timeout in seconds to connect to the System database
+            ssl (bool, opt): Enable SSL connection
+            ssl_validate_cert (bool, opt): Validate SSL certificate. Required in HANA cloud
         """
         connection_data = self._get_connection_data(
-            kwargs.get('userkey', None), kwargs.get('user', ''), kwargs.get('password', ''))
+            kwargs.get('userkey', None),
+            kwargs.get('user', ''),
+            kwargs.get('password', ''),
+            ssl=kwargs.get('ssl', False),
+            ssl_validate_cert=kwargs.get('ssl_validate_cert', False)
+        )
+
         current_time = time.time()
         timeout = current_time + kwargs.get('timeout', 600)
         while current_time <= timeout:

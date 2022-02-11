@@ -177,7 +177,8 @@ class TestDatabaseManager(object):
         mock_api.API = 'dbapi'
         connection_data = self._db_manager._get_connection_data('userkey', '', '')
         assert connection_data == {
-            'userkey': 'userkey', 'user': '', 'password': '', 'RECONNECT': 'FALSE'}
+            'userkey': 'userkey', 'user': '', 'password': '', 'RECONNECT': 'FALSE',
+            'encrypt': False, 'sslValidateCertificate': False, 'sslTrustStore': None}
         logger.assert_called_once_with(
             'stored user key %s will be used to connect to the database', 'userkey')
         assert logger_warn.call_count == 0
@@ -190,7 +191,8 @@ class TestDatabaseManager(object):
         mock_api.API = 'dbapi'
         connection_data = self._db_manager._get_connection_data('userkey', 'user', '')
         assert connection_data == {
-            'userkey': 'userkey', 'user': 'user', 'password': '', 'RECONNECT': 'FALSE'}
+            'userkey': 'userkey', 'user': 'user', 'password': '', 'RECONNECT': 'FALSE',
+            'encrypt': False, 'sslValidateCertificate': False, 'sslTrustStore': None}
         logger.assert_called_once_with(
             'stored user key %s will be used to connect to the database', 'userkey')
         logger_warn.assert_called_once_with(
@@ -199,13 +201,29 @@ class TestDatabaseManager(object):
     @mock.patch('hanadb_exporter.db_manager.hdb_connector')
     @mock.patch('logging.Logger.info')
     def test_get_connection_data_pass(self, logger, mock_api):
-
         mock_api.API = 'dbapi'
         connection_data = self._db_manager._get_connection_data(None, 'user', 'pass')
         assert connection_data == {
-            'userkey': None, 'user': 'user', 'password': 'pass', 'RECONNECT': 'FALSE'}
+            'userkey': None, 'user': 'user', 'password': 'pass', 'RECONNECT': 'FALSE',
+            'encrypt': False, 'sslValidateCertificate': False, 'sslTrustStore': None}
         logger.assert_called_once_with(
             'user/password combination will be used to connect to the database')
+
+    @mock.patch('certifi.where')
+    @mock.patch('hanadb_exporter.db_manager.hdb_connector')
+    @mock.patch('logging.Logger.info')
+    def test_get_connection_ssl(self, logger, mock_api, mock_where):
+        mock_where.return_value = 'my.pem'
+        mock_api.API = 'dbapi'
+        connection_data = self._db_manager._get_connection_data(
+            None, 'user', 'pass', ssl=True, ssl_validate_cert=True)
+        assert connection_data == {
+            'userkey': None, 'user': 'user', 'password': 'pass', 'RECONNECT': 'FALSE',
+            'encrypt': True, 'sslValidateCertificate': True, 'sslTrustStore': 'my.pem'}
+        logger.assert_has_calls([
+            mock.call('user/password combination will be used to connect to the databse'),
+            mock.call('Using ssl connection...')
+        ])
 
     @mock.patch('hanadb_exporter.db_manager.hdb_connector.connectors.base_connector')
     @mock.patch('logging.Logger.error')
