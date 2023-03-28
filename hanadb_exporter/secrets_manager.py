@@ -12,7 +12,6 @@ import logging
 import boto3
 from ec2_metadata import ec2_metadata
 from botocore.exceptions import ClientError
-from requests.exceptions import HTTPError
 
 LOGGER = logging.getLogger(__name__)
 
