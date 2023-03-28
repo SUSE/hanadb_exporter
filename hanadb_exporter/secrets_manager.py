@@ -10,7 +10,6 @@ import json
 import logging
 
 import boto3
-import requests
 from ec2_metadata import ec2_metadata
 from botocore.exceptions import ClientError
 from requests.exceptions import HTTPError
