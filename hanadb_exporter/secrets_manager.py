@@ -1,7 +1,7 @@
 """
 Unitary tests for exporters/secrets_manager.py.
 
-:author: elturkym
+:author: elturkym, schniber
 
 :since: 2021-07-15
 """
@@ -11,10 +11,10 @@ import logging
 
 import boto3
 import requests
+from ec2_metadata import ec2_metadata
 from botocore.exceptions import ClientError
 from requests.exceptions import HTTPError
 
-EC2_INFO_URL = "http://169.254.169.254/latest/dynamic/instance-identity/document"
 LOGGER = logging.getLogger(__name__)
 
 
@@ -27,15 +27,9 @@ class SecretsManagerError(ValueError):
 def get_db_credentials(secret_name):
     LOGGER.info('retrieving AWS secret details')
 
-    ec2_info_response = requests.get(EC2_INFO_URL)
-
-    try:
-        ec2_info_response.raise_for_status()
-    except HTTPError as e:
-        raise SecretsManagerError("EC2 information request failed") from e
-
-    ec2_info = ec2_info_response.json()
-    region_name = ec2_info["region"]
+    # In this call, we leverage the use of the ec2_metadata python package to read the region name.
+    # this package abstracts the requirement to adapt the call to the EC2 Metadata Service depending on the fact that the instance is configures for IMDSv1 or IMDSv2
+    region_name = ec2_metadata.region
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
