@@ -34,9 +34,12 @@ def get_db_credentials(secret_name):
     # In case the EC2 instance is making use of IMDSv2, calls to the EC2 instance metadata data service will return 401 Unauthorized HTTP Return code.
     # In this case, python catches the error, generates an authentication token before attempting the call to the EC2 instance metadata service again using IMDSv2.
     if ec2_info_response.status_code == 401:
-            ec2_metadata_service_token = requests.put(
-                TOKEN_URL, headers=TOKEN_HEADER
-            ).content
+            try:
+                ec2_metadata_service_token = requests.put(
+                    TOKEN_URL, headers=TOKEN_HEADER
+                ).content
+            except HTTPError as e:
+                raise SecretsManagerError("EC2 instance metadata service request failed") from e
             ec2_info_response = requests.get(
                 EC2_INFO_URL,
                 headers={"X-aws-ec2-metadata-token": ec2_metadata_service_token},

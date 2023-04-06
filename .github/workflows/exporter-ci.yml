@@ -21,7 +21,9 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # TODO: Pending fix of https://github.com/SUSE/hanadb_exporter/issues/113
+    # runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         python-version: [3.6, 3.8]
