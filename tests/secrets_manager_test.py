@@ -53,10 +53,21 @@ class TestSecretsManager(object):
     @mock.patch('hanadb_exporter.secrets_manager.requests')
     @mock.patch('hanadb_exporter.secrets_manager.boto3.session')
     def test_get_db_credentials_imdsv2(self, mock_boto3, mock_requests, mock_logger):
+        mock_ec2_unauthorized = mock.Mock()
+        mock_ec2_unauthorized.status_code = 401
+
         mock_ec2_response = mock.Mock()
+        mock_ec2_response.json.return_value = json.loads('{"region":"test_region_imdsv2"}')
+
         mock_requests.get.return_value = mock_ec2_response
         mock_requests.get.return_value.status_code = 401
-        mock_ec2_response.json.return_value = json.loads('{"region":"test_region_imdsv2"}')
+        mock_requests.get.side_effects = [mock_ec2_unauthorized, mock_ec2_response]
+
+        mock_ec2_put = mock.Mock()
+        mock_ec2_put.content = 'my-test-token'
+
+        mock_requests.put.return_value = mock_ec2_put
+
         mock_session = mock.Mock()
         mock_sm_client = mock.Mock()
         mock_boto3.Session.return_value = mock_session
@@ -71,9 +82,15 @@ class TestSecretsManager(object):
         mock_logger.info.assert_has_calls([
             mock.call('retrieving AWS secret details')
         ])
+
         assert actual_secret['username'] == 'db_user'
         assert actual_secret['password'] == 'db_pass'
-    
+
+        mock_requests.get.assert_called_with(
+            'http://169.254.169.254/latest/dynamic/instance-identity/document',
+            headers={'X-aws-ec2-metadata-token': 'my-test-token'}
+        )
+
     @mock.patch('hanadb_exporter.secrets_manager.requests')
     def test_get_db_credentials_ec2_request_error(self, mock_requests):
         ec2_info_response = mock.Mock()
