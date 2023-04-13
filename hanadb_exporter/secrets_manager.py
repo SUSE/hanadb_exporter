@@ -1,7 +1,7 @@
 """
 Unitary tests for exporters/secrets_manager.py.
 
-:author: elturkym
+:author: elturkym, schniber
 
 :since: 2021-07-15
 """
@@ -15,6 +15,8 @@ from botocore.exceptions import ClientError
 from requests.exceptions import HTTPError
 
 EC2_INFO_URL = "http://169.254.169.254/latest/dynamic/instance-identity/document"
+TOKEN_URL = "http://169.254.169.254/latest/api/token"
+TOKEN_HEADER = {"X-aws-ec2-metadata-token-ttl-seconds": "21600"}
 LOGGER = logging.getLogger(__name__)
 
 
@@ -25,9 +27,27 @@ class SecretsManagerError(ValueError):
 
 
 def get_db_credentials(secret_name):
-    LOGGER.info('retrieving AWS secret details')
+    LOGGER.info("retrieving AWS secret details")
 
     ec2_info_response = requests.get(EC2_INFO_URL)
+
+    # In case the EC2 instance is making use of IMDSv2, calls to the EC2 instance
+    # metadata data service will return 401 Unauthorized HTTP Return code.
+    # In this case, python catches the error, generates an authentication token
+    # before attempting the call to the EC2 instance metadata service again using
+    # the IMDSv2 token authentication header.
+    if ec2_info_response.status_code == 401:
+        try:
+            ec2_metadata_service_token = requests.put(
+                TOKEN_URL, headers=TOKEN_HEADER
+            ).content
+        except HTTPError as e:
+            raise SecretsManagerError("EC2 instance metadata service request failed") from e
+
+        ec2_info_response = requests.get(
+            EC2_INFO_URL,
+            headers={"X-aws-ec2-metadata-token": ec2_metadata_service_token},
+        )
 
     try:
         ec2_info_response.raise_for_status()
