@@ -83,13 +83,17 @@ class TestSecretsManager(object):
             mock.call('retrieving AWS secret details')
         ])
 
+        mock_requests.get.assert_has_calls([
+            mock.call("http://169.254.169.254/latest/dynamic/instance-identity/document"),
+            mock.call("http://169.254.169.254/latest/dynamic/instance-identity/document",
+                      headers={'X-aws-ec2-metadata-token': 'my-test-token'})
+        ])
+
+        mock_requests.put.assert_called_with("http://169.254.169.254/latest/api/token",
+                                             headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"})
+
         assert actual_secret['username'] == 'db_user'
         assert actual_secret['password'] == 'db_pass'
-
-        mock_requests.get.assert_called_with(
-            'http://169.254.169.254/latest/dynamic/instance-identity/document',
-            headers={'X-aws-ec2-metadata-token': 'my-test-token'}
-        )
 
     @mock.patch('hanadb_exporter.secrets_manager.requests')
     def test_get_db_credentials_ec2_request_error(self, mock_requests):
