@@ -59,9 +59,7 @@ class TestSecretsManager(object):
         mock_ec2_response = mock.Mock()
         mock_ec2_response.json.return_value = json.loads('{"region":"test_region_imdsv2"}')
 
-        mock_requests.get.return_value = mock_ec2_response
-        mock_requests.get.return_value.status_code = 401
-        mock_requests.get.side_effects = [mock_ec2_unauthorized, mock_ec2_response]
+        mock_requests.get.side_effect = [mock_ec2_unauthorized, mock_ec2_response]
 
         mock_ec2_put = mock.Mock()
         mock_ec2_put.content = 'my-test-token'
