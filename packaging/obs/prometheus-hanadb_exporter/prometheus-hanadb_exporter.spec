@@ -1,7 +1,7 @@
 #
 # spec file for package prometheus-hanadb_exporter
 #
-# Copyright (c) 2022 SUSE LLC
+# Copyright (c) 2022-2024 SUSE LLC
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -77,6 +77,7 @@ install -D -m 644 daemon/%{shortname}@.service %{buildroot}%{_unitdir}/%{name}@.
 install -D -m 0644 config.json.example %{buildroot}%{_docdir}/%{name}/config.json.example
 install -D -m 0644 metrics.json %{buildroot}%{_docdir}/%{name}/metrics.json
 install -D -m 0644 logging_config.ini %{buildroot}%{_docdir}/%{name}/logging_config.ini
+install -D -m 755 supportconfig-hanadb_exporter %{buildroot}%{_prefix}/lib/supportconfig/plugins/%{shortname}
 
 %post
 %service_add_post %{name}@.service
@@ -117,5 +118,8 @@ pytest tests
 %{_docdir}/%{name}/metrics.json
 %{_docdir}/%{name}/logging_config.ini
 %{_unitdir}/%{name}@.service
+%dir %{_prefix}/lib/supportconfig
+%dir %{_prefix}/lib/supportconfig/plugins
+%{_prefix}/lib/supportconfig/plugins/%{shortname}
 
 %changelog
