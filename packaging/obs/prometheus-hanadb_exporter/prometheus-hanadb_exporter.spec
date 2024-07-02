@@ -34,8 +34,7 @@ Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0
 Group:          System/Monitoring
 URL:            https://github.com/SUSE/hanadb_exporter
-Source0:        %{name}-%{version}.tar.gz
-Source1:        supportconfig-hanadb_exporter
+Source:        %{name}-%{version}.tar.gz
 %if %{with test}
 BuildRequires:  %{python_module pytest}
 BuildRequires:  %{python_module boto3}
@@ -78,7 +77,7 @@ install -D -m 644 daemon/%{shortname}@.service %{buildroot}%{_unitdir}/%{name}@.
 install -D -m 0644 config.json.example %{buildroot}%{_docdir}/%{name}/config.json.example
 install -D -m 0644 metrics.json %{buildroot}%{_docdir}/%{name}/metrics.json
 install -D -m 0644 logging_config.ini %{buildroot}%{_docdir}/%{name}/logging_config.ini
-install -D -m 755 supportconfig-hanadb_exporter %{buildroot}%{_prefix}/lib/supportconfig/plugins/%{shortname}
+install -D -m 755 bin/supportconfig-hanadb_exporter %{buildroot}%{_prefix}/lib/supportconfig/plugins/%{shortname}
 
 %post
 %service_add_post %{name}@.service
