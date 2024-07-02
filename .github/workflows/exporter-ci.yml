@@ -44,7 +44,7 @@ jobs:
     if: ${{ github.event_name != 'pull_request' }}
     concurrency: 
       group: obs
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-20.04
     container: shap/continuous_deliver
     env:
       OBS_USER: ${{ secrets.OBS_USER }}
@@ -69,7 +69,7 @@ jobs:
     if: github.event.release
     concurrency:
       group: obs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     container: shap/continuous_deliver
     env:
       OBS_USER: ${{ secrets.OBS_USER }}
