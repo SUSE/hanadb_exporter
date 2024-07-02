@@ -21,18 +21,16 @@ on:
 
 jobs:
   test:
-    # TODO: Pending fix of https://github.com/SUSE/hanadb_exporter/issues/113
-    # runs-on: ubuntu-latest
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         python-version: [3.6, 3.8, 3.11]
     steps:
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: install deps
       run: make deps
     - name: static analysis
@@ -44,17 +42,19 @@ jobs:
   obs-commit:
     needs: test
     if: ${{ github.event_name != 'pull_request' }}
-    runs-on: ubuntu-latest
+    concurrency: 
+      group: obs
+    runs-on: ubuntu-24.04
     container: shap/continuous_deliver
     env:
       OBS_USER: ${{ secrets.OBS_USER }}
       OBS_PASS: ${{ secrets.OBS_PASS }}
-      OBS_PROJECT: ${{ secrets.OBS_PROJECT }}
+      OBS_PROJECT: ${{ env.OBS_PROJECT }}
       REVISION: ${{ github.sha }}
       REPOSITORY: ${{ github.repository }}
       GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: configure OSC
@@ -67,19 +67,21 @@ jobs:
   obs-submit-request:
     needs: test
     if: github.event.release
+    concurrency:
+      group: obs
     runs-on: ubuntu-latest
     container: shap/continuous_deliver
     env:
       OBS_USER: ${{ secrets.OBS_USER }}
       OBS_PASS: ${{ secrets.OBS_PASS }}
-      OBS_PROJECT: ${{ secrets.OBS_PROJECT }}
+      OBS_PROJECT: ${{ env.OBS_PROJECT }}
       PACKAGE_NAME: prometheus-hanadb_exporter
-      TARGET_PROJECT: ${{ secrets.OBS_DOWNSTREAM_PROJECT }}
+      TARGET_PROJECT: ${{ env.OBS_DOWNSTREAM_PROJECT }}
       REVISION: ${{ github.event.release.tag_name }}
       REPOSITORY: ${{ github.repository }}
       GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - name: configure OSC
