@@ -2,7 +2,7 @@
 
 ## OBS Packaging
 
-The CI will automatically interact with SUSE's [Open Build Service](https://build.opensuse.org): the `master` branch will be kept in sync with the `network:ha-clustering:sap-deployments:devel` project.
+The CI will automatically interact with SUSE's [Open Build Service](https://build.opensuse.org): the `main` branch will be kept in sync with the `network:ha-clustering:sap-deployments:devel` project.
 
 ### Publishing the Exporter RPM in openSUSE code stream.
 
@@ -14,13 +14,13 @@ When accepting Submit Requests against `server:monitoring`, you can contextually
 
 ### Publishing Grafana Dashboards
  
-While Grafana dashboard are not continuously deployed like the exporter, the [OBS development package](https://build.opensuse.org/package/show/network:ha-clustering:sap-deployments:devel/grafana-sap-hana-dashboards) is still kept in sync with the `master` branch of this repository.  
+While Grafana dashboard are not continuously deployed like the exporter, the [OBS development package](https://build.opensuse.org/package/show/network:ha-clustering:sap-deployments:devel/grafana-sap-hana-dashboards) is still kept in sync with the `main` branch of this repository.  
 GitHub releases do not apply in this case, they are only used for the exporter; the dashboards RPM version number is instead hard-coded in the OBS source services configuration.
 
 To publish a new release:
 - update the numerical prefix of the `versionformat` field in the [_service](packaging/obs/grafana-sap-hana-dashboards/_service) file;
 - add an entry to the [changelog](packaging/obs/grafana-sap-hana-dashboards/grafana-sap-hana-dashboards.changes) file;
-- commit these changes directly in the `master` branch;
+- commit these changes directly in the `main` branch;
 - perform a Submit Request via [`osc`] manually:  
   `osc sr network:ha-clustering:sap-deployments:devel grafana-sap-hana-dashboards openSUSE:Factory`
 
