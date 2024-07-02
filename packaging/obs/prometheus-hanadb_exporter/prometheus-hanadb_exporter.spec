@@ -34,7 +34,8 @@ Summary:        SAP HANA database metrics exporter
 License:        Apache-2.0
 Group:          System/Monitoring
 URL:            https://github.com/SUSE/hanadb_exporter
-Source:         %{name}-%{version}.tar.gz
+Source0:        %{name}-%{version}.tar.gz
+Source1:        supportconfig-hanadb_exporter
 %if %{with test}
 BuildRequires:  %{python_module pytest}
 BuildRequires:  %{python_module boto3}
