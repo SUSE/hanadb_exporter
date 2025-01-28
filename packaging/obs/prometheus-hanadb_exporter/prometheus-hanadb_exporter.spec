@@ -45,6 +45,8 @@ BuildRequires:  python-rpm-macros
 Provides:       hanadb_exporter = %{version}-%{release}
 BuildRequires:  fdupes
 BuildRequires:  systemd-rpm-macros
+Requires(pre):  user(prometheus)
+Requires(pre):  group(prometheus)
 %{?systemd_requires}
 Requires:       %{python_module prometheus_client} >= 0.6.0
 Requires:       %{python_module shaptools}
@@ -114,6 +116,7 @@ pytest tests
 %dir %{_sysconfdir}
 %dir %{oldsyscondir}/%{shortname}
 %dir %{_sysconfdir}/%{shortname}
+%attr(0750, prometheus,prometheus)%{_sysconfdir}/%{shortname}
 %{_docdir}/%{name}/config.json.example
 %{_docdir}/%{name}/metrics.json
 %{_docdir}/%{name}/logging_config.ini
