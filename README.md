@@ -171,6 +171,7 @@ hanadb_exporter --identifier config # Notice that the identifier matches with th
 ### Running as a daemon
 
 The hanadb_exporter can be executed using `systemd`. For that, the best option is to install the project using the rpm package as described in [Installation](#installation).
+The exporter runs under *prometheus* user.
 
 After that we need to create the configuration file as `/etc/hanadb_exporter/my-exporter.json` (the name of the file is relevant as we will use it to start the daemon).
 The [config.json.example](./config.json.example) can be used as example (the example file is stored in `/usr/etc/hanadb_exporter` folder too).
@@ -180,13 +181,29 @@ The default [metrics file](./metrics.json) is stored in `/usr/etc/hanadb_exporte
 The logging configuration file can be updated as well to customize changing the new configuration file `logging.config_file` entry (default one available in `/usr/etc/hanadb_exporter/logging_config.ini`).
 
 Now, the exporter can be started as a daemon. As we can have multiple `hanadb_exporter` instances running in one machine, the service is created using a template file, so an extra information must be given to `systemd` (this is done adding the `@` keyword after the service name together with the name of the configuration file created previously in `/etc/hanadb_exporter/{name}.json`):
+
 ```
 # All the command must be executed as root user
-systemctl start prometheus-hanadb_exporter@my-exporter
+systemctl start prometheus-hanadb_exporter@SAPABC_00
 # Check the status with
-systemctl status prometheus-hanadb_exporter@my-exporter
+systemctl status prometheus-hanadb_exporter@SAPABC_00
 # Enable the exporter to be started at boot time
-systemctl enable prometheus-hanadb_exporter@my-exporter
+systemctl enable prometheus-hanadb_exporter@SAPABC_00
+```
+
+If *userkey* authentication is required, manual prerequisite steps need to be performed to install hdbcli and pyhdb pip packages, and to deploy userkey into *prometheus* home dir:
+
+```
+install -d -o prometheus -g prometheus -m 0700 ~prometheus/.hdb
+touch ~prometheus/hdbuserstore
+mount --rbind /hana/shared/*/exe/linux*/HDB_*/hdbuserstore ~prometheus/hdbuserstore
+su -s /bin/sh prometheus -c "/var/lib/prometheus/hdbuserstore -i SET <userkey name> localhost:3<instance>13@SYSTEMDB <user>"
+rm -i ~prometheus/hdbuserstore
+install -d -o prometheus -g prometheus -m 0755 ~prometheus/hanadb_exporter
+su -s /bin/sh prometheus -c "pip install -t /var/lib/prometheus/hanadb_exporter pyhdb"
+su -s /bin/sh prometheus -c "pip install -t /var/lib/prometheus/hanadb_exporter /usr/sap/hdbclient/hdbcli-*.*.*.tar.gz"
+umount ~prometheus/hdbuserstore
+rm ~prometheus/hdbuserstore
 ```
 
 ## License
